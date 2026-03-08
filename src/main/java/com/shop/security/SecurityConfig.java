@@ -35,12 +35,7 @@ private final JwtCheckFilter jwtCheckFilter;
 			.formLogin(a -> a.disable())
 			.sessionManagement(a -> a.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/login").permitAll()
-					.requestMatchers("/admin/**").hasRole("ADMIN")
-					.anyRequest().authenticated()
-					);
-			
-			
-			
+					.requestMatchers("/admin/**").hasRole("ADMIN"));
 			
 			http.addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
 

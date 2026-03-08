@@ -50,9 +50,7 @@ public class AuthController {
 			log.info("auth contorlelr:"+authentication.getName());
 			Member member = memberService.readOneMember(authentication.getName());
 			memberService.updateRefreshToken(member.getMemberId(),refreshToken);
-			
-			
-			
+
 			ResponseCookie accessCookie = ResponseCookie
 					.from("accessToken", accessToken)
 					.secure(false)
