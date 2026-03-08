@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.MemberMapper">
+
+	<resultMap type="MemberRole" id="roleMap">
+		<result property="memberRoleNo" column="member_role_no" />
+		<result property="memberNo" column="member_no" />
+		<result property="roleName" column="role_name" />
+	</resultMap>
+	<resultMap type="Member" id="memberMap">
+		<id property="memberNo" column="member_no" />
+		<result property="memberId" column="member_id" />
+		<result property="password" column="password" />
+		<result property="name" column="name" />
+		<result property="nickName" column="nick_name" />
+		<result property="email" column="email" />
+		<result property="phoneNumber" column="phone_number" />
+		<result property="zipCode" column="zip_code" />
+		<result property="basicAddress" column="basic_address" />
+		<result property="detailAddress" column="detail_address" />
+		<result property="gender" column="gender" />
+		<result property="birthday" column="birthday" />
+		<result property="refreshToken" column="refresh_token" />
+		<result property="createdAt" column="created_at" />
+		<result property="purchaseCount" column="purchase_count" />
+		<result property="bankName" column="bank_name" />
+		<result property="bankCode" column="bank_code" />
+		<result property="accountHolderName"
+			column="account_holder_name" />
+		<result property="status" column="status" />
+		<collection property="memberRoleList" resultMap="roleMap">
+		</collection>
+	</resultMap>
+
+	<select id="readOneMemberWithRoles" resultMap="memberMap">
+		select
+		m.member_no,m.member_id,m.password,m.name,m.nick_name,m.email,m.phone_number,m.zip_code,m.basic_address,
+		m.detail_address,m.gender,m.birthday,m.refresh_token,m.created_at,m.purchase_count,m.bank_name,m.bank_code,
+		m.account_holder_name,m.status,r.member_role_no,r.role_name
+		from
+		member
+		m join member_role r on m.member_no = r.member_no
+		where
+		m.member_id = #{memberId}
+	</select>
+
+	<!-- memberId로 한명의 멤버만 가져오기 -->
+	<select id="readOneMember">
+		select * from member where member_Id = #{memberId}
+	</select>
+
+	<!-- 로그인 시 리프레시 토큰 삽입 -->
+	<update id="updateRefreshToken">
+		update member set refresh_token=#{refreshToken}
+		where member_id=#{memberId}
+	</update>
+
+	<!-- 추후에 수정 필요 -->
+	<insert id="insertMember">
+		INSERT INTO member (
+		member_no,
+		member_id,
+		password,
+		name,
+		nick_name,
+		email,
+		phone_number
+		) VALUES (
+		seq_member.NEXTVAL,
+		#{memberId},
+		#{password},
+		#{name},
+		#{nickName},
+		#{email},
+		#{phoneNumber}
+		)
+	</insert>
+
+</mapper>
