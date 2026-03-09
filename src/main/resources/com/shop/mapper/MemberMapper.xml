@@ -49,7 +49,7 @@
 		select * from member where member_Id = #{memberId}
 	</select>
 
-	<!-- 로그인 시 리프레시 토큰 삽입 -->
+	<!-- 로그인 시 리프레시 토큰 업데이트 -->
 	<update id="updateRefreshToken">
 		update member set refresh_token=#{refreshToken}
 		where member_id=#{memberId}
