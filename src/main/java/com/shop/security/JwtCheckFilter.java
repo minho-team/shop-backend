@@ -24,9 +24,8 @@ import lombok.extern.java.Log;
 @Component
 public class JwtCheckFilter extends OncePerRequestFilter {
 
-	
 	private final JwtUtil jwtUtil;
-	
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
@@ -61,7 +60,7 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 				String username = jwtUtil.getUsername(token);
 
 				List<SimpleGrantedAuthority> authorities = Arrays.stream(jwtUtil.getRoles(token))
-						.map(role->new SimpleGrantedAuthority(role)).collect(Collectors.toList());
+						.map(role -> new SimpleGrantedAuthority(role)).collect(Collectors.toList());
 
 				// 인증 세팅을 위한 토큰 객체 만들기
 				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,
@@ -78,20 +77,15 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 		}
 		filterChain.doFilter(request, response);
 	}
-	
+
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
 		String path = request.getRequestURI();
-		
-		return path.startsWith("/auth/login")
-				||path.startsWith("/auth/refresh");
-		
+
+		return path.startsWith("/auth/login") 
+				|| path.startsWith("/auth/refresh") 
+				|| path.startsWith("/auth/signup");
+
 	}
-	
-	
-	
-	
-	
-	
 
 }
