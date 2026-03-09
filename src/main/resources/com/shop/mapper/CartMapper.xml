@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.CartMapper">
+	<insert id="createCart">
+		insert into cart(member_no) values(#{memberNo})
+	</insert>
+	<delete id="deleteCart">
+		delete from cart where member_no = #{memberNo}
+	</delete>
+	<select id ="readCart">
+		select * from cart where member_no = #{memberNo}
+	</select>
+	<select id ="readAllCart">
+		select * from cart
+	</select>
+	<update id = "updateCart">
+		
+	</update>
+	<select id ="readOneMemberByCartNo">
+		select * from member where cart_no = #{cartNo}
+	</select>
+</mapper>
