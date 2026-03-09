@@ -34,8 +34,10 @@ private final JwtCheckFilter jwtCheckFilter;
 			.csrf(csrf -> csrf.disable())
 			.formLogin(a -> a.disable())
 			.sessionManagement(a -> a.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/login").permitAll()
-					.requestMatchers("/admin/**").hasRole("ADMIN"));
+			.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**").permitAll()
+					.requestMatchers("/admin/**").hasRole("ADMIN")
+					.anyRequest().authenticated()
+					);
 			
 			http.addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
 
