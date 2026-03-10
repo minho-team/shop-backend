@@ -3,7 +3,10 @@ package com.shop.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,12 +24,12 @@ import com.shop.service.Impl.ProductService;
 @RestController
 @RequestMapping("/api/product")
 public class ProductController {
-	
+
 	@Autowired
 	private ProductService productService;
-	
+
 	@PostMapping
-	public ResponseEntity<?> insertProduct (@RequestBody ProductCreateRequest dto) {
+	public ResponseEntity<?> insertProduct(@RequestBody ProductCreateRequest dto) {
 		try {
 			productService.insertProduct(dto);
 		} catch (Exception e) {
@@ -34,9 +37,9 @@ public class ProductController {
 		}
 		return null;
 	}
-	
+
 	@GetMapping("/{productNo}")
-	public ResponseEntity<?> getOneProduct (@PathVariable Long productNo) {
+	public ResponseEntity<?> getOneProduct(@PathVariable Long productNo) {
 		try {
 			productService.getOneProduct(productNo);
 		} catch (Exception e) {
@@ -45,30 +48,33 @@ public class ProductController {
 		}
 		return null;
 	}
-	
+
 	@GetMapping
-	public ResponseEntity<?> getAllProduct () {
+	public ResponseEntity<?> getAllProduct(Authentication auth) {
+
 		List<Product> list = null;
 		try {
 			list = productService.getAllProducts();
+			return ResponseEntity.ok(list);
 		} catch (Exception e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
 		}
-		return null;
 	}
-	
+
 	@PutMapping("/{productNo}")
-	public ResponseEntity<?> updateProduct (@PathVariable Long productNo,@RequestBody ProductUpdateRequest dto) {
+	public ResponseEntity<?> updateProduct(@PathVariable Long productNo, @RequestBody ProductUpdateRequest dto) {
 		try {
 			productService.updateProducts(productNo, dto);
+			return ResponseEntity.ok("업데이트 완료");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
 	}
-	
+
 	@DeleteMapping("/{productNo}")
-	public ResponseEntity<?> deleteProduct (@PathVariable Long productNo) {
+	public ResponseEntity<?> deleteProduct(@PathVariable Long productNo) {
 		try {
 			productService.deleteProduct(productNo);
 		} catch (Exception e) {
@@ -76,5 +82,5 @@ public class ProductController {
 		}
 		return null;
 	}
-	
+
 }

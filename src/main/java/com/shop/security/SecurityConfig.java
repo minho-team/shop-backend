@@ -24,34 +24,29 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-private final JwtCheckFilter jwtCheckFilter;
-	
+	private final JwtCheckFilter jwtCheckFilter;
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-		http
-			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-			.csrf(csrf -> csrf.disable())
-			.formLogin(a -> a.disable())
-			.sessionManagement(a -> a.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**").permitAll()
-					.requestMatchers("/admin/**").hasRole("ADMIN")
-					.anyRequest().authenticated()
-					);
-			
-			http.addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf(csrf -> csrf.disable())
+				.formLogin(a -> a.disable())
+				.sessionManagement(a -> a.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**", "/api/product/**").permitAll()
+						.requestMatchers("/admin/**").hasRole("ADMIN").anyRequest().authenticated());
+
+		http.addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 
 	}
-	
-	
+
 	@Bean
 	AuthenticationManager createAuthManager(AuthenticationConfiguration configuration) {
 		return configuration.getAuthenticationManager();
-		
+
 	}
-	
+
 	@Bean
 	PasswordEncoder createPasswordEncoder() {
 		return new BCryptPasswordEncoder();

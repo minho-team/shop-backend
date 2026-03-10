@@ -1,7 +1,7 @@
 package com.shop.domain;
 
-import java.sql.Timestamp;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class Member {
 	private Long memberNo;
 	private String memberId;
@@ -26,9 +25,9 @@ public class Member {
 	private String basicAddress;
 	private String detailAddress;
 	private String gender;
-	private Date birthday;
+	private LocalDate birthday;
 	private String refreshToken;
-	private Timestamp createdAt;
+	private LocalDateTime createdAt;
 	private Integer purchaseCount;
 	private String bankName;
 	private String bankCode;
