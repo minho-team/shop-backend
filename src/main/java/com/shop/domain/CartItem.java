@@ -1,14 +1,14 @@
 package com.shop.domain;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import lombok.Data;
 
 @Data
 public class CartItem {
-	private int cartItemNo;
-	private int cartNo;
-	private int productOptionNo;
+	private Long cartItemNo;
+	private Long cartNo;
+	private Long productOptionNo;
 	private int quantity;
-	private Timestamp createdAt;
+	private LocalDateTime createdAt;
 }

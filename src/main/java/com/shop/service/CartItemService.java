@@ -10,7 +10,7 @@ import com.shop.dto.CartItemAddRequest;
 @Service
 public interface CartItemService {
 
-	public void addCartItem(CartItemAddRequest request) throws Exception;
+	public void addCartItem(CartItem cartItem) throws Exception;
 
 	public void deleteCartItem(Long cartItemNo) throws Exception;
 
