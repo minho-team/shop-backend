@@ -1,22 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.shop.mapper.CartMapper">
-	<insert id="createCart">
-		insert into cart(member_no) values(#{memberNo})
-	</insert>
-	<delete id="deleteCart">
-		delete from cart where member_no = #{memberNo}
-	</delete>
-	<select id ="readCart">
-		select * from cart where member_no = #{memberNo}
-	</select>
-	<select id ="readAllCart">
-		select * from cart
-	</select>
-	<update id = "updateCart">
-		
-	</update>
-	<select id ="readOneMemberByCartNo">
-		select * from member where cart_no = #{cartNo}
-	</select>
+
+    <insert id="createCart" parameterType="com.shop.domain.Cart">
+        INSERT INTO cart(member_no) VALUES(#{memberNo})
+    </insert>
+
+    <update id="updateCart" parameterType="com.shop.domain.Cart">
+        UPDATE cart SET member_no = #{memberNo} WHERE cart_no = #{cartNo}
+    </update>
+
+    <delete id="deleteCart" parameterType="long">
+        DELETE FROM cart WHERE cart_no = #{cartNo}
+    </delete>
+
+    <select id="readCart" parameterType="long" resultType="com.shop.domain.Cart">
+        SELECT * FROM cart WHERE cart_no = #{cartNo}
+    </select>
+
+    <select id="readAllCart" resultType="com.shop.domain.Cart">
+        SELECT * FROM cart
+    </select>
+
+    <select id="readOneMemberByCartNo" parameterType="long" resultType="com.shop.domain.Member">
+        SELECT m.* FROM member m
+        JOIN cart c ON m.member_no = c.member_no
+        WHERE c.cart_no = #{cartNo}
+    </select>
+
 </mapper>
