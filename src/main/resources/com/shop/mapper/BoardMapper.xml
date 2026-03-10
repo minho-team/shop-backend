@@ -9,38 +9,40 @@
     <!-- 게시글 작성 -->
     <insert id="createBoard">
         insert into board(board_no, title, content, member_no, created_at, use_yn)
-        values(seq_board.nextval(), #{title}, #{content}, #{memberNo}, systimestamp, 'Y')
+        values(seq_board.nextval, #{title}, #{content}, #{memberNo}, systimestamp, 'Y')
     </insert>
     
+
     <!-- 게시글 전체 조회 (삭제되지 않은 게시글만 조회, 최신순 정렬) -->
     <select id="readAllBoard" resultType="Board">
-        select board_no as boardNo, title, content, member_no as memberNo, 
-               created_at as createdAt, updated_at as updatedAt, 
+        select board_no as boardNo, title, content, member_no as memberNo,
+               created_at as createdAt, updated_at as updatedAt,
                view_count as viewCount, use_yn as useYn
-        from board 
+        from board
         where use_yn = 'Y'
         order by created_at desc
     </select>
-    
+
     <!-- 게시글 하나 조회 -->
     <select id="readOneBoard" resultType="Board">
-        select board_no as boardNo, title, content, member_no as memberNo, 
-               created_at as createdAt, updated_at as updatedAt, 
+        select board_no as boardNo, title, content, member_no as memberNo,
+               created_at as createdAt, updated_at as updatedAt,
                view_count as viewCount, use_yn as useYn
-        from board 
+        from board
         where board_no = #{boardNo} and use_yn = 'Y'
     </select>
-    
+
     <!-- 게시글 수정 -->
     <update id="updateBoard">
-        update board 
-        set title = #{title}, content = #{content}, updated_at = systimestamp
+        update board
+        set title = #{dto.title}, content = #{dto.content}, updated_at = systimestamp
         where board_no = #{boardNo}
     </update>
     
+
     <!-- 게시글 삭제 (soft delete: 실제 삭제하지 않고 use_yn을 N으로 변경) -->
     <update id="deleteBoard">
-        update board 
+        update board
         set use_yn = 'N', updated_at = systimestamp
         where board_no = #{boardNo} and member_no = #{memberNo}
     </update>
