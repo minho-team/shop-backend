@@ -5,4 +5,8 @@
 	<select id="getAllProducts">
 		select * from product
 	</select>
+	
+	<select id="getOneProducts">
+		select * from product_option where product_no = #{productNo}
+	</select>
 </mapper>

@@ -3,6 +3,7 @@ package com.shop.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,7 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.domain.Cart;
+import com.shop.domain.Member;
+import com.shop.dto.CartItemAddRequest;
 import com.shop.service.CartService;
+import com.shop.service.MemberService;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -21,11 +25,15 @@ public class CartController {
 
     @Autowired
     private CartService cartService;
+    private MemberService memberService;
 
     @PostMapping
-    public ResponseEntity<?> createCart(@RequestBody Cart cart) {
+    public ResponseEntity<?> createCart(Authentication authentication, CartItemAddRequest dto) {
+    	//productNo에 RequestBody를 붙여줘야 하는 지 체크해야함
         try {
-            cartService.createCart(cart);
+        	String userId = authentication.getName();
+        	Member member = memberService.readOneMember(userId);
+        	cartService.createCart(member.getMemberNo(), dto);
             return ResponseEntity.ok("장바구니 생성 완료");
         } catch (Exception e) {
             e.printStackTrace();

@@ -7,7 +7,7 @@ import com.shop.dto.CartItemAddRequest;
 
 public interface CartItemMapper {
 
-	public void addCartItem(CartItemAddRequest request) throws Exception;
+	public void addCartItem(CartItem cartItem) throws Exception;
 
 	public void deleteCartItem(Long cartItemNo) throws Exception;
 
