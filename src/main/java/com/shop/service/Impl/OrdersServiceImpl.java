@@ -1,4 +1,4 @@
-package com.shop.service;
+package com.shop.service.Impl;
 
 import java.util.List;
 
@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.shop.domain.Orders;
 import com.shop.mapper.OrdersMapper;
+import com.shop.service.OrdersService;
 
 @Service
 public class OrdersServiceImpl implements OrdersService {

@@ -1,4 +1,4 @@
-package com.shop.service;
+package com.shop.service.Impl;
 
 import java.util.List;
 
@@ -9,7 +9,6 @@ import com.shop.domain.Product;
 import com.shop.dto.ProductCreateRequest;
 import com.shop.dto.ProductUpdateRequest;
 import com.shop.mapper.ProductMapper;
-import com.shop.service.Impl.ProductService;
 
 @Service
 public class ProductServiceImpl implements ProductService{
