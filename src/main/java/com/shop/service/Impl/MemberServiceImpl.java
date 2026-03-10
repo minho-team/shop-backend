@@ -71,5 +71,28 @@ public class MemberServiceImpl implements MemberService {
 		
 	}
 
+	//관리자 계정 넣어놓는 함수
+	
+	@Override
+	@Transactional
+	public void insertAdmin(Member member) throws Exception {
+		
+		
+		MemberRole mr1 = new MemberRole();
+		mr1.setMemberRoleNo(9999998L);
+		mr1.setMemberNo(member.getMemberNo());
+		mr1.setRoleName("USER");
+		
+		MemberRole mr2 = new MemberRole();
+		mr2.setMemberRoleNo(9999999L);
+		mr2.setMemberNo(member.getMemberNo());
+		mr2.setRoleName("ADMIN");
+		
+		memberMapper.insertAdmin(member);
+		memberMapper.insertAdminRole(mr1);
+		memberMapper.insertAdminRole(mr2);
+		
+	}
+
 
 }

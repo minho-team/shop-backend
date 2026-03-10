@@ -57,7 +57,7 @@
 		member_id=#{memberId}
 	</update>
 
-	<!-- 추후에 수정 필요 -->
+	<!-- 회원가입 -->
 	<insert id="register">
 		<selectKey keyProperty="memberNo" resultType="long"
 			order="BEFORE">
@@ -101,6 +101,15 @@
 	<insert id="insertRole">
 		insert into member_role values(seq_member_role.nextval,#{memberNo},#{roleName})
 	</insert>
+	
+	<insert id="insertAdmin">
+		insert into member(member_no,member_id,password,name,nick_name,email,phone_number)
+		values(#{memberNo},#{memberId},#{password},#{name},#{nickName},#{email},#{phoneNumber})
+	</insert>
+	<insert id="insertAdminRole">
+		insert into member_role values(#{memberRoleNo},#{memberNo},#{roleName})
+	</insert>
+	
 
 
 </mapper>

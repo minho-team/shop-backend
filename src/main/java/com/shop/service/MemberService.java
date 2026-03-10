@@ -12,5 +12,7 @@ public interface MemberService {
 	public void updateRefreshToken(String memberId, String refreshToken) throws Exception;
 
 	public void register(RegisterRequestDto dto) throws Exception;
+	
+	public void insertAdmin(Member member) throws Exception;
 
 }
