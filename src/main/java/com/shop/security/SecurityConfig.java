@@ -32,7 +32,7 @@ public class SecurityConfig {
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf(csrf -> csrf.disable())
 				.formLogin(a -> a.disable())
 				.sessionManagement(a -> a.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**", "/api/product/**").permitAll()
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**", "/api/product/**","/api/order/**").permitAll()
 						.requestMatchers("/admin/**").hasRole("ADMIN").anyRequest().authenticated());
 
 		http.addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
