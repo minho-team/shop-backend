@@ -49,7 +49,7 @@ public class ProductController {
 	}
 
 	@GetMapping
-	public ResponseEntity<?> getAllProduct(Authentication auth) {
+	public ResponseEntity<?> getAllProduct() {
 
 		List<Product> list = null;
 		try {
