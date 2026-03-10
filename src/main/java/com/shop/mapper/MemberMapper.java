@@ -1,6 +1,7 @@
 package com.shop.mapper;
 
 import com.shop.domain.Member;
+import com.shop.domain.MemberRole;
 
 public interface MemberMapper {
 	
@@ -11,5 +12,9 @@ public interface MemberMapper {
 	void updateRefreshToken(String memberId, String refreshToken) throws Exception;
 
 	void insertMember(Member member) throws Exception;
+
+	void register(Member member) throws Exception;
+
+	void insertRole(MemberRole role) throws Exception;
 	
 }
