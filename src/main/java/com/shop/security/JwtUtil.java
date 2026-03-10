@@ -49,13 +49,13 @@ public class JwtUtil {
 	
 	public String createRefreshToken(Authentication authentication) {
 		
-		String username = authentication.getName();
+		String userId = authentication.getName();
 		
 		Date now = new Date();
 		Date expiryDate = new Date(now.getTime()+REFRESH_EXPIRATION_TIME);
 		
 		return Jwts.builder()
-				.setSubject(username)
+				.setSubject(userId)
 				.setIssuedAt(now)
 				.setExpiration(expiryDate)
 				.signWith(getSigningKey(),SignatureAlgorithm.HS256)
@@ -63,7 +63,7 @@ public class JwtUtil {
 	}
 	
 	//토큰에서 이름 추출
-	public String getUsername(String token) {
+	public String getUserId(String token) {
 		return  Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()

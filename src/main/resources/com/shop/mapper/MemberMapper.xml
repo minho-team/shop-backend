@@ -41,7 +41,8 @@
 		member
 		m join member_role r on m.member_no = r.member_no
 		where
-		m.member_id = #{memberId}
+		m.member_id =
+		#{memberId}
 	</select>
 
 	<!-- memberId로 한명의 멤버만 가져오기 -->
@@ -52,11 +53,16 @@
 	<!-- 로그인 시 리프레시 토큰 업데이트 -->
 	<update id="updateRefreshToken">
 		update member set refresh_token=#{refreshToken}
-		where member_id=#{memberId}
+		where
+		member_id=#{memberId}
 	</update>
 
 	<!-- 추후에 수정 필요 -->
-	<insert id="insertMember">
+	<insert id="register">
+		<selectKey keyProperty="memberNo" resultType="long"
+			order="BEFORE">
+			SELECT seq_member.NEXTVAL FROM dual
+		</selectKey>
 		INSERT INTO member (
 		member_no,
 		member_id,
@@ -64,16 +70,37 @@
 		name,
 		nick_name,
 		email,
-		phone_number
+		phone_number,
+		zip_code,
+		basic_address,
+		detail_address,
+		gender,
+		birthday,
+		bank_name,
+		bank_code,
+		account_holder_name
 		) VALUES (
-		seq_member.NEXTVAL,
+		#{memberNo},
 		#{memberId},
 		#{password},
 		#{name},
 		#{nickName},
 		#{email},
-		#{phoneNumber}
+		#{phoneNumber},
+		#{zipCode},
+		#{basicAddress},
+		#{detailAddress},
+		#{gender},
+		#{birthday},
+		#{bankName},
+		#{bankCode},
+		#{accountHolderName}
 		)
 	</insert>
+
+	<insert id="insertRole">
+		insert into member_role values(seq_member_role.nextval,#{memberNo},#{roleName})
+	</insert>
+
 
 </mapper>

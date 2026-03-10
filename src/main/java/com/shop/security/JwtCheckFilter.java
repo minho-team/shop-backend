@@ -57,7 +57,7 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 		try {
 			if (jwtUtil.validateToken(token)) {
 				// 토큰에서 유저네임 추출
-				String username = jwtUtil.getUsername(token);
+				String username = jwtUtil.getUserId(token);
 
 				List<SimpleGrantedAuthority> authorities = Arrays.stream(jwtUtil.getRoles(token))
 						.map(role -> new SimpleGrantedAuthority(role)).collect(Collectors.toList());
