@@ -28,6 +28,6 @@ public class Board {
     // 게시글 조회수
     private Integer viewCount;
 
-    // 게시글 사용 여부 (삭제 여부)
-    private String useYn;
+    // 게시글 삭제 여부 Y : 정상 / N : 삭제
+    private String deleteYn;
 }
