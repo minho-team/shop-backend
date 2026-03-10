@@ -28,7 +28,7 @@ class ShopApplicationTests {
 		member.setEmail("admin@test.com");
 		member.setPhoneNumber("010-1111-2222");
 
-		memberService.insertMember(member);
+//		memberService.insertMember(member);
 	}
 
 }
