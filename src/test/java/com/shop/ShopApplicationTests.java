@@ -6,9 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.shop.domain.Member;
+import com.shop.domain.MemberRole;
 import com.shop.service.MemberService;
-
-import lombok.RequiredArgsConstructor;
 
 @SpringBootTest
 class ShopApplicationTests {
@@ -21,6 +20,7 @@ class ShopApplicationTests {
 	@Test
 	void insertTestAdmin() throws Exception {
 		Member member = new Member();
+		member.setMemberNo(999999L);
 		member.setMemberId("admin");
 		member.setPassword(passwordEncoder.encode("admin"));
 		member.setName("관리자");
@@ -28,7 +28,10 @@ class ShopApplicationTests {
 		member.setEmail("admin@test.com");
 		member.setPhoneNumber("010-1111-2222");
 
-//		memberService.insertMember(member);
+		
+		
+		memberService.insertAdmin(member);
+		
 	}
 
 }

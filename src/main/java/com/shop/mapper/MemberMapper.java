@@ -11,10 +11,12 @@ public interface MemberMapper {
 	
 	void updateRefreshToken(String memberId, String refreshToken) throws Exception;
 
-	void insertMember(Member member) throws Exception;
-
 	void register(Member member) throws Exception;
 
 	void insertRole(MemberRole role) throws Exception;
+
+	void insertAdmin(Member member) throws Exception;
+
+	void insertAdminRole(MemberRole mr)throws Exception;
 	
 }

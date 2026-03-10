@@ -11,6 +11,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -164,7 +166,7 @@ public class AuthController {
 				member = memberService.readOneMember(userId);
 				log.info("로그아웃 때 받아온 member의 이메일 확인:" + member.getEmail());
 				// 리프레시토큰을 무효화
-				memberService.updateRefreshToken(userId, null);
+				memberService.updateRefreshToken(userId, "");
 			} catch (Exception e) {
 				e.printStackTrace();
 				log.info("리프레시토큰 무효화 과정에서 에러");
@@ -185,5 +187,25 @@ public class AuthController {
 
 		return ResponseEntity.ok("로그아웃 완료");
 	}
+	
+	@GetMapping("/me")
+	public ResponseEntity<?> me(Authentication authentication) {
+	    if (authentication == null || !authentication.isAuthenticated()) {
+	        return ResponseEntity.status(401).body("Unauthorized, 로그인 안 되어 있는 상태");
+	    }
+
+	    String memberId = authentication.getName();
+
+	    Map<String, Object> result = Map.of(
+	        "memberId", memberId, //이게 userId임
+	        "roles", authentication.getAuthorities().stream()
+	                .map(a -> a.getAuthority())
+	                .toList()
+	    );
+	    log.info("멤버의 권한 리스트:"+ result.get("roles"));
+
+	    return ResponseEntity.ok(result);
+	}
+	
 
 }
