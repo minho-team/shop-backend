@@ -3,12 +3,18 @@ package com.shop.domain;
 import lombok.Data;
 import java.sql.Timestamp;
 
-// 게시판 테이블 데이터를 담는 도메인 클래스
+// 1:1 문의 게시판 테이블 데이터를 담는 도메인 클래스
 @Data
 public class Board {
 
-    // 게시글 번호
+    // 게시글 번호 (PK)
     private Long boardNo;
+
+    // 작성자 회원 번호 (FK → member.member_no)
+    private Long memberNo;
+
+    // 문의 카테고리 (배송 / 주문/결제 / 취소/교환/반품 / 상품/AS문의 / 회원정보 / 서비스 / 이용안내)
+    private String category;
 
     // 게시글 제목
     private String title;
@@ -16,18 +22,21 @@ public class Board {
     // 게시글 내용
     private String content;
 
-    // 작성자 회원 번호
-    private Long memberNo;
+    // 비밀글 여부 (Y: 비밀글 / N: 공개글)
+    private String secretYn;
 
-    // 게시글 생성 시간
-    private Timestamp createdAt;
+    // 문의 상태 (답변대기 / 답변완료)
+    private String status;
 
-    // 게시글 수정 시간
-    private Timestamp updatedAt;
-
-    // 게시글 조회수
+    // 조회수
     private Integer viewCount;
 
-    // 게시글 삭제 여부 Y : 정상 / N : 삭제
+    // 작성일
+    private Timestamp createdAt;
+
+    // 수정일
+    private Timestamp updatedAt;
+
+    // 삭제 여부 (N: 정상 / Y: 삭제)
     private String deleteYn;
 }

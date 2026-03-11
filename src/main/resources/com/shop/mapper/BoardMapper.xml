@@ -6,53 +6,101 @@
 <!-- BoardMapper 인터페이스와 연결되는 Mapper -->
 <mapper namespace="com.shop.mapper.BoardMapper">
 
-    <!-- 게시글 작성 -->
+    <!-- 게시글 작성 (카테고리, 비밀글 여부 포함) -->
+    <!-- delete_yn 기본값 N = 정상, Y = 삭제 -->
     <insert id="createBoard">
-        insert into board(board_no, title, content, member_no, created_at, delete_yn)
-        values(seq_board.nextval, #{title}, #{content}, #{memberNo}, systimestamp, 'Y')
+        INSERT INTO board (board_no, member_no, category, title, content, secret_yn, status, created_at, delete_yn)
+        VALUES (board_seq.nextval, #{memberNo}, #{category}, #{title}, #{content}, #{secretYn}, '답변대기', SYSTIMESTAMP, 'N')
     </insert>
 
-    <!-- 게시글 전체 조회 (삭제되지 않은 게시글만 조회, 최신순 정렬) -->
+    <!-- 게시글 전체 조회 (삭제되지 않은 게시글만, 최신순 정렬) - 관리자용 -->
     <select id="readAllBoard" resultType="Board">
-        select board_no    as boardNo,
+        SELECT board_no    AS boardNo,
+               member_no   AS memberNo,
+               category,
                title,
                content,
-               member_no  as memberNo,
-               created_at as createdAt,
-               updated_at as updatedAt,
-               view_count as viewCount,
-               delete_yn  as deleteYn
-        from board
-        where delete_yn = 'Y'
-        order by created_at desc
+               secret_yn   AS secretYn,
+               status,
+               view_count  AS viewCount,
+               created_at  AS createdAt,
+               updated_at  AS updatedAt,
+               delete_yn   AS deleteYn
+        FROM board
+        WHERE delete_yn = 'N'
+        ORDER BY created_at DESC
     </select>
 
-    <!-- 게시글 하나 조회 -->
+    <!-- 내 문의 내역 조회 (로그인한 회원의 게시글만, 최신순) -->
+    <select id="readMyBoard" resultType="Board">
+        SELECT board_no    AS boardNo,
+               member_no   AS memberNo,
+               category,
+               title,
+               content,
+               secret_yn   AS secretYn,
+               status,
+               view_count  AS viewCount,
+               created_at  AS createdAt,
+               updated_at  AS updatedAt,
+               delete_yn   AS deleteYn
+        FROM board
+        WHERE delete_yn = 'N'
+          AND member_no = #{memberNo}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 게시글 하나 조회 (삭제되지 않은 것만) -->
     <select id="readOneBoard" resultType="Board">
-        select board_no    as boardNo,
+        SELECT board_no    AS boardNo,
+               member_no   AS memberNo,
+               category,
                title,
                content,
-               member_no  as memberNo,
-               created_at as createdAt,
-               updated_at as updatedAt,
-               view_count as viewCount,
-               delete_yn  as deleteYn
-        from board
-        where board_no = #{boardNo} and delete_yn = 'Y'
+               secret_yn   AS secretYn,
+               status,
+               view_count  AS viewCount,
+               created_at  AS createdAt,
+               updated_at  AS updatedAt,
+               delete_yn   AS deleteYn
+        FROM board
+        WHERE board_no = #{boardNo}
+          AND delete_yn = 'N'
     </select>
 
-    <!-- 게시글 수정 -->
-    <update id="updateBoard">
-        update board
-        set title = #{dto.title}, content = #{dto.content}, updated_at = systimestamp
-        where board_no = #{boardNo}
+    <!-- 조회수 1 증가 -->
+    <update id="increaseViewCount">
+        UPDATE board
+        SET view_count = view_count + 1
+        WHERE board_no = #{boardNo}
     </update>
 
-    <!-- 게시글 삭제 (soft delete) -->
+    <!-- 게시글 수정 (카테고리, 제목, 내용, 비밀글 여부 수정 가능) -->
+    <update id="updateBoard">
+        UPDATE board
+        SET category   = #{dto.category},
+            title      = #{dto.title},
+            content    = #{dto.content},
+            secret_yn  = #{dto.secretYn},
+            updated_at = SYSTIMESTAMP
+        WHERE board_no = #{boardNo}
+    </update>
+
+    <!-- 게시글 삭제 (soft delete - delete_yn을 Y로 변경, 본인 글만 가능) -->
     <update id="deleteBoard">
-        update board
-        set delete_yn = 'N', updated_at = systimestamp
-        where board_no = #{boardNo} and member_no = #{memberNo}
+        UPDATE board
+        SET delete_yn  = 'Y',
+            updated_at = SYSTIMESTAMP
+        WHERE board_no  = #{boardNo}
+          AND member_no = #{memberNo}
+    </update>
+
+    <!-- 문의 상태 변경 (관리자가 답변 후 '답변완료'로 변경) -->
+    <update id="updateStatus">
+        UPDATE board
+        SET status     = #{status},
+            updated_at = SYSTIMESTAMP
+        WHERE board_no = #{boardNo}
     </update>
 
 </mapper>
