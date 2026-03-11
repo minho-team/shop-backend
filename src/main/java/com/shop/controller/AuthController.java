@@ -29,11 +29,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class AuthController {
 
 	private final AuthenticationManager authenticationManager;
@@ -82,7 +83,7 @@ public class AuthController {
 		Cookie[] cookies = request.getCookies();
 
 		if (cookies == null) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 없습니다.");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 없습니다.1");
 		}
 
 		String refreshToken = null;
@@ -95,7 +96,7 @@ public class AuthController {
 		}
 
 		if (refreshToken == null) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 없습니다.");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 없습니다.2");
 		}
 
 		// JWT 자체 유효성 검증
@@ -111,8 +112,8 @@ public class AuthController {
 		try {
 			member = memberService.readOneMemberWithRoles(userId);
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.info("authcontroller에서 refresh토큰 함수 에러");
+			log.info("authcontroller refresh 에러: " + e.getMessage());
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("사용자를 찾을 수 없습니다.");
 		}
 
 		// DB에 저장된 refreshToken과 비교

@@ -19,7 +19,7 @@ public class JwtUtil {
 	
 	private final String SECRET_KEY="domino-my-super-key-12345160-domino-24843343";
 	
-	private final long EXPIRATION_TIME =3600000;
+	private final long EXPIRATION_TIME =1800000;
 	private final long REFRESH_EXPIRATION_TIME = 604800000;
 	
 	private Key getSigningKey() {

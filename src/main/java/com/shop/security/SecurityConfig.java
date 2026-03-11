@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,23 +24,38 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
 	private final JwtCheckFilter jwtCheckFilter;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	    http
+	        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+	        .csrf(csrf -> csrf.disable())
+	        .formLogin(form -> form.disable())
+	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+	        .authorizeHttpRequests(auth -> auth
+	            .requestMatchers("/api/auth/**").permitAll()
+	            .requestMatchers("/api/board/**").permitAll()
 
-		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf(csrf -> csrf.disable())
-				.formLogin(a -> a.disable())
-				.sessionManagement(a -> a.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**", "/api/product/**","/api/order/**").permitAll()
-						.requestMatchers("/admin/**").hasRole("ADMIN").anyRequest().authenticated());
+	            // 상품 조회는 모두 허용
+	            .requestMatchers(HttpMethod.GET, "/api/product/**").permitAll()
 
-		http.addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
+	            // 상품 등록/수정/삭제는 관리자만
+	            .requestMatchers(HttpMethod.POST, "/api/product/**").hasRole("ADMIN")
+	            .requestMatchers(HttpMethod.PUT, "/api/product/**").hasRole("ADMIN")
+	            .requestMatchers(HttpMethod.DELETE, "/api/product/**").hasRole("ADMIN")
 
-		return http.build();
+	            .requestMatchers("/admin/**").hasRole("ADMIN")
+	            .requestMatchers("/api/order/**", "/api/cart/**", "/api/cart/item/**").hasRole("USER")
+	            .anyRequest().authenticated()
+	        );
 
+	    http.addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
+
+	    return http.build();
 	}
 
 	@Bean
@@ -58,7 +75,7 @@ public class SecurityConfig {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowedOrigins(List.of("http://localhost:5173/"));
 		config.setAllowedMethods(List.of("PUT", "PATCH", "POST", "DELETE", "GET"));
-		config.setAllowedHeaders(List.of("Authorization", "Content-type"));
+		config.setAllowedHeaders(List.of("Authorization", "Content-type", "Cookie"));
 
 		config.setAllowCredentials(true);
 

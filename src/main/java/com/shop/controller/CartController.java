@@ -28,8 +28,7 @@ public class CartController {
     private MemberService memberService;
 
     @PostMapping
-    public ResponseEntity<?> createCart(Authentication authentication, CartItemAddRequest dto) {
-    	//productNo에 RequestBody를 붙여줘야 하는 지 체크해야함
+    public ResponseEntity<?> createCart(Authentication authentication, @RequestBody CartItemAddRequest dto) {
         try {
         	String userId = authentication.getName();
         	Member member = memberService.readOneMember(userId);

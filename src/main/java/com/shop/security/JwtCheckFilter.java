@@ -71,8 +71,8 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 		} catch (Exception e) {
 			log.info("jwt check error: " + e.getMessage());
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			response.setContentType("application/json");
-			response.getWriter().write("INVALID_TOKEN");
+			response.setContentType("application/json;charset=UTF-8");
+			response.getWriter().write("{\"message\":\"INVALID_TOKEN\"}");
 			return;
 		}
 		filterChain.doFilter(request, response);
@@ -82,9 +82,9 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
 		String path = request.getRequestURI();
 
-		return path.startsWith("/auth/login") 
-				|| path.startsWith("/auth/refresh") 
-				|| path.startsWith("/auth/signup");
+		return path.startsWith("/api/auth/login") 
+				|| path.startsWith("/api/auth/refresh") 
+				|| path.startsWith("/api/auth/register");
 
 	}
 

@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +28,7 @@ public class ProductController {
 	private ProductService productService;
 
 	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> insertProduct(@RequestBody ProductCreateRequest dto) {
 		try {
 			productService.insertProduct(dto);
@@ -62,6 +63,7 @@ public class ProductController {
 	}
 
 	@PutMapping("/{productNo}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> updateProduct(@PathVariable Long productNo, @RequestBody ProductUpdateRequest dto) {
 		try {
 			productService.updateProducts(productNo, dto);
@@ -73,6 +75,7 @@ public class ProductController {
 	}
 
 	@DeleteMapping("/{productNo}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> deleteProduct(@PathVariable Long productNo) {
 		try {
 			productService.deleteProduct(productNo);
