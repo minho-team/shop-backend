@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- MyBatis Mapper 설정 파일 -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- BoardFileMapper 인터페이스와 연결되는 Mapper -->
+<mapper namespace="com.shop.mapper.BoardFileMapper">
+
+    <!-- 첨부파일 저장 -->
+    <insert id="insertFile">
+        INSERT INTO board_file (file_no, board_no, file_url, file_name, file_size, file_type, created_at, delete_yn)
+        VALUES (board_file_seq.nextval, #{boardNo}, #{fileUrl}, #{fileName}, #{fileSize}, #{fileType}, SYSTIMESTAMP, 'N')
+    </insert>
+
+    <!-- 게시글에 해당하는 첨부파일 목록 조회 (삭제되지 않은 것만) -->
+    <select id="getFilesByBoardNo" resultType="BoardFile">
+        SELECT file_no    AS fileNo,
+               board_no   AS boardNo,
+               file_url   AS fileUrl,
+               file_name  AS fileName,
+               file_size  AS fileSize,
+               file_type  AS fileType,
+               created_at AS createdAt,
+               delete_yn  AS deleteYn
+        FROM board_file
+        WHERE board_no = #{boardNo}
+          AND delete_yn = 'N'
+        ORDER BY created_at ASC
+    </select>
+
+    <!-- 첨부파일 삭제 (soft delete - delete_yn을 Y로 변경) -->
+    <update id="deleteFile">
+        UPDATE board_file
+        SET delete_yn = 'Y'
+        WHERE file_no = #{fileNo}
+    </update>
+
+</mapper>

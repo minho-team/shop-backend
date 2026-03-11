@@ -6,9 +6,15 @@ import lombok.Data;
 @Data
 public class UpdateBoardRequest {
 
-    // 수정할 게시글 제목
+    // 수정할 카테고리
+    private String category;
+
+    // 수정할 제목
     private String title;
 
-    // 수정할 게시글 내용
+    // 수정할 내용
     private String content;
+
+    // 수정할 비밀글 여부 (Y: 비밀글 / N: 공개글)
+    private String secretYn;
 }
