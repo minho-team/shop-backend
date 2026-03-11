@@ -38,7 +38,7 @@ public class SecurityConfig {
 	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 	        .authorizeHttpRequests(auth -> auth
 	            .requestMatchers("/api/auth/**").permitAll()
-	            .requestMatchers("/api/board/**").permitAll()
+	            .requestMatchers("/api/inquiry/**").permitAll()
 
 	            // 상품 조회는 모두 허용
 	            .requestMatchers(HttpMethod.GET, "/api/product/**").permitAll()

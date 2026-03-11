@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.shop.domain.Product;
 import com.shop.dto.ProductCreateRequest;
 import com.shop.dto.ProductUpdateRequest;
-import com.shop.service.Impl.ProductService;
+import com.shop.service.ProductService;
 
 @RestController
 @RequestMapping("/api/product")

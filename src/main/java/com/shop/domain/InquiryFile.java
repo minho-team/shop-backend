@@ -1,17 +1,18 @@
 package com.shop.domain;
 
+import java.time.LocalDateTime;
+
 import lombok.Data;
-import java.sql.Timestamp;
 
 // 게시글 첨부파일 테이블 데이터를 담는 도메인 클래스
 @Data
-public class BoardFile {
+public class InquiryFile {
 
     // 파일 번호 (PK)
-    private Long fileNo;
+    private Long inquiryFileNo;
 
-    // 게시글 번호 (FK → board.board_no)
-    private Long boardNo;
+    // 게시글 번호 (FK → inquiry.inquiry_no)
+    private Long inquiryNo;
 
     // 파일 저장 경로 (서버 내 접근 URL)
     private String fileUrl;
@@ -26,7 +27,7 @@ public class BoardFile {
     private String fileType;
 
     // 업로드일
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     // 삭제 여부 (N: 정상 / Y: 삭제)
     private String deleteYn;

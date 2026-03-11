@@ -4,7 +4,7 @@ import lombok.Data;
 
 // 게시글 작성 요청 데이터를 담는 DTO
 @Data
-public class BoardCreateRequest {
+public class InquiryCreateRequest {
 
     // 작성자 회원 번호 (JWT에서 추출하여 컨트롤러에서 주입)
     private Long memberNo;

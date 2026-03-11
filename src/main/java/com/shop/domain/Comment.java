@@ -10,8 +10,8 @@ public class Comment {
     // 댓글 번호 (PK)
     private Long commentNo;
 
-    // 게시글 번호 (FK → board.board_no)
-    private Long boardNo;
+    // 게시글 번호 (FK → inquiry.inquiry_no)
+    private Long inquiryNo;
 
     // 작성자 회원 번호 (FK, 관리자)
     private Long memberNo;

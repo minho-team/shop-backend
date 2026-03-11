@@ -9,6 +9,7 @@ import com.shop.domain.Product;
 import com.shop.dto.ProductCreateRequest;
 import com.shop.dto.ProductUpdateRequest;
 import com.shop.mapper.ProductMapper;
+import com.shop.service.ProductService;
 
 @Service
 public class ProductServiceImpl implements ProductService{

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.shop.mapper.InquiryMapper">
+
+    <insert id="createInquiry">
+        INSERT INTO inquiry (
+            inquiry_no, member_no, category, title, content, secret_yn, status, created_at, delete_yn
+        )
+        VALUES (
+            seq_inquiry.nextval, #{memberNo}, #{category}, #{title}, #{content}, #{secretYn}, '답변대기', SYSTIMESTAMP, 'N'
+        )
+    </insert>
+
+    <select id="readAllInquiry" resultType="Inquiry">
+        SELECT inquiry_no   AS inquiryNo,
+               member_no    AS memberNo,
+               category,
+               title,
+               content,
+               secret_yn    AS secretYn,
+               status,
+               view_count   AS viewCount,
+               created_at   AS createdAt,
+               updated_at   AS updatedAt,
+               delete_yn    AS deleteYn
+        FROM inquiry
+        WHERE delete_yn = 'N'
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="readMyInquiry" resultType="Inquiry">
+        SELECT inquiry_no   AS inquiryNo,
+               member_no    AS memberNo,
+               category,
+               title,
+               content,
+               secret_yn    AS secretYn,
+               status,
+               view_count   AS viewCount,
+               created_at   AS createdAt,
+               updated_at   AS updatedAt,
+               delete_yn    AS deleteYn
+        FROM inquiry
+        WHERE delete_yn = 'N'
+          AND member_no = #{memberNo}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="readOneInquiry" resultType="Inquiry">
+        SELECT inquiry_no   AS inquiryNo,
+               member_no    AS memberNo,
+               category,
+               title,
+               content,
+               secret_yn    AS secretYn,
+               status,
+               view_count   AS viewCount,
+               created_at   AS createdAt,
+               updated_at   AS updatedAt,
+               delete_yn    AS deleteYn
+        FROM inquiry
+        WHERE inquiry_no = #{inquiryNo}
+          AND delete_yn = 'N'
+    </select>
+
+    <update id="increaseViewCount">
+        UPDATE inquiry
+        SET view_count = view_count + 1
+        WHERE inquiry_no = #{inquiryNo}
+    </update>
+
+    <update id="updateInquiry">
+        UPDATE inquiry
+        SET category   = #{dto.category},
+            title      = #{dto.title},
+            content    = #{dto.content},
+            secret_yn  = #{dto.secretYn},
+            updated_at = SYSTIMESTAMP
+        WHERE inquiry_no = #{inquiryNo}
+    </update>
+
+    <update id="deleteInquiry">
+        UPDATE inquiry
+        SET delete_yn  = 'Y',
+            updated_at = SYSTIMESTAMP
+        WHERE inquiry_no = #{inquiryNo}
+          AND member_no  = #{memberNo}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE inquiry
+        SET status     = #{status},
+            updated_at = SYSTIMESTAMP
+        WHERE inquiry_no = #{inquiryNo}
+    </update>
+
+</mapper>

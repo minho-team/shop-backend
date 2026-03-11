@@ -6,8 +6,8 @@ import lombok.Data;
 @Data
 public class CommentCreateRequest {
 
-    // 게시글 번호
-    private Long boardNo;
+    // 문의글 번호
+    private Long inquiryNo;
 
     // 작성자 회원 번호 (관리자, JWT에서 추출하여 컨트롤러에서 주입)
     private Long memberNo;

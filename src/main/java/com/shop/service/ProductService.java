@@ -1,4 +1,4 @@
-package com.shop.service.Impl;
+package com.shop.service;
 
 import java.util.List;
 
