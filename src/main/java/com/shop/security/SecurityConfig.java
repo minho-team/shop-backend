@@ -39,6 +39,7 @@ public class SecurityConfig {
 	        .authorizeHttpRequests(auth -> auth
 	            .requestMatchers("/api/auth/**").permitAll()
 	            .requestMatchers("/api/inquiry/**").permitAll()
+	            .requestMatchers("/api/faq/**").permitAll()
 
 	            // 상품 조회는 모두 허용
 	            .requestMatchers(HttpMethod.GET, "/api/product/**").permitAll()
@@ -73,7 +74,7 @@ public class SecurityConfig {
 	CorsConfigurationSource corsConfigurationSource() {
 
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(List.of("http://localhost:5173/"));
+		config.setAllowedOrigins(List.of("http://localhost:5173"));
 		config.setAllowedMethods(List.of("PUT", "PATCH", "POST", "DELETE", "GET"));
 		config.setAllowedHeaders(List.of("Authorization", "Content-type", "Cookie"));
 

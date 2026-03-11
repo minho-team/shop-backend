@@ -15,9 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.shop.domain.Orders;
 import com.shop.service.OrdersService;
 
-
-
-
 @RestController
 @RequestMapping("/api/order")
 public class OrdersController {

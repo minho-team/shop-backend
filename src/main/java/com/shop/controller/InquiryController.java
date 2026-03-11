@@ -44,7 +44,7 @@ public class InquiryController {
         return inquiryService.readAllInquiry();
     }
 
-    // 내 문의 내역 조회 API (로그인한 회원의 게시글만)
+    // 내 1:1문의 내역 조회 API (로그인한 회원의 게시글만)
     @GetMapping("/my")
     public ResponseEntity<?> readMyInquiry(@AuthenticationPrincipal User user) {
 
@@ -54,13 +54,13 @@ public class InquiryController {
         return inquiryService.readMyInquiry(memberNo);
     }
 
-    // 게시글 하나 조회 API (첨부파일 + 관리자 답변 포함)
+    // 1:1문의글 하나 조회 API (첨부파일 + 관리자 답변 포함)
     @GetMapping("/{inquiryNo}")
     public ResponseEntity<?> readOneInquiry(@PathVariable Long inquiryNo) {
         return inquiryService.readOneInquiry(inquiryNo);
     }
 
-    // 게시글 수정 API
+    // 1:1문의글 수정 API
     @PutMapping("/{inquiryNo}")
     public ResponseEntity<?> updateInquiry(
             @PathVariable Long inquiryNo,
@@ -68,9 +68,9 @@ public class InquiryController {
         return inquiryService.updateInquiry(inquiryNo, dto);
     }
 
-    // 게시글 삭제 API (본인 글만 삭제 가능)
+    // 1:1문의글 삭제 API (본인 글만 삭제 가능)
     @DeleteMapping("/{inquiryNo}")
-    public ResponseEntity<?> deleteInquiry(
+    public ResponseEntity<?> deleteInquiryNo(
             @PathVariable Long inquiryNo,
             @AuthenticationPrincipal User user) {
 
