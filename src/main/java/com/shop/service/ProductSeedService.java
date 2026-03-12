@@ -1,114 +1,202 @@
 package com.shop.service;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.UUID;
-
+import com.shop.dto.seed.ProductImageSeedRow;
+import com.shop.dto.seed.ProductOptionSeedRow;
+import com.shop.dto.seed.ProductSeedRow;
+import com.shop.mapper.ProductImageMapper;
+import com.shop.mapper.ProductMapper;
+import com.shop.mapper.ProductOptionMapper;
+import com.shop.domain.Product;
+import com.shop.domain.ProductImage;
+import com.shop.domain.ProductOption;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.shop.domain.Product;
-import com.shop.domain.ProductImage;
-import com.shop.domain.ProductOption;
-import com.shop.mapper.ProductImageMapper;
-import com.shop.mapper.ProductMapper;
-import com.shop.mapper.ProductOptionMapper;
-
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class ProductSeedService {
 
-    private final ProductMapper productMapper;
-    private final ProductImageMapper productImageMapper;
-    private final ProductOptionMapper productOptionMapper;
-    
     @Value("${upload.path}")
     private String uploadPath;
-    
+
+    private final ProductMapper productMapper;
+    private final ProductOptionMapper productOptionMapper;
+    private final ProductImageMapper productImgMapper;
+
     @Transactional
-    public void seedOneProduct() throws Exception {
+    public void seedFromCsv() throws Exception {
 
-        // 1. 상품 객체 생성
-        Product product = new Product();
-        product.setName("토트 백");
-        product.setPrice(19900);
-        product.setSalePrice(15900);
-        product.setCategoryId(244L); // 네 category 테이블에 실제 존재하는 값으로 바꿔야 함
-        product.setDescription("초기 데이터 테스트용 토트 백 상품");
-        product.setUseYn("Y");
-        product.setViewCount(0);
-        product.setSameDayDeliveryYn("N");
+        Path seedRoot = Paths.get(uploadPath, "seed");
+        Path productCsv = seedRoot.resolve("products.csv");
+        Path optionCsv = seedRoot.resolve("product_options.csv");
+        Path imageCsv = seedRoot.resolve("product_images.csv");
+        Path seedImageDir = seedRoot.resolve("images");
 
-        // 2. 상품 INSERT
-        productMapper.insertSeedProduct(product);
+        List<ProductSeedRow> productRows = readProducts(productCsv);
+        List<ProductOptionSeedRow> optionRows = readOptions(optionCsv);
+        List<ProductImageSeedRow> imageRows = readImages(imageCsv);
 
-        // selectKey로 채워진 PK
-        Long productNo = product.getProductNo();
+        Map<String, Long> productKeyToProductNo = new HashMap<>();
 
-        // 3. 이미지 저장 폴더
-        Path uploadDir = Path.of(uploadPath,"product");
-        
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
+        // 1. 상품 insert
+        for (ProductSeedRow row : productRows) {
+            Product product = new Product();
+            product.setName(row.getName());
+            product.setPrice(row.getPrice());
+            product.setSalePrice(row.getSalePrice());
+            product.setCategoryId(row.getCategoryId());
+            product.setDescription(row.getDescription());
+            product.setUseYn(row.getUseYn());
+            product.setSameDayDeliveryYn(row.getSameDayDeliveryYn());
+
+            productMapper.insertSeedProduct(product); // insert 후 productNo 채워지게
+            productKeyToProductNo.put(row.getProductKey(), product.getProductNo());
         }
 
-        // 4. 원본 이미지들
-        Path mainImage = Path.of("C:/upload/seed/Tote_bag1.jpg");
-        Path galleryImage1 = Path.of("C:/upload/seed/Tote_bag2.jpg");
-        Path galleryImage2 = Path.of("C:/upload/seed/Tote_bag3.jpg");
+        // 2. 옵션 insert
+        for (ProductOptionSeedRow row : optionRows) {
+            Long productNo = productKeyToProductNo.get(row.getProductKey());
+            if (productNo == null) {
+                throw new IllegalArgumentException("옵션 CSV의 product_key가 products.csv에 없음: " + row.getProductKey());
+            }
 
-        // 5. 이미지 저장 + DB insert
-        saveImage(mainImage, uploadDir, productNo, "MAIN", 1);
-        saveImage(galleryImage1, uploadDir, productNo, "GALLERY", 2);
-        saveImage(galleryImage2, uploadDir, productNo, "GALLERY", 3);
+            ProductOption option = new ProductOption();
+            option.setProductNo(productNo);
+            option.setOptionSize(row.getOptionSize());
+            option.setColor(row.getColor());
+            option.setStock(row.getStock());
+            option.setUseYn(row.getUseYn());
 
-        // 6. 옵션도 같이 넣고 싶으면
-        insertOption(productNo, "S", "BEIGE", 100);
-        insertOption(productNo, "M", "BEIGE", 100);
-    }
-
-    private void saveImage(Path sourceFile,
-                           Path uploadDir,
-                           Long productNo,
-                           String imageType,
-                           int sortOrder) throws IOException {
-
-        if (!Files.exists(sourceFile)) {
-            throw new IllegalArgumentException("원본 이미지 파일이 없습니다: " + sourceFile);
+            productOptionMapper.insertSeedOption(option);
         }
 
-        String originalName = sourceFile.getFileName().toString();
-        String storedName = UUID.randomUUID() + "_" + originalName;
+     // 3. 이미지 복사 + DB insert
+        for (ProductImageSeedRow row : imageRows) {
+            Long productNo = productKeyToProductNo.get(row.getProductKey());
+            if (productNo == null) {
+                throw new IllegalArgumentException("이미지 CSV의 product_key가 products.csv에 없음: " + row.getProductKey());
+            }
 
-        Path targetFile = uploadDir.resolve(storedName);
+            Path source = seedImageDir.resolve(row.getImageFileName());
+            if (!Files.exists(source)) {
+                throw new IllegalArgumentException("시드 이미지 파일이 없음: " + source);
+            }
 
-        Files.copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
+            Path targetDir = Paths.get(uploadPath);
+            Files.createDirectories(targetDir);
 
-        ProductImage productImg = new ProductImage();
-        productImg.setProductNo(productNo);
+            String savedFileName = UUID.randomUUID() + "_" + row.getImageFileName();
+            Path target = targetDir.resolve(savedFileName);
 
-        // DB에는 절대경로 말고 상대경로 비슷하게 저장
-        productImg.setImageUrl("product/" + storedName);
+            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
 
-        productImg.setImageType(imageType);
-        productImg.setSortOrder(sortOrder);
+            String dbImageUrl = savedFileName;
 
-        productImageMapper.insertProductImg(productImg);
+            ProductImage productImg = new ProductImage();
+            productImg.setProductNo(productNo);
+            productImg.setImageUrl(dbImageUrl);
+            productImg.setImageType(row.getImageType());
+            productImg.setSortOrder(row.getSortOrder());
+
+            productImgMapper.insertSeedProductImg(productImg);
+        }
     }
 
-    private void insertOption(Long productNo, String size, String color, int stock) {
-        ProductOption option = new ProductOption();
-        option.setProductNo(productNo);
-        option.setOptionSize(size);
-        option.setColor(color);
-        option.setStock(stock);
-        option.setUseYn("Y");
+    private List<ProductSeedRow> readProducts(Path csvPath) throws IOException {
+        List<ProductSeedRow> list = new ArrayList<>();
 
-        productOptionMapper.insertProductOption(option);
+        try (
+                Reader reader = Files.newBufferedReader(csvPath, StandardCharsets.UTF_8);
+                CSVParser parser = CSVFormat.DEFAULT.builder()
+                        .setHeader()
+                        .setSkipHeaderRecord(true)
+                        .build()
+                        .parse(reader)
+        ) {
+            for (CSVRecord record : parser) {
+                ProductSeedRow row = new ProductSeedRow();
+                row.setProductKey(record.get("product_key"));
+                row.setName(record.get("name"));
+                row.setPrice(parseLong(record.get("price")));
+                row.setSalePrice(parseLong(record.get("sale_price")));
+                row.setCategoryId(parseLong(record.get("category_id")));
+                row.setDescription(record.get("description"));
+                row.setUseYn(record.get("use_yn"));
+                row.setSameDayDeliveryYn(record.get("same_day_delivery_yn"));
+                list.add(row);
+            }
+        }
+
+        return list;
+    }
+
+    private List<ProductOptionSeedRow> readOptions(Path csvPath) throws IOException {
+        List<ProductOptionSeedRow> list = new ArrayList<>();
+
+        try (
+                Reader reader = Files.newBufferedReader(csvPath, StandardCharsets.UTF_8);
+                CSVParser parser = CSVFormat.DEFAULT.builder()
+                        .setHeader()
+                        .setSkipHeaderRecord(true)
+                        .build()
+                        .parse(reader)
+        ) {
+            for (CSVRecord record : parser) {
+                ProductOptionSeedRow row = new ProductOptionSeedRow();
+                row.setProductKey(record.get("product_key"));
+                row.setOptionSize(record.get("option_size"));
+                row.setColor(record.get("color"));
+                row.setStock(parseInt(record.get("stock")));
+                row.setUseYn(record.get("use_yn"));
+                list.add(row);
+            }
+        }
+
+        return list;
+    }
+
+    private List<ProductImageSeedRow> readImages(Path csvPath) throws IOException {
+        List<ProductImageSeedRow> list = new ArrayList<>();
+
+        try (
+                Reader reader = Files.newBufferedReader(csvPath, StandardCharsets.UTF_8);
+                CSVParser parser = CSVFormat.DEFAULT.builder()
+                        .setHeader()
+                        .setSkipHeaderRecord(true)
+                        .build()
+                        .parse(reader)
+        ) {
+            for (CSVRecord record : parser) {
+                ProductImageSeedRow row = new ProductImageSeedRow();
+                row.setProductKey(record.get("product_key"));
+                row.setImageFileName(record.get("image_file_name"));
+                row.setImageType(record.get("image_type"));
+                row.setSortOrder(parseInt(record.get("sort_order")));
+                list.add(row);
+            }
+        }
+
+        return list;
+    }
+
+    private Long parseLong(String value) {
+        if (value == null || value.isBlank()) return null;
+        return Long.parseLong(value.trim());
+    }
+
+    private Integer parseInt(String value) {
+        if (value == null || value.isBlank()) return null;
+        return Integer.parseInt(value.trim());
     }
 }

@@ -40,7 +40,7 @@ public class SecurityConfig {
 	            .requestMatchers("/api/auth/**").permitAll()
 	            .requestMatchers("/api/inquiry/**").permitAll()
 	            .requestMatchers("/api/faq/**").permitAll()
-
+	            .requestMatchers("/upload/**").permitAll()
 	            // 상품 조회는 모두 허용
 	            .requestMatchers(HttpMethod.GET, "/api/product/**").permitAll()
 

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.shop.domain.Product;
 import com.shop.dto.ProductCreateRequest;
+import com.shop.dto.ProductListResponse;
 import com.shop.dto.ProductUpdateRequest;
 import com.shop.mapper.ProductMapper;
 import com.shop.service.ProductService;
@@ -24,12 +25,6 @@ public class ProductServiceImpl implements ProductService{
 
 
 	@Override
-	public List<Product> getAllProducts() throws Exception {
-		return mapper.getAllProducts();
-		
-	}
-
-	@Override
 	public void updateProducts(Long productNo, ProductUpdateRequest dto) {
 		try {
 			mapper.updateProducts(productNo, dto);
@@ -37,10 +32,7 @@ public class ProductServiceImpl implements ProductService{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
-
-
 
 
 	@Override
@@ -59,6 +51,27 @@ public class ProductServiceImpl implements ProductService{
 	public Product getOneProduct(Long productNo) throws Exception {
 		return mapper.getOneProducts(productNo);
 
+	}
+
+
+	@Override
+	public List<ProductListResponse> getAllProductToMainPage() throws Exception {
+	    List<ProductListResponse> list = mapper.getAllProductToMainPage();
+
+	    for (ProductListResponse dto : list) {
+	        if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+	            dto.setImageUrl("/upload/" + dto.getImageUrl());
+	        }
+	    }
+
+	    return list;
+	}
+
+
+	@Override
+	public List<Product> getAllProducts() throws Exception {
+		// TODO Auto-generated method stub
+		return mapper.getAllProducts();
 	}
 
 
