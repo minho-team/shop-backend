@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.ProductImageMapper">
+
+	
+	 <insert id="insertProductImg" parameterType="ProductImage">
+        <selectKey keyProperty="productImgNo" resultType="long" order="BEFORE">
+            SELECT seq_product_img.nextval FROM dual
+        </selectKey>
+
+        INSERT INTO product_img (
+            product_img_no,
+            product_no,
+            image_url,
+            image_type,
+            sort_order
+        ) VALUES (
+            #{productImgNo},
+            #{productNo},
+            #{imageUrl},
+            #{imageType},
+            #{sortOrder}
+        )
+    </insert>
+	
+</mapper>

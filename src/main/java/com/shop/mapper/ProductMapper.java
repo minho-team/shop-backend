@@ -9,6 +9,9 @@ import com.shop.dto.ProductUpdateRequest;
 public interface ProductMapper {
 
 	public void insertProduct(ProductCreateRequest dto) throws Exception;
+	
+	//초기 이미지 넣는 용도
+	public void insertSeedProduct(Product product) throws Exception;
 
 	public List<Product> getAllProducts() throws Exception;
 	

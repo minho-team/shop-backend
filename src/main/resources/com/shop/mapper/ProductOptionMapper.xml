@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.ProductOptionMapper">
+
+	<insert id="insertProductOption" parameterType="ProductOption">
+		<selectKey keyProperty="productOptionNo" resultType="long"
+			order="BEFORE">
+			SELECT seq_product_option.nextval FROM dual
+		</selectKey>
+
+		INSERT INTO product_option (
+		product_option_no,
+		product_no,
+		option_size,
+		color,
+		stock,
+		use_yn
+		) VALUES (
+		#{productOptionNo},
+		#{productNo},
+		#{optionSize},
+		#{color},
+		#{stock},
+		#{useYn}
+		)
+	</insert>
+
+</mapper>
