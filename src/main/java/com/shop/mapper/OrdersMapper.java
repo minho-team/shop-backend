@@ -11,7 +11,7 @@ public interface OrdersMapper {
 
 	void createOrder(Orders orders);
 
-	List<Orders> getAllOrders();
+	List<Orders> getAllOrders(Long memberNo);
 
 	Orders getOneOrder(Long orderNo);
 

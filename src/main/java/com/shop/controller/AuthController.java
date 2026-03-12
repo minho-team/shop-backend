@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -189,6 +190,7 @@ public class AuthController {
 		return ResponseEntity.ok("로그아웃 완료");
 	}
 	
+	
 	@GetMapping("/me")
 	public ResponseEntity<?> me(Authentication authentication) {
 	    if (authentication == null || !authentication.isAuthenticated()) {
@@ -196,17 +198,25 @@ public class AuthController {
 	    }
 
 	    String memberId = authentication.getName();
+	    try {
+	        Member member = memberService.readOneMember(memberId);
+	        
+	        Map<String, Object> result = Map.of(
+	            "memberId", memberId,
+	            "memberName", member.getName(),
+	            "memberNo", member.getMemberNo(), // 리액트 if(!user.memberNo) 통과를 위해 추가
+	            "roles", authentication.getAuthorities().stream()
+	                    .map(a -> a.getAuthority())
+	                    .toList()
+	        );
 
-	    Map<String, Object> result = Map.of(
-	        "memberId", memberId, //이게 userId임
-	        "roles", authentication.getAuthorities().stream()
-	                .map(a -> a.getAuthority())
-	                .toList()
-	    );
-	    log.info("멤버의 권한 리스트:"+ result.get("roles"));
-
-	    return ResponseEntity.ok(result);
+	        log.info("멤버의 권한 리스트:" + result.get("roles"));
+	        return ResponseEntity.ok(result);
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("auth 컨트롤러에서 get Me 실패");
+	    }
 	}
-	
 
 }

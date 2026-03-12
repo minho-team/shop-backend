@@ -40,7 +40,7 @@
 
 <select id="getAllOrders">
 	SELECT * 
-	FROM orders
+	FROM orders where member_no =#{memberNo}
 </select>
 
 <select id="getOneOrder">
