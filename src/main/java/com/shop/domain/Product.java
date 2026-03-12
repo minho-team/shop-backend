@@ -1,21 +1,22 @@
 package com.shop.domain;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import lombok.Data;
 
 @Data
 public class Product {
-	 private int product_no;
+	 private Long productNo;
 	 private String name;
 	 private int price;
-	 private int sale_price;
-	 private int category_id;
+	 private int salePrice;
+	 private Long categoryId;
 	 private String description;
-	 private String use_yn;
-	 private Date created_at;
-	 private Date updated_at;
-	 private int view_count;
-	 private String same_day_delivery_yn;
+	 private String useYn;
+	 private LocalDateTime createdAt;
+	 private LocalDateTime updatedAt;
+	 private int viewCount;
+	 private String sameDayDeliveryYn;
 	 
 }

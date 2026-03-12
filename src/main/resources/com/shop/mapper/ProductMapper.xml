@@ -5,8 +5,45 @@
 	<select id="getAllProducts">
 		select * from product
 	</select>
-	
+
 	<select id="getOneProducts">
-		select * from product_option where product_no = #{productNo}
+		select * from product_option where product_no =
+		#{productNo}
 	</select>
+
+	<!-- 초기 이미지 넣어놓는 용도,insertProduct는 아직 없음, 만들때 이거 써도 되면 복사ㄱㄱ -->
+	<insert id="insertSeedProduct" parameterType="Product">
+		<selectKey keyProperty="productNo" resultType="long"
+			order="BEFORE">
+			SELECT seq_product.nextval FROM dual
+		</selectKey>
+
+		INSERT INTO product (
+		product_no,
+		name,
+		price,
+		sale_price,
+		category_id,
+		description,
+		use_yn,
+		created_at,
+		updated_at,
+		view_count,
+		same_day_delivery_yn
+		) VALUES (
+		#{productNo},
+		#{name},
+		#{price},
+		#{salePrice},
+		#{categoryId},
+		#{description},
+		#{useYn},
+		SYSTIMESTAMP,
+		NULL,
+		#{viewCount},
+		#{sameDayDeliveryYn}
+		)
+	</insert>
+
+
 </mapper>
