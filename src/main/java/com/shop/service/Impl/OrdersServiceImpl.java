@@ -21,9 +21,9 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public List<Orders> getAllOrders() {
+	public List<Orders> getAllOrders(Long memberNo) {
 		
-		return mapper.getAllOrders();
+		return mapper.getAllOrders(memberNo);
 	}
 
 	@Override

@@ -9,7 +9,7 @@ public interface OrdersService {
 
 	void createOrder(Orders orders) throws Exception;
 
-	List<Orders> getAllOrders() throws Exception;
+	List<Orders> getAllOrders(Long memberNo) throws Exception;
 
 	Orders getOneOrder(Long orderNo) throws Exception;
 
