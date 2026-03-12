@@ -15,35 +15,36 @@
 	<insert id="insertSeedProduct" parameterType="Product">
 		<selectKey keyProperty="productNo" resultType="long"
 			order="BEFORE">
-			SELECT seq_product.nextval FROM dual
+			SELECT seq_product.NEXTVAL FROM dual
 		</selectKey>
 
 		INSERT INTO product (
-		product_no,
-		name,
-		price,
-		sale_price,
-		category_id,
-		description,
-		use_yn,
-		created_at,
-		updated_at,
-		view_count,
+		product_no, name, price, sale_price, category_id,
+		description, use_yn, created_at, updated_at, view_count,
 		same_day_delivery_yn
 		) VALUES (
-		#{productNo},
-		#{name},
-		#{price},
-		#{salePrice},
-		#{categoryId},
-		#{description},
-		#{useYn},
-		SYSTIMESTAMP,
-		NULL,
-		#{viewCount},
-		#{sameDayDeliveryYn}
+		#{productNo}, #{name}, #{price},
+		#{salePrice}, #{categoryId},
+		#{description}, #{useYn}, SYSTIMESTAMP,
+		NULL, 0, #{sameDayDeliveryYn}
 		)
+
+
 	</insert>
+	<select id="getAllProductToMainPage"  resultType="com.shop.dto.ProductListResponse">
+		SELECT
+		p.product_no AS productNo,
+		p.name AS name,
+		p.price AS price,
+		p.sale_price AS salePrice,
+		pi.image_url AS imageUrl
+		FROM product p
+		LEFT JOIN product_img pi
+		ON p.product_no = pi.product_no
+		AND pi.image_type = 'THUMB'
+		WHERE p.use_yn = 'Y'
+		ORDER BY p.product_no DESC
+	</select>
 
 
 </mapper>

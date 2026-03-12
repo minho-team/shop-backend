@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.shop.domain.Product;
 import com.shop.dto.ProductCreateRequest;
+import com.shop.dto.ProductListResponse;
 import com.shop.dto.ProductUpdateRequest;
 
 public interface ProductService {
@@ -17,5 +18,7 @@ public interface ProductService {
 	public void updateProducts(Long productNo, ProductUpdateRequest dto) throws Exception;
 
 	public void deleteProduct(Long productNo) throws Exception;
+
+	public List<ProductListResponse> getAllProductToMainPage() throws Exception;
 
 }

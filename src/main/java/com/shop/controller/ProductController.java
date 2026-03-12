@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.shop.domain.Product;
 import com.shop.dto.ProductCreateRequest;
+import com.shop.dto.ProductListResponse;
 import com.shop.dto.ProductUpdateRequest;
 import com.shop.service.ProductService;
 
@@ -50,11 +50,11 @@ public class ProductController {
 	}
 
 	@GetMapping
-	public ResponseEntity<?> getAllProduct() {
+	public ResponseEntity<?> getAllProductToMainPage() {
 
-		List<Product> list = null;
 		try {
-			list = productService.getAllProducts();
+			List<ProductListResponse> list = productService.getAllProductToMainPage();
+			
 			return ResponseEntity.ok(list);
 		} catch (Exception e) {
 			e.printStackTrace();

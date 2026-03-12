@@ -5,14 +5,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class ProductSeedServiceTest {
 
-    @Autowired
+import com.shop.service.ProductSeedService;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+
+public class ProductSeedServiceTest {
+
+	@Autowired
     private ProductSeedService productSeedService;
 
     @Test
-    void 초기상품_넣기() throws Exception {
-        productSeedService.seedOneProduct();
+    void seedProducts() throws Exception {
+        productSeedService.seedFromCsv();
     }
 }

@@ -3,7 +3,7 @@
 <mapper namespace="com.shop.mapper.ProductImageMapper">
 
 	
-	 <insert id="insertProductImg" parameterType="ProductImage">
+	 <insert id="insertSeedProductImg" parameterType="ProductImage">
         <selectKey keyProperty="productImgNo" resultType="long" order="BEFORE">
             SELECT seq_product_img.nextval FROM dual
         </selectKey>

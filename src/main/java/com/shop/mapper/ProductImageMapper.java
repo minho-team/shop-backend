@@ -7,5 +7,5 @@ import org.apache.ibatis.annotations.Mapper;
 public interface ProductImageMapper {
 	
 	//초기 이미지 넣어놓는 용도
-    void insertProductImg(ProductImage productImage);
+    void insertSeedProductImg(ProductImage productImage);
 }
