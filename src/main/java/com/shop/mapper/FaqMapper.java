@@ -2,6 +2,7 @@ package com.shop.mapper;
 
 import java.util.List;
 import com.shop.domain.Faq;
+import com.shop.dto.FaqCreateRequest;
 import org.apache.ibatis.annotations.Mapper;
 
 // FAQ DB 접근을 담당하는 MyBatis Mapper
@@ -16,4 +17,10 @@ public interface FaqMapper {
 
     // FAQ 키워드 검색 (질문 또는 답변에 키워드 포함)
     List<Faq> searchFaq(String keyword) throws Exception;
+
+    // FAQ 등록 (관리자 전용)
+    void createFaq(FaqCreateRequest request) throws Exception;
+
+    // FAQ 삭제 (관리자 전용, soft delete - delete_yn을 Y로 변경)
+    void deleteFaq(Long faqNo) throws Exception;
 }
