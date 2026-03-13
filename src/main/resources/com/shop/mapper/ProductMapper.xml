@@ -7,7 +7,7 @@
 	</select>
 
 	<select id="getOneProducts">
-		select * from product_option where product_no =
+		select * from product where product_no =
 		#{productNo}
 	</select>
 
