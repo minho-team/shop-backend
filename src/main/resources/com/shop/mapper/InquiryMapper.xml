@@ -98,6 +98,14 @@
           AND member_no  = #{memberNo}
     </update>
 
+    <!-- 문의 삭제 (관리자 전용, soft delete) - memberNo 체크 없이 모든 문의 삭제 가능 -->
+    <update id="adminDeleteInquiry">
+        UPDATE inquiry
+        SET delete_yn  = 'Y',
+            updated_at = SYSTIMESTAMP
+        WHERE inquiry_no = #{inquiryNo}
+    </update>
+
     <!-- 문의 상태 변경 - 답변 등록/삭제 시 자동 업데이트 (답변대기 / 답변완료) -->
     <update id="updateStatus">
         UPDATE inquiry
