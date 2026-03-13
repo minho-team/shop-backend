@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shop.domain.Product;
 import com.shop.dto.ProductCreateRequest;
 import com.shop.dto.ProductListResponse;
 import com.shop.dto.ProductUpdateRequest;
@@ -41,12 +42,12 @@ public class ProductController {
 	@GetMapping("/{productNo}")
 	public ResponseEntity<?> getOneProduct(@PathVariable Long productNo) {
 		try {
-			productService.getOneProduct(productNo);
+			Product product = productService.getOneProduct(productNo);
+			return ResponseEntity.ok(product);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("하나의 상품을 받아오지 못했습니다.");
 		}
-		return null;
 	}
 
 	@GetMapping
