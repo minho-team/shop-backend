@@ -2,9 +2,12 @@ package com.shop.dto;
 
 import lombok.Data;
 
-// 게시글 작성 요청 데이터를 담는 DTO
+// 1:1 문의 게시글 작성 요청 데이터를 담는 DTO
 @Data
 public class InquiryCreateRequest {
+
+    // 문의 번호 (INSERT 전 selectKey로 시퀀스 값 자동 주입)
+    private Long inquiryNo;
 
     // 작성자 회원 번호 (JWT에서 추출하여 컨트롤러에서 주입)
     private Long memberNo;
