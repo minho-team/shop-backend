@@ -1,6 +1,7 @@
 package com.shop.service;
 
 import org.springframework.http.ResponseEntity;
+import com.shop.dto.FaqCreateRequest;
 
 // FAQ 비즈니스 로직 인터페이스
 public interface FaqService {
@@ -13,4 +14,10 @@ public interface FaqService {
 
     // FAQ 키워드 검색
     ResponseEntity<?> searchFaq(String keyword);
+
+    // FAQ 등록 (관리자 전용)
+    ResponseEntity<?> createFaq(FaqCreateRequest request);
+
+    // FAQ 삭제 (관리자 전용, soft delete)
+    ResponseEntity<?> deleteFaq(Long faqNo);
 }
