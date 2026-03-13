@@ -1,4 +1,4 @@
-package com.shop.controller;
+package com.shop.controller.admin.controller;
 
 import java.util.Map;
 
@@ -21,6 +21,7 @@ import com.shop.service.AdminOrderService;
 @RestController
 @RequestMapping("/api/admin/orders")
 public class AdminOrderController {
+	
 	@Autowired
 	private AdminOrderService adminOrderService;
 	
