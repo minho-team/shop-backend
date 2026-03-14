@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.shop.domain.CartItem;
-import com.shop.dto.user.cart.CartItemAddRequest;
 
 @Service
 public interface CartItemService {
