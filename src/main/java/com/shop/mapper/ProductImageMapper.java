@@ -14,5 +14,5 @@ public interface ProductImageMapper {
 	// 초기 이미지 넣어놓는 용도
 	void insertSeedProductImg(ProductImage productImage);
 
-	List<ProductImageDTO> getProductImagesByTypes(@Param("productNo") Long productNo);
+	List<ProductImageDTO> getProductMainAndThumbImages(@Param("productNo") Long productNo);
 }

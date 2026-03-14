@@ -18,7 +18,7 @@ public class ProductImageServiceImpl implements ProductImageService {
 
 	@Override
 	public ProductImageListDTO getProductMainAndThumbImages(Long productNo) {
-		List<ProductImageDTO> images = productImageMapper.getProductImagesByTypes(productNo);
+		List<ProductImageDTO> images = productImageMapper.getProductMainAndThumbImages(productNo);
 
 		images.forEach(img -> {
 			if (img.getImageUrl() != null && !img.getImageUrl().startsWith("/upload/")) {

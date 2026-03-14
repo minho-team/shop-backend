@@ -3,6 +3,7 @@
 <mapper namespace="com.shop.mapper.ProductImageMapper">
 
 
+	<!-- 초기 이미지 넣는 쿼리 -->
 	<insert id="insertSeedProductImg" parameterType="ProductImage">
 		<selectKey keyProperty="productImgNo" resultType="long"
 			order="BEFORE">
@@ -25,7 +26,7 @@
 	</insert>
 
 	<!-- 상품 상세 페이지에서 이미지 받아오는 쿼리 -->
-	<select id="getProductImagesByTypes"
+	<select id="getProductMainAndThumbImages"
 		resultType="com.shop.dto.user.product.ProductImageDTO">
 		SELECT
 		product_img_no AS productImgNo,

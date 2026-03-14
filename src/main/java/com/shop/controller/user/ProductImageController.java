@@ -11,17 +11,21 @@ import com.shop.dto.user.product.ProductImageListDTO;
 import com.shop.service.user.product.ProductImageService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/product")
+@RequestMapping("/api/product/image")
+@Slf4j
 public class ProductImageController {
 
 	private final ProductImageService productImageService;
 
-	@GetMapping("/{productNo}/images")
+	@GetMapping("/{productNo}")
 	public ResponseEntity<?> getProductMainAndThumbImages(@PathVariable Long productNo) {
 		try {
+			
+			log.info("ffffff");
 			ProductImageListDTO result = productImageService.getProductMainAndThumbImages(productNo);
 
 			if (result.getImages() == null || result.getImages().isEmpty()) {
