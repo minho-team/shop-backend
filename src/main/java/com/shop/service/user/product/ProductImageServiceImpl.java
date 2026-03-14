@@ -1,4 +1,4 @@
-package com.shop.service;
+package com.shop.service.user.product;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.shop.service.Impl;
+package com.shop.service.user.cart;
 
 import java.util.List;
 
@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.shop.domain.CartItem;
 import com.shop.dto.user.cart.CartItemAddRequest;
 import com.shop.mapper.CartItemMapper;
-import com.shop.service.CartItemService;
 
 @Service
 public class CartItemServiceImpl implements CartItemService {

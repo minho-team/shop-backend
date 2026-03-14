@@ -1,9 +1,9 @@
-package com.shop.service.Impl;
+package com.shop.service.user.faq;
 
 import com.shop.domain.Faq;
 import com.shop.dto.user.inquiry.FaqCreateRequest;
 import com.shop.mapper.FaqMapper;
-import com.shop.service.FaqService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

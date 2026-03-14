@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.domain.Member;
 import com.shop.dto.user.inquiry.CommentCreateRequest;
-import com.shop.service.CommentService;
-import com.shop.service.MemberService;
+import com.shop.service.user.comment.CommentService;
+import com.shop.service.user.member.MemberService;
 
 import lombok.RequiredArgsConstructor;
 

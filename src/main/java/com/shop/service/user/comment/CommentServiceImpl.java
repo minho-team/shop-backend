@@ -1,9 +1,9 @@
-package com.shop.service.Impl;
+package com.shop.service.user.comment;
 
 import com.shop.mapper.InquiryMapper;
 import com.shop.dto.user.inquiry.CommentCreateRequest;
 import com.shop.mapper.CommentMapper;
-import com.shop.service.CommentService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

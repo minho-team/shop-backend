@@ -1,4 +1,4 @@
-package com.shop.service;
+package com.shop.service.user.member;
 
 import com.shop.domain.Member;
 import com.shop.dto.user.auth.RegisterRequestDto;
