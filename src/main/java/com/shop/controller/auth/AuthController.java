@@ -1,4 +1,4 @@
-package com.shop.controller;
+package com.shop.controller.auth;
 
 import java.util.Map;
 import java.util.stream.Collectors;

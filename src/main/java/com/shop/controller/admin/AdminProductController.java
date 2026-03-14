@@ -1,5 +1,5 @@
 /*
-package com.shop.controller.admin.controller;
+package com.shop.controller.admin;
 
 import java.nio.file.FileStore;
 import java.util.List;
@@ -52,7 +52,7 @@ public class AdminProductController {
 		return null;
 	}
 	
-	/*
+	
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> insertProduct(@RequestBody ProductCreateRequest dto) {
@@ -112,4 +112,6 @@ public class AdminProductController {
 	}
 	
 }
+
 */
+
