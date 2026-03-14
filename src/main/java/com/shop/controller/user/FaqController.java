@@ -1,4 +1,4 @@
-package com.shop.controller;
+package com.shop.controller.user;
 
 import com.shop.dto.FaqCreateRequest;
 import com.shop.service.FaqService;

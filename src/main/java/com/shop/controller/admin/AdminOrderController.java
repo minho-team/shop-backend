@@ -1,4 +1,4 @@
-package com.shop.controller.admin.controller;
+package com.shop.controller.admin;
 
 import java.util.Map;
 

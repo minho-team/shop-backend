@@ -1,4 +1,4 @@
-package com.shop.controller;
+package com.shop.controller.user;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
