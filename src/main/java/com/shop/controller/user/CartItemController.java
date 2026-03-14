@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.domain.CartItem;
-import com.shop.dto.CartItemAddRequest;
+import com.shop.dto.user.cart.CartItemAddRequest;
 import com.shop.service.CartItemService;
 
 @RestController

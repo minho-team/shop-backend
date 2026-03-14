@@ -1,8 +1,9 @@
 package com.shop.mapper;
 
 import com.shop.domain.Inquiry;
-import com.shop.dto.InquiryCreateRequest;
-import com.shop.dto.UpdateInquiryRequest;
+import com.shop.dto.user.inquiry.InquiryCreateRequest;
+import com.shop.dto.user.inquiry.UpdateInquiryRequest;
+
 import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 

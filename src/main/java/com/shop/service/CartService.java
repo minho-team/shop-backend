@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.shop.domain.Cart;
 import com.shop.domain.Member;
-import com.shop.dto.CartItemAddRequest;
+import com.shop.dto.user.cart.CartItemAddRequest;
 
 public interface CartService {
 

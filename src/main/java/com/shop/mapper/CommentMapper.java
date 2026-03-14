@@ -2,7 +2,8 @@ package com.shop.mapper;
 
 import java.util.List;
 import com.shop.domain.Comment;
-import com.shop.dto.CommentCreateRequest;
+import com.shop.dto.user.inquiry.CommentCreateRequest;
+
 import org.apache.ibatis.annotations.Mapper;
 
 // 관리자 답변(댓글) DB 접근을 담당하는 MyBatis Mapper

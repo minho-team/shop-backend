@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.shop.dto.ProductImageListDTO;
+import com.shop.dto.user.product.ProductImageListDTO;
 import com.shop.service.ProductImageService;
 
 import lombok.RequiredArgsConstructor;

@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.shop.domain.ProductImage;
-import com.shop.dto.ProductImageDTO;
+import com.shop.dto.user.product.ProductImageDTO;
 
 @Mapper
 public interface ProductImageMapper {

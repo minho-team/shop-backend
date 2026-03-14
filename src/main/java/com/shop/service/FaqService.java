@@ -1,7 +1,8 @@
 package com.shop.service;
 
 import org.springframework.http.ResponseEntity;
-import com.shop.dto.FaqCreateRequest;
+
+import com.shop.dto.user.inquiry.FaqCreateRequest;
 
 // FAQ 비즈니스 로직 인터페이스
 public interface FaqService {

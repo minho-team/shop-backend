@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.domain.Member;
-import com.shop.dto.RegisterRequestDto;
+import com.shop.dto.user.auth.RegisterRequestDto;
 import com.shop.security.JwtUtil;
 import com.shop.security.domain.LoginDto;
 import com.shop.service.MemberService;

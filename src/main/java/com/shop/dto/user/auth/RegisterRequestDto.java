@@ -1,4 +1,4 @@
-package com.shop.dto;
+package com.shop.dto.user.auth;
 
 import java.time.LocalDate;
 

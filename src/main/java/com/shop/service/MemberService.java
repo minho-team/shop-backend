@@ -1,7 +1,7 @@
 package com.shop.service;
 
 import com.shop.domain.Member;
-import com.shop.dto.RegisterRequestDto;
+import com.shop.dto.user.auth.RegisterRequestDto;
 
 public interface MemberService {
 

@@ -1,6 +1,4 @@
-package com.shop.dto;
-
-import java.util.List;
+package com.shop.dto.user.product;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,8 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductImageListDTO {
+public class ProductImageDTO {
 
+	private Long productImgNo;
 	private Long productNo;
-	private List<ProductImageDTO> images;
+	private String imageUrl;
+	private String imageType;
+	private Integer sortOrder;
 }

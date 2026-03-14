@@ -1,6 +1,6 @@
 package com.shop.controller.user;
 
-import com.shop.dto.FaqCreateRequest;
+import com.shop.dto.user.inquiry.FaqCreateRequest;
 import com.shop.service.FaqService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

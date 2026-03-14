@@ -1,7 +1,7 @@
 package com.shop.service.Impl;
 
-import com.shop.dto.CommentCreateRequest;
 import com.shop.mapper.InquiryMapper;
+import com.shop.dto.user.inquiry.CommentCreateRequest;
 import com.shop.mapper.CommentMapper;
 import com.shop.service.CommentService;
 import lombok.RequiredArgsConstructor;

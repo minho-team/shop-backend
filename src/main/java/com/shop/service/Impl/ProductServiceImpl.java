@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.shop.domain.Product;
-import com.shop.dto.ProductCreateRequest;
-import com.shop.dto.ProductListResponse;
-import com.shop.dto.ProductUpdateRequest;
+import com.shop.dto.user.product.ProductCreateRequest;
+import com.shop.dto.user.product.ProductListResponse;
+import com.shop.dto.user.product.ProductUpdateRequest;
 import com.shop.mapper.ProductMapper;
 import com.shop.service.ProductService;
 

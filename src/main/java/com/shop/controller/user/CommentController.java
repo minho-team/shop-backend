@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.domain.Member;
-import com.shop.dto.CommentCreateRequest;
+import com.shop.dto.user.inquiry.CommentCreateRequest;
 import com.shop.service.CommentService;
 import com.shop.service.MemberService;
 

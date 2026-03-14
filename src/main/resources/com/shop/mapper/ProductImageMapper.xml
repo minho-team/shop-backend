@@ -26,7 +26,7 @@
 
 	<!-- 상품 상세 페이지에서 이미지 받아오는 쿼리 -->
 	<select id="getProductImagesByTypes"
-		resultType="com.shop.dto.ProductImageDTO">
+		resultType="com.shop.dto.user.product.ProductImageDTO">
 		SELECT
 		product_img_no AS productImgNo,
 		product_no AS productNo,
