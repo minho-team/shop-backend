@@ -19,7 +19,7 @@ import com.shop.domain.Product;
 import com.shop.dto.user.product.ProductCreateRequest;
 import com.shop.dto.user.product.ProductListResponse;
 import com.shop.dto.user.product.ProductUpdateRequest;
-import com.shop.service.ProductService;
+import com.shop.service.user.product.ProductService;
 
 @RestController
 @RequestMapping("/api/product")

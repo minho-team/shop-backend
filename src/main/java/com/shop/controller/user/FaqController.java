@@ -1,7 +1,8 @@
 package com.shop.controller.user;
 
 import com.shop.dto.user.inquiry.FaqCreateRequest;
-import com.shop.service.FaqService;
+import com.shop.service.user.faq.FaqService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

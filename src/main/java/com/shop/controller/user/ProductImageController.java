@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.dto.user.product.ProductImageListDTO;
-import com.shop.service.ProductImageService;
+import com.shop.service.user.product.ProductImageService;
 
 import lombok.RequiredArgsConstructor;
 

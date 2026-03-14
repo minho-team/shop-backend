@@ -7,7 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.shop.domain.Member;
 import com.shop.domain.MemberRole;
-import com.shop.service.MemberService;
+import com.shop.service.user.member.MemberService;
 
 @SpringBootTest
 class ShopApplicationTests {

@@ -23,7 +23,7 @@ import com.shop.domain.Member;
 import com.shop.dto.user.auth.RegisterRequestDto;
 import com.shop.security.JwtUtil;
 import com.shop.security.domain.LoginDto;
-import com.shop.service.MemberService;
+import com.shop.service.user.member.MemberService;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

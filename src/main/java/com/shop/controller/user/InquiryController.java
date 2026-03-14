@@ -19,8 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.shop.domain.Member;
 import com.shop.dto.user.inquiry.InquiryCreateRequest;
 import com.shop.dto.user.inquiry.UpdateInquiryRequest;
-import com.shop.service.InquiryService;
-import com.shop.service.MemberService;
+import com.shop.service.user.inquiry.InquiryService;
+import com.shop.service.user.member.MemberService;
 
 import lombok.RequiredArgsConstructor;
 

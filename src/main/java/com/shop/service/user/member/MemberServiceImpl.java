@@ -1,4 +1,4 @@
-package com.shop.service.Impl;
+package com.shop.service.user.member;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -8,7 +8,6 @@ import com.shop.domain.Member;
 import com.shop.domain.MemberRole;
 import com.shop.dto.user.auth.RegisterRequestDto;
 import com.shop.mapper.MemberMapper;
-import com.shop.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,4 +1,4 @@
-package com.shop.service.Impl;
+package com.shop.service.user.cart;
 
 import java.util.List;
 
@@ -11,7 +11,6 @@ import com.shop.dto.user.cart.CartItemAddRequest;
 import com.shop.mapper.CartItemMapper;
 import com.shop.mapper.CartMapper;
 import com.shop.mapper.ProductMapper;
-import com.shop.service.CartService;
 
 import lombok.RequiredArgsConstructor;
 

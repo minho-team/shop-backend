@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.shop.domain.Member;
-import com.shop.service.MemberService;
+import com.shop.service.user.member.MemberService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;

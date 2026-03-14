@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.shop.dto.admin.order.AdminOrderSearchDTO;
 import com.shop.dto.admin.order.OrderStatusUpdateRequestDTO;
 import com.shop.dto.admin.order.RefundStatusUpdateRequestDTO;
-import com.shop.service.AdminOrderService;
+import com.shop.service.admin.order.AdminOrderService;
 
 
 @RestController

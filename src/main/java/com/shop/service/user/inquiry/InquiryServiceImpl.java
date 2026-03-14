@@ -1,4 +1,4 @@
-package com.shop.service.Impl;
+package com.shop.service.user.inquiry;
 
 import com.shop.domain.Comment;
 import com.shop.domain.Inquiry;
@@ -8,7 +8,7 @@ import com.shop.dto.user.inquiry.UpdateInquiryRequest;
 import com.shop.mapper.CommentMapper;
 import com.shop.mapper.InquiryFileMapper;
 import com.shop.mapper.InquiryMapper;
-import com.shop.service.InquiryService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

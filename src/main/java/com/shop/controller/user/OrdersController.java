@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.domain.Member;
 import com.shop.domain.Orders;
-import com.shop.service.MemberService;
-import com.shop.service.OrdersService;
+import com.shop.service.user.member.MemberService;
+import com.shop.service.user.order.OrdersService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
