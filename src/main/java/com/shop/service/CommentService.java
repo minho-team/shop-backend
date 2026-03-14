@@ -1,7 +1,8 @@
 package com.shop.service;
 
-import com.shop.dto.CommentCreateRequest;
 import org.springframework.http.ResponseEntity;
+
+import com.shop.dto.user.inquiry.CommentCreateRequest;
 
 // 관리자 답변 비즈니스 로직 인터페이스
 public interface CommentService {

@@ -1,7 +1,7 @@
 package com.shop.service.Impl;
 
 import com.shop.domain.Faq;
-import com.shop.dto.FaqCreateRequest;
+import com.shop.dto.user.inquiry.FaqCreateRequest;
 import com.shop.mapper.FaqMapper;
 import com.shop.service.FaqService;
 import lombok.RequiredArgsConstructor;

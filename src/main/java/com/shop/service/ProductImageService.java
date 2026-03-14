@@ -1,6 +1,6 @@
 package com.shop.service;
 
-import com.shop.dto.ProductImageListDTO;
+import com.shop.dto.user.product.ProductImageListDTO;
 
 public interface ProductImageService {
 

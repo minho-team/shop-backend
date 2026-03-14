@@ -1,9 +1,11 @@
 package com.shop.service;
 
 import org.springframework.http.ResponseEntity;
-import com.shop.dto.InquiryCreateRequest;
-import com.shop.dto.UpdateInquiryRequest;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.shop.dto.user.inquiry.InquiryCreateRequest;
+import com.shop.dto.user.inquiry.UpdateInquiryRequest;
+
 import java.util.List;
 
 // 1:1 문의 비즈니스 로직 인터페이스

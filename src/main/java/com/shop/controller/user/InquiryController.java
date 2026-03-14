@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shop.domain.Member;
-import com.shop.dto.InquiryCreateRequest;
-import com.shop.dto.UpdateInquiryRequest;
+import com.shop.dto.user.inquiry.InquiryCreateRequest;
+import com.shop.dto.user.inquiry.UpdateInquiryRequest;
 import com.shop.service.InquiryService;
 import com.shop.service.MemberService;
 

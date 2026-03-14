@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.shop.domain.Member;
 import com.shop.domain.MemberRole;
-import com.shop.dto.RegisterRequestDto;
+import com.shop.dto.user.auth.RegisterRequestDto;
 import com.shop.mapper.MemberMapper;
 import com.shop.service.MemberService;
 

@@ -3,7 +3,7 @@ package com.shop.mapper;
 import java.util.List;
 
 import com.shop.domain.CartItem;
-import com.shop.dto.CartItemAddRequest;
+import com.shop.dto.user.cart.CartItemAddRequest;
 
 public interface CartItemMapper {
 

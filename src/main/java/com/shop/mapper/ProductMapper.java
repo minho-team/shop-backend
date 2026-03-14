@@ -3,9 +3,9 @@ package com.shop.mapper;
 import java.util.List;
 
 import com.shop.domain.Product;
-import com.shop.dto.ProductCreateRequest;
-import com.shop.dto.ProductListResponse;
-import com.shop.dto.ProductUpdateRequest;
+import com.shop.dto.user.product.ProductCreateRequest;
+import com.shop.dto.user.product.ProductListResponse;
+import com.shop.dto.user.product.ProductUpdateRequest;
 
 public interface ProductMapper {
 

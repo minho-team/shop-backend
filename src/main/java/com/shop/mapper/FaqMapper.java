@@ -2,7 +2,8 @@ package com.shop.mapper;
 
 import java.util.List;
 import com.shop.domain.Faq;
-import com.shop.dto.FaqCreateRequest;
+import com.shop.dto.user.inquiry.FaqCreateRequest;
+
 import org.apache.ibatis.annotations.Mapper;
 
 // FAQ DB 접근을 담당하는 MyBatis Mapper
