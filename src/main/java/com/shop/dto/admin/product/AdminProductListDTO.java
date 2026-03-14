@@ -8,12 +8,14 @@ import lombok.Data;
 @Data
 public class AdminProductListDTO {
 	private Long productNo;
+    private String thumbnailUrl;
     private String name;
-    private Integer price;
-    private Integer salePrice;
-    private Long categoryId;
+    private String categoryName;
+    private int price;
+    private int discountRate;
+    private int salePrice;
     private String useYn;
-    private LocalDateTime createdAt;
-    private Integer viewCount;
+    private int viewCount;
     private String sameDayDeliveryYn;
+    private LocalDateTime createdAt;
 }
