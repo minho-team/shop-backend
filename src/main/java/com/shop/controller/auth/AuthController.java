@@ -68,6 +68,7 @@ public class AuthController {
 			response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 			response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
+			log.info("액세스 토큰 발급 완료");
 			return ResponseEntity.ok(Map.of("message", "로그인성공"));
 
 		} catch (Exception e) {
@@ -138,7 +139,7 @@ public class AuthController {
 				.build();
 
 		response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-
+		log.info("액세스토큰 재발급 완료");
 		return ResponseEntity.ok().body("Access Token 재발급 완료");
 	}
 

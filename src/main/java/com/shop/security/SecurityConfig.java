@@ -35,24 +35,26 @@ public class SecurityConfig {
 	        .formLogin(form -> form.disable())
 	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 	        .authorizeHttpRequests(auth -> auth
-	            .requestMatchers("/api/auth/**").permitAll()
-	            // [수정] 변경 전: .requestMatchers("/api/inquiry/**").permitAll()
-	            // 전체 permitAll 시 JWT 인증 정보가 null로 주입되는 문제 → 메서드별로 분리
-	            .requestMatchers(HttpMethod.GET, "/api/inquiry/**").permitAll()         // 조회는 비로그인도 허용
-	            .requestMatchers(HttpMethod.POST, "/api/inquiry/**").authenticated()    // 등록은 로그인 필수
-	            .requestMatchers(HttpMethod.PUT, "/api/inquiry/**").authenticated()     // 수정은 로그인 필수
-	            .requestMatchers(HttpMethod.DELETE, "/api/inquiry/**").authenticated()  // 삭제는 로그인 필수
-	            // [수정 끝]
-	            .requestMatchers("/api/faq/**").permitAll()
+	        		
+	        		//사용자
+	        		.requestMatchers("/api/auth/**").permitAll()
+	        		.requestMatchers("/api/cart/**").permitAll()
+	        		.requestMatchers("/api/cart/item/**").permitAll()
+	        		.requestMatchers("/api/category/**").permitAll()
+	        		.requestMatchers("/api/comment/**").permitAll()
+	        		.requestMatchers("/api/faq/**").permitAll()
+	            .requestMatchers("/api/inquiry/**").permitAll()
+	            .requestMatchers("/api/member/**").permitAll()
+	            .requestMatchers("/api/orders/**").permitAll()
+	            .requestMatchers("/api/orders/item/**").permitAll()
+	            .requestMatchers("/api/product/**").permitAll()
+	            .requestMatchers("/api/product/image/**").permitAll()
+	            .requestMatchers("/api/product/option/**").permitAll()
+	            
 	            .requestMatchers("/upload/**").permitAll()
-	            // 상품 조회는 모두 허용
-	            .requestMatchers(HttpMethod.GET, "/api/product/**").permitAll()
-	            // 상품 등록/수정/삭제는 관리자만
-	            .requestMatchers(HttpMethod.POST, "/api/product/**").hasRole("ADMIN")
-	            .requestMatchers(HttpMethod.PUT, "/api/product/**").hasRole("ADMIN")
-	            .requestMatchers(HttpMethod.DELETE, "/api/product/**").hasRole("ADMIN")
-	            .requestMatchers("/admin/**").hasRole("ADMIN")
-	            .requestMatchers("/api/order/**", "/api/cart/**", "/api/cart/item/**").hasRole("USER")
+	            
+	            // 관리자
+	            .requestMatchers("/api/admin/**").hasRole("ADMIN")
 	            .anyRequest().authenticated()
 	        );
 	    http.addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
