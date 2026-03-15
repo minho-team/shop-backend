@@ -9,6 +9,6 @@ public class CartItem {
 	private Long cartItemNo;
 	private Long cartNo;
 	private Long productOptionNo;
-	private int quantity;
+	private Integer quantity;
 	private LocalDateTime createdAt;
 }

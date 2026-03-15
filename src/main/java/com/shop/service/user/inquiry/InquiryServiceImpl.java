@@ -12,6 +12,7 @@ import com.shop.mapper.InquiryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ public class InquiryServiceImpl implements InquiryService {
     // 문의 작성 처리 (첨부파일 포함)
     // =========================================
     @Override
+    @Transactional
     public ResponseEntity<?> createInquiry(InquiryCreateRequest request, List<MultipartFile> files) {
         try {
             inquiryMapper.createInquiry(request);  // 문의 등록
@@ -86,6 +88,7 @@ public class InquiryServiceImpl implements InquiryService {
     // Map.of() 대신 HashMap 사용 - null 값 허용을 위해
     // =========================================
     @Override
+    @Transactional
     public ResponseEntity<?> readOneInquiry(Long inquiryNo) {
         try {
             inquiryMapper.increaseViewCount(inquiryNo);  // 조회수 증가
@@ -110,6 +113,7 @@ public class InquiryServiceImpl implements InquiryService {
     // inquiryNo: 수정할 문의 번호
     // =========================================
     @Override
+    @Transactional
     public ResponseEntity<?> updateInquiry(Long inquiryNo, UpdateInquiryRequest dto) {
         try {
             inquiryMapper.updateInquiry(inquiryNo, dto);  // 문의 수정
@@ -125,6 +129,7 @@ public class InquiryServiceImpl implements InquiryService {
     // memberNo: 로그인한 회원 번호 (본인 확인용)
     // =========================================
     @Override
+    @Transactional
     public ResponseEntity<?> deleteInquiry(Long inquiryNo, Long memberNo) {
         try {
             inquiryMapper.deleteInquiry(inquiryNo, memberNo);  // 본인 글만 삭제
@@ -139,6 +144,7 @@ public class InquiryServiceImpl implements InquiryService {
     // inquiryNo: 삭제할 문의 번호
     // =========================================
     @Override
+    @Transactional
     public ResponseEntity<?> adminDeleteInquiry(Long inquiryNo) {
         try {
             inquiryMapper.adminDeleteInquiry(inquiryNo);  // 관리자 전용 삭제 Mapper 호출

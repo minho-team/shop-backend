@@ -15,7 +15,7 @@ public class Product {
 	 private String useYn;
 	 private LocalDateTime createdAt;
 	 private LocalDateTime updatedAt;
-	 private int viewCount;
+	 private Integer viewCount;
 	 private String sameDayDeliveryYn;
 	 
 }

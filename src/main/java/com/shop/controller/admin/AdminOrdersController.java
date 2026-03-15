@@ -20,7 +20,7 @@ import com.shop.service.admin.order.AdminOrderService;
 
 @RestController
 @RequestMapping("/api/admin/orders")
-public class AdminOrderController {
+public class AdminOrdersController {
 	
 	@Autowired
 	private AdminOrderService adminOrderService;

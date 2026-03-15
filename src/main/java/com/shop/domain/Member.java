@@ -28,7 +28,7 @@ public class Member {
 	private LocalDate birthday;
 	private String refreshToken;
 	private LocalDateTime createdAt;
-	private int purchaseCount;
+	private Integer purchaseCount;
 	private String bankName;
 	private String bankCode;
 	private String accountHolderName;
