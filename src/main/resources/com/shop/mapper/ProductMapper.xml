@@ -19,12 +19,12 @@
 		</selectKey>
 
 		INSERT INTO product (
-		product_no, name, price, sale_price, category_id,
+		product_no, name, price, discount_rate, category_id,
 		description, use_yn, created_at, updated_at, view_count,
 		same_day_delivery_yn
 		) VALUES (
 		#{productNo}, #{name}, #{price},
-		#{salePrice}, #{categoryId},
+		#{discountRate}, #{categoryId},
 		#{description}, #{useYn}, SYSTIMESTAMP,
 		NULL, 0, #{sameDayDeliveryYn}
 		)
@@ -37,7 +37,7 @@
 		p.product_no AS productNo,
 		p.name AS name,
 		p.price AS price,
-		p.sale_price AS salePrice,
+		p.discount_rate AS discountRate,
 		pi.image_url AS imageUrl
 		FROM product p
 		LEFT JOIN product_img pi
