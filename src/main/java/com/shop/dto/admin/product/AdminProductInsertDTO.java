@@ -8,14 +8,14 @@ import lombok.Data;
 
 //상품 등록 DTO
 @Data
-public class AdminProductCreateDTO {
+public class AdminProductInsertDTO {
     
     private Long productNo;
 
     private String name;
     private Long categoryId;
     private Integer price;
-    private Integer salePrice;
+    private Integer discountRate;
     private String description;
     private String useYn;
     private String sameDayDeliveryYn;

@@ -54,7 +54,7 @@ public class ProductSeedService {
             Product product = new Product();
             product.setName(row.getName());
             product.setPrice(row.getPrice());
-            product.setSalePrice(row.getSalePrice());
+            product.setDiscountRate(row.getDiscountRate());
             product.setCategoryId(row.getCategoryId());
             product.setDescription(row.getDescription());
             product.setUseYn(row.getUseYn());
@@ -129,7 +129,7 @@ public class ProductSeedService {
                 row.setProductKey(record.get("product_key"));
                 row.setName(record.get("name"));
                 row.setPrice(parseLong(record.get("price")));
-                row.setSalePrice(parseLong(record.get("sale_price")));
+                row.setDiscountRate(parseInt(record.get("discount_rate")));
                 row.setCategoryId(parseLong(record.get("category_id")));
                 row.setDescription(record.get("description"));
                 row.setUseYn(record.get("use_yn"));

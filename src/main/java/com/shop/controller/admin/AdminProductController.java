@@ -5,7 +5,6 @@ import java.nio.file.FileStore;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,47 +14,55 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.shop.domain.Product;
-import com.shop.dto.ProductCreateRequest;
-import com.shop.dto.ProductUpdateRequest;
-import com.shop.dto.admin.product.AdminProductCreateDTO;
-import com.shop.dto.admin.product.ProductImageDTO;
+import com.shop.dto.admin.product.AdminProductInsertDTO;
+import com.shop.dto.user.product.ProductCreateRequest;
+import com.shop.dto.user.product.ProductListResponse;
+import com.shop.dto.user.product.ProductUpdateRequest;
+import com.shop.service.admin.product.AdminProductImageService;
+import com.shop.service.admin.product.AdminProductService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/admin/product")
 public class AdminProductController {
 
-	private final AdminProductService apService;
-	private final AdminProductImageService apiService;
+	private final AdminProductService productService;
+	private final AdminProductImageService productImageService;
 	private final FileStore fileStore;
 	
-	@PostMapping(value="/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<String> productRegister(
-			@RequestParam String name,
-			@RequestParam Long categoryId,
-			@RequestParam int price,
-			@RequestParam(required=false) String description,
-			@RequestParam(required=true) MultipartFile thumbImage,
-			@RequestParam(required=false) List<MultipartFile> galleryImages,
-			AdminProductCreateDTO createDTO, ProductImageDTO imageDTO)throws Exception{
-		if (thumbImage != null && !thumbImage.isEmpty()) {
-            
-                return ResponseEntity.badRequest().body("images/types 개수 불일치");
-            }
-		
-		return null;
-	}
 	
+	@GetMapping("/{productNo}")
+	public ResponseEntity<?> getOneProduct(@PathVariable Long productNo) {
+		try {
+			Product product = productService.getOneProduct(productNo);
+			return ResponseEntity.ok(product);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("하나의 상품을 받아오지 못했습니다.");
+		}
+	}
+
+	@GetMapping
+	public ResponseEntity<?> getAllProductToMainPage() {
+
+		try {
+			List<ProductListResponse> list = productService.getAllProductToMainPage();
+			
+			return ResponseEntity.ok(list);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
+		}
+	}
 	
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<?> insertProduct(@RequestBody ProductCreateRequest dto) {
+	public ResponseEntity<?> insertProduct(@RequestBody AdminProductInsertDTO dto) {
 		try {
 			productService.insertProduct(dto);
 		} catch (Exception e) {
@@ -63,31 +70,7 @@ public class AdminProductController {
 		}
 		return null;
 	}
-
-	@GetMapping("/{productNo}")
-	public ResponseEntity<?> getOneProduct(@PathVariable Long productNo) {
-		try {
-			productService.getOneProduct(productNo);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	@GetMapping
-	public ResponseEntity<?> getAllProduct() {
-
-		List<Product> list = null;
-		try {
-			list = productService.getAllProducts();
-			return ResponseEntity.ok(list);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
-		}
-	}
-
+	
 	@PutMapping("/{productNo}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> updateProduct(@PathVariable Long productNo, @RequestBody ProductUpdateRequest dto) {
@@ -113,5 +96,5 @@ public class AdminProductController {
 	
 }
 
-*/
 
+*/

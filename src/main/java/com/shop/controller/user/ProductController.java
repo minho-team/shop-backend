@@ -28,16 +28,6 @@ public class ProductController {
 	@Autowired
 	private ProductService productService;
 
-	@PostMapping
-	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<?> insertProduct(@RequestBody ProductCreateRequest dto) {
-		try {
-			productService.insertProduct(dto);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 	@GetMapping("/{productNo}")
 	public ResponseEntity<?> getOneProduct(@PathVariable Long productNo) {
@@ -63,27 +53,6 @@ public class ProductController {
 		}
 	}
 
-	@PutMapping("/{productNo}")
-	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<?> updateProduct(@PathVariable Long productNo, @RequestBody ProductUpdateRequest dto) {
-		try {
-			productService.updateProducts(productNo, dto);
-			return ResponseEntity.ok("업데이트 완료");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
-	}
-
-	@DeleteMapping("/{productNo}")
-	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<?> deleteProduct(@PathVariable Long productNo) {
-		try {
-			productService.deleteProduct(productNo);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+	
 
 }
