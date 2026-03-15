@@ -9,7 +9,7 @@ public class Product {
 	 private Long productNo;
 	 private String name;
 	 private Long price;
-	 private Long salePrice;
+	 private Integer discountRate;
 	 private Long categoryId;
 	 private String description;
 	 private String useYn;
