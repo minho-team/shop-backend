@@ -1,27 +1,16 @@
-/*
 package com.shop.controller.admin;
 
-import java.nio.file.FileStore;
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.shop.domain.Product;
-import com.shop.dto.admin.product.AdminProductInsertDTO;
-import com.shop.dto.user.product.ProductCreateRequest;
-import com.shop.dto.user.product.ProductListResponse;
-import com.shop.dto.user.product.ProductUpdateRequest;
-import com.shop.service.admin.product.AdminProductImageService;
+import com.shop.dto.admin.product.AdminProductPageResponseDTO;
+import com.shop.dto.admin.product.AdminProductReadDTO;
+import com.shop.dto.admin.product.AdminProductSearchDTO;
 import com.shop.service.admin.product.AdminProductService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,34 +21,35 @@ import lombok.RequiredArgsConstructor;
 public class AdminProductController {
 
 	private final AdminProductService productService;
-	private final AdminProductImageService productImageService;
-	private final FileStore fileStore;
+	//private final AdminProductImageService productImageService;
+	//private final FileStore fileStore;
 	
 	
-	@GetMapping("/{productNo}")
-	public ResponseEntity<?> getOneProduct(@PathVariable Long productNo) {
-		try {
-			Product product = productService.getOneProduct(productNo);
-			return ResponseEntity.ok(product);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("하나의 상품을 받아오지 못했습니다.");
-		}
-	}
-
+	// 관리자 상품 목록 조회
 	@GetMapping
-	public ResponseEntity<?> getAllProductToMainPage() {
-
+	public ResponseEntity<?> getProductList(AdminProductSearchDTO searchDTO) {
 		try {
-			List<ProductListResponse> list = productService.getAllProductToMainPage();
-			
+			AdminProductPageResponseDTO list = productService.getProductList(searchDTO);
 			return ResponseEntity.ok(list);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품 목록 조회중 오류가 발생하였습니다.");
 		}
 	}
 	
+	// 관리자 상품 상세 조회
+	@GetMapping("/{productNo}")
+	public ResponseEntity<?> getOneProduct(@PathVariable Long productNo) {
+		try {
+			AdminProductReadDTO productDetail = productService.getProduct(productNo);
+			return ResponseEntity.ok(productDetail);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품 상세 조회 중 오류가 발생했습니다.");
+		}
+	}
+	
+	/*
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> insertProduct(@RequestBody AdminProductInsertDTO dto) {
@@ -93,8 +83,7 @@ public class AdminProductController {
 		}
 		return null;
 	}
-	
+	*/
 }
 
 
-*/

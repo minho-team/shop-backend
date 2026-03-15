@@ -4,8 +4,9 @@ import lombok.Data;
 
 //상품 이미지 DTO
 @Data
-public class ProductImageDTO {
+public class AdminProductImageDTO {
 	
+	private Long productImgNo;
     private Long productNo;
     private String imageUrl;
     private String imageType;
