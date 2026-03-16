@@ -53,9 +53,9 @@ public class SecurityConfig {
 	            
 	            .requestMatchers("/upload/**").permitAll()
 	            
-	            // 관리자
-	            .requestMatchers("/api/admin/**").hasRole("ADMIN")
-	            .anyRequest().authenticated()
+	            // 관리자.hasRole("ADMIN") authenticated()
+	            .requestMatchers("/api/admin/**").permitAll()
+	            .anyRequest().permitAll()
 	        );
 	    http.addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
 	    return http.build();

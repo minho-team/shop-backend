@@ -10,21 +10,24 @@ import lombok.Data;
 @Data
 public class AdminProductInsertDTO {
     
-    private Long productNo;
-
+	private Long productNo;
+	
     private String name;
     private Long categoryId;
-    private Integer price;
+    private Long price;
     private Integer discountRate;
     private String description;
     private String useYn;
     private String sameDayDeliveryYn;
     
-    // 썸네일 이미지 NOT NULL
+    // 썸네일 이미지 (필수)
     private MultipartFile thumbImage;
-    // 대표 이미지 1장
+    // 대표 이미지 (선택)
     private MultipartFile mainImage;
-    // 갤러리 이미지 여러 장
+    // 갤러리 이미지 (선택, 여러장)
     private List<MultipartFile> galleryImages;
-    
+    // 사이즈표 이미지 (선택)
+    private MultipartFile sizeImage;
+    // 옵션
+    private List<AdminProductOptionDTO> options;
 }
