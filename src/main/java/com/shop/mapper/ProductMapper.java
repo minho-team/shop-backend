@@ -2,9 +2,12 @@ package com.shop.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.shop.domain.Product;
 import com.shop.dto.user.product.ProductCreateRequest;
 import com.shop.dto.user.product.ProductListResponse;
+import com.shop.dto.user.product.ProductListResponseDto;
 import com.shop.dto.user.product.ProductUpdateRequest;
 
 public interface ProductMapper {
@@ -24,4 +27,6 @@ public interface ProductMapper {
 
 	// 메인 페이지에서 섬네일과 함께 product 내려주는 매퍼
 	public List<ProductListResponse> getAllProductToMainPage() throws Exception;
+
+	public List<ProductListResponseDto> selectProductList(@Param("categoryId") Long categoryId) throws Exception;
 }

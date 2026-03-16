@@ -8,20 +8,23 @@ import org.springframework.stereotype.Service;
 import com.shop.domain.Product;
 import com.shop.dto.user.product.ProductCreateRequest;
 import com.shop.dto.user.product.ProductListResponse;
+import com.shop.dto.user.product.ProductListResponseDto;
 import com.shop.dto.user.product.ProductUpdateRequest;
 import com.shop.mapper.ProductMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
-public class ProductServiceImpl implements ProductService{
+@Slf4j
+public class ProductServiceImpl implements ProductService {
 	@Autowired
 	private ProductMapper mapper;
 
 	@Override
 	public void insertProduct(ProductCreateRequest dto) throws Exception {
 		mapper.insertProduct(dto);
-		
-	}
 
+	}
 
 	@Override
 	public void updateProducts(Long productNo, ProductUpdateRequest dto) {
@@ -33,7 +36,6 @@ public class ProductServiceImpl implements ProductService{
 		}
 	}
 
-
 	@Override
 	public void deleteProduct(Long productNo) {
 		try {
@@ -42,9 +44,8 @@ public class ProductServiceImpl implements ProductService{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-	}
 
+	}
 
 	@Override
 	public Product getOneProduct(Long productNo) throws Exception {
@@ -52,20 +53,18 @@ public class ProductServiceImpl implements ProductService{
 
 	}
 
-
 	@Override
 	public List<ProductListResponse> getAllProductToMainPage() throws Exception {
-	    List<ProductListResponse> list = mapper.getAllProductToMainPage();
+		List<ProductListResponse> list = mapper.getAllProductToMainPage();
 
-	    for (ProductListResponse dto : list) {
-	        if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
-	            dto.setImageUrl("/upload/" + dto.getImageUrl());
-	        }
-	    }
+		for (ProductListResponse dto : list) {
+			if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+				dto.setImageUrl("/upload/" + dto.getImageUrl());
+			}
+		}
 
-	    return list;
+		return list;
 	}
-
 
 	@Override
 	public List<Product> getAllProducts() throws Exception {
@@ -73,8 +72,20 @@ public class ProductServiceImpl implements ProductService{
 		return mapper.getAllProducts();
 	}
 
+	@Override
+	public List<ProductListResponseDto> getProductList(Long categoryId) throws Exception {
+		List<ProductListResponseDto> list = mapper.selectProductList(categoryId);
+		if (list != null) {
+			for (ProductListResponseDto dto : list) {
+				String fileName = dto.getImageUrl();
 
-	
+				if (fileName != null && !fileName.isBlank()) {
+					dto.setImageUrl("/upload/" + fileName);
+				}
+			}
+		}
 
+		return list;
+	}
 
 }

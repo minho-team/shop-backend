@@ -46,6 +46,33 @@
 		WHERE p.use_yn = 'Y'
 		ORDER BY p.product_no DESC
 	</select>
+	<!-- 카테고리 클릭했을때 상품을 가져오기 위한 쿼리 -->
+	<select id="selectProductList" resultType="com.shop.dto.user.product.ProductListResponseDto">
+        SELECT
+            p.product_no   AS productNo,
+            p.name         AS name,
+            p.price        AS price,
+            p.discount_rate   AS discountRate,
+            pi.image_url   AS imageUrl,
+            p.category_id  AS categoryId
+        FROM product p
+        LEFT JOIN product_img pi
+               ON pi.product_no = p.product_no
+              AND pi.image_type = 'THUMB'
+        WHERE p.use_yn = 'Y'
+
+        <if test="categoryId != null">
+            AND p.category_id IN (
+                SELECT c.category_id
+                FROM category c
+                WHERE c.use_yn = 'Y'
+                START WITH c.category_id = #{categoryId}
+                CONNECT BY PRIOR c.category_id = c.parent_id
+            )
+        </if>
+
+        ORDER BY p.product_no DESC
+    </select>
 
 
 </mapper>
