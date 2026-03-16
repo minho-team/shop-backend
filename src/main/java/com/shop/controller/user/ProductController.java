@@ -29,11 +29,11 @@ public class ProductController {
 	@GetMapping("/{productNo}")
 	public ResponseEntity<?> getOneProduct(@PathVariable Long productNo) {
 		try {
-			Product product = productService.getOneProduct(productNo);
-			return ResponseEntity.ok(product);
+			ProductDetailResponse response = productService.getOneProduct(productNo);
+			return ResponseEntity.ok(response);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("하나의 상품을 받아오지 못했습니다.");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품 정보를 받아오지 못했습니다.");
 		}
 	}
 

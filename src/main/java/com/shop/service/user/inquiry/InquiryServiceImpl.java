@@ -10,14 +10,18 @@ import com.shop.mapper.InquiryFileMapper;
 import com.shop.mapper.InquiryMapper;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 // 1:1 문의 서비스 구현 클래스
 @Service
@@ -29,6 +33,10 @@ public class InquiryServiceImpl implements InquiryService {
     private final InquiryFileMapper inquiryFileMapper;
     // 답변 목록 조회를 위한 CommentMapper 주입
     private final CommentMapper commentMapper;
+
+    // application.properties의 업로드 경로 (예: C:/upload)
+    @Value("${upload.path}")
+    private String uploadPath;
 
     // =========================================
     // 문의 작성 처리 (첨부파일 포함)
@@ -42,11 +50,30 @@ public class InquiryServiceImpl implements InquiryService {
             // 첨부파일이 있으면 저장
             if (files != null && !files.isEmpty()) {
                 for (MultipartFile file : files) {
-                    // InquiryFile 객체 생성 후 저장
+                    if (file.isEmpty()) continue;
+
+                    // UUID로 고유 파일명 생성 (원본 확장자 유지)
+                    String originalName = file.getOriginalFilename();
+                    String ext = (originalName != null && originalName.contains("."))
+                            ? originalName.substring(originalName.lastIndexOf("."))
+                            : "";
+                    String savedName = UUID.randomUUID().toString() + ext;
+
+                    // 업로드 디렉토리가 없으면 생성
+                    File uploadDir = new File(uploadPath);
+                    if (!uploadDir.exists()) uploadDir.mkdirs();
+
+                    // 실제 파일 디스크 저장
+                    file.transferTo(new File(uploadPath + File.separator + savedName));
+
+                    // InquiryFile 객체 구성 후 DB 저장
                     InquiryFile inquiryFile = new InquiryFile();
                     inquiryFile.setInquiryNo(request.getInquiryNo());
-                    inquiryFile.setFileName(file.getOriginalFilename());
-                    inquiryFileMapper.insertFile(inquiryFile);  // 첨부파일 저장
+                    inquiryFile.setFileName(originalName);
+                    inquiryFile.setFileUrl("/upload/" + savedName);    // 브라우저 접근 URL
+                    inquiryFile.setFileSize(file.getSize());
+                    inquiryFile.setFileType(file.getContentType());
+                    inquiryFileMapper.insertFile(inquiryFile);  // 첨부파일 DB 저장
                 }
             }
             return ResponseEntity.ok("문의가 등록되었습니다.");

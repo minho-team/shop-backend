@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.shop.domain.Product;
+import com.shop.domain.ProductOption;
 import com.shop.dto.user.product.ProductCreateRequest;
+import com.shop.dto.user.product.ProductDetailResponse;
 import com.shop.dto.user.product.ProductListResponse;
 import com.shop.dto.user.product.ProductListResponseDto;
 import com.shop.dto.user.product.ProductUpdateRequest;
 import com.shop.mapper.ProductMapper;
+import com.shop.mapper.ProductOptionMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 	@Autowired
-	private ProductMapper mapper;
+	private ProductMapper productMapper;
+	
+	@Autowired
+	private ProductOptionMapper productOptionMapper;
 
 	@Override
 	public void insertProduct(ProductCreateRequest dto) throws Exception {
@@ -29,7 +35,7 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void updateProducts(Long productNo, ProductUpdateRequest dto) {
 		try {
-			mapper.updateProducts(productNo, dto);
+			productMapper.updateProducts(productNo, dto);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -39,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void deleteProduct(Long productNo) {
 		try {
-			mapper.deleteProduct(productNo);
+			productMapper.deleteProduct(productNo);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -48,10 +54,13 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public Product getOneProduct(Long productNo) throws Exception {
-		return mapper.getOneProducts(productNo);
+	public ProductDetailResponse getOneProduct(Long productNo) throws Exception {
+		Product product = productMapper.getOneProducts(productNo);
+		List<ProductOption> options = productOptionMapper.getOptionsByProductNo(productNo);
 
-	}
+		ProductDetailResponse response = new ProductDetailResponse();
+		response.setProduct(product);
+		response.setOptions(options);
 
 	@Override
 	public List<ProductListResponse> getAllProductToMainPage() throws Exception {
@@ -68,8 +77,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public List<Product> getAllProducts() throws Exception {
-		// TODO Auto-generated method stub
-		return mapper.getAllProducts();
+		return productMapper.getAllProducts();
 	}
 
 	@Override
