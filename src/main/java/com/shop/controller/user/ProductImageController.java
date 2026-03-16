@@ -24,8 +24,8 @@ public class ProductImageController {
 	@GetMapping("/{productNo}")
 	public ResponseEntity<?> getProductMainAndThumbImages(@PathVariable Long productNo) {
 		try {
-			
-			log.info("ffffff");
+
+			log.info("컨트롤러로 넘어온 productNo:" + productNo);
 			ProductImageListDTO result = productImageService.getProductMainAndThumbImages(productNo);
 
 			if (result.getImages() == null || result.getImages().isEmpty()) {
