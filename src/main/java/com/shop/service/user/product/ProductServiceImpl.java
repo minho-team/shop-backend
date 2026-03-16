@@ -28,7 +28,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public void insertProduct(ProductCreateRequest dto) throws Exception {
-		mapper.insertProduct(dto);
+		productMapper.insertProduct(dto);
 
 	}
 
@@ -61,10 +61,12 @@ public class ProductServiceImpl implements ProductService {
 		ProductDetailResponse response = new ProductDetailResponse();
 		response.setProduct(product);
 		response.setOptions(options);
-
+		
+		return response;
+	}
 	@Override
 	public List<ProductListResponse> getAllProductToMainPage() throws Exception {
-		List<ProductListResponse> list = mapper.getAllProductToMainPage();
+		List<ProductListResponse> list = productMapper.getAllProductToMainPage();
 
 		for (ProductListResponse dto : list) {
 			if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
@@ -82,7 +84,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public List<ProductListResponseDto> getProductList(Long categoryId) throws Exception {
-		List<ProductListResponseDto> list = mapper.selectProductList(categoryId);
+		List<ProductListResponseDto> list = productMapper.selectProductList(categoryId);
 		if (list != null) {
 			for (ProductListResponseDto dto : list) {
 				String fileName = dto.getImageUrl();
