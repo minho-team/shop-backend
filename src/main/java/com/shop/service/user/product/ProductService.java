@@ -6,6 +6,7 @@ import com.shop.domain.Product;
 import com.shop.dto.user.product.ProductCreateRequest;
 import com.shop.dto.user.product.ProductDetailResponse;
 import com.shop.dto.user.product.ProductListResponse;
+import com.shop.dto.user.product.ProductListResponseDto;
 import com.shop.dto.user.product.ProductUpdateRequest;
 
 public interface ProductService {
@@ -21,5 +22,7 @@ public interface ProductService {
 	public void deleteProduct(Long productNo) throws Exception;
 
 	public List<ProductListResponse> getAllProductToMainPage() throws Exception;
+
+	public List<ProductListResponseDto> getProductList(Long categoryId) throws Exception;
 
 }
