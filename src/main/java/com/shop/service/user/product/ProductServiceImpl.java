@@ -6,75 +6,77 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.shop.domain.Product;
+import com.shop.domain.ProductOption;
 import com.shop.dto.user.product.ProductCreateRequest;
+import com.shop.dto.user.product.ProductDetailResponse;
 import com.shop.dto.user.product.ProductListResponse;
 import com.shop.dto.user.product.ProductUpdateRequest;
 import com.shop.mapper.ProductMapper;
+import com.shop.mapper.ProductOptionMapper;
 
 @Service
-public class ProductServiceImpl implements ProductService{
+public class ProductServiceImpl implements ProductService {
 	@Autowired
-	private ProductMapper mapper;
+	private ProductMapper productMapper;
+	
+	@Autowired
+	private ProductOptionMapper productOptionMapper;
 
 	@Override
 	public void insertProduct(ProductCreateRequest dto) throws Exception {
-		mapper.insertProduct(dto);
-		
-	}
+		productMapper.insertProduct(dto);
 
+	}
 
 	@Override
 	public void updateProducts(Long productNo, ProductUpdateRequest dto) {
 		try {
-			mapper.updateProducts(productNo, dto);
+			productMapper.updateProducts(productNo, dto);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
 
 	@Override
 	public void deleteProduct(Long productNo) {
 		try {
-			mapper.deleteProduct(productNo);
+			productMapper.deleteProduct(productNo);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-	}
 
+	}
 
 	@Override
-	public Product getOneProduct(Long productNo) throws Exception {
-		return mapper.getOneProducts(productNo);
+	public ProductDetailResponse getOneProduct(Long productNo) throws Exception {
+		Product product = productMapper.getOneProducts(productNo);
+		List<ProductOption> options = productOptionMapper.getOptionsByProductNo(productNo);
 
+		ProductDetailResponse response = new ProductDetailResponse();
+		response.setProduct(product);
+		response.setOptions(options);
+
+		return response;
 	}
-
 
 	@Override
 	public List<ProductListResponse> getAllProductToMainPage() throws Exception {
-	    List<ProductListResponse> list = mapper.getAllProductToMainPage();
+		List<ProductListResponse> list = productMapper.getAllProductToMainPage();
 
-	    for (ProductListResponse dto : list) {
-	        if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
-	            dto.setImageUrl("/upload/" + dto.getImageUrl());
-	        }
-	    }
+		for (ProductListResponse dto : list) {
+			if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+				dto.setImageUrl("/upload/" + dto.getImageUrl());
+			}
+		}
 
-	    return list;
+		return list;
 	}
-
 
 	@Override
 	public List<Product> getAllProducts() throws Exception {
-		// TODO Auto-generated method stub
-		return mapper.getAllProducts();
+		return productMapper.getAllProducts();
 	}
-
-
-	
-
 
 }
