@@ -161,9 +161,80 @@
 	    WHERE product_no = #{productNo}
 	    ORDER BY product_option_no ASC
 
-</select>
+	</select>
 
+	<!-- 상품 등록 -->
+    <insert id="insertProduct"
+            parameterType="com.shop.dto.admin.product.AdminProductInsertDTO">
 
+        <!-- 상품 번호 시퀀스 생성 후 DTO의 productNo에 세팅 -->
+        <selectKey keyProperty="productNo" resultType="long" order="BEFORE">
+            SELECT seq_product.NEXTVAL FROM dual
+        </selectKey>
+        
+		INSERT INTO product (
+            product_no,
+            name,
+            price,
+            discount_rate,
+            category_id,
+            description,
+            use_yn,
+            created_at,
+            updated_at,
+            view_count,
+            same_day_delivery_yn
+        ) VALUES (
+            #{productNo},
+            #{name},
+            #{price},
+            #{discountRate},
+            #{categoryId},
+            #{description},
+            #{useYn},
+            SYSTIMESTAMP,
+            SYSTIMESTAMP,
+            0,
+            #{sameDayDeliveryYn}
+        )
+    </insert>
+
+    <!-- 상품 이미지 등록 -->
+    <insert id="insertProductImage">
+        INSERT INTO product_img (
+            product_img_no,
+            product_no,
+            image_url,
+            image_type,
+            sort_order
+        ) VALUES (
+            seq_product_img.NEXTVAL,
+            #{productNo},
+            #{imageUrl},
+            #{imageType},
+            #{sortOrder}
+        )
+    </insert>
+
+    <!-- 상품 옵션 등록 -->
+    <insert id="insertProductOption"
+            parameterType="com.shop.dto.admin.product.AdminProductOptionDTO">
+        INSERT INTO product_option (
+            product_option_no,
+            product_no,
+            option_size,
+            color,
+            stock,
+            use_yn
+        ) VALUES (
+            seq_product_option.NEXTVAL,
+            #{productNo},
+            #{optionSize},
+            #{color},
+            #{stock},
+            #{useYn}
+        )
+    </insert>
 </mapper>
 
 
