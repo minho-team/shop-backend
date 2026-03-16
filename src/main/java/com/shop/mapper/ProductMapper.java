@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.shop.domain.Product;
 import com.shop.dto.user.product.ProductCreateRequest;
+import com.shop.dto.user.product.ProductDetailResponse;
 import com.shop.dto.user.product.ProductListResponse;
 import com.shop.dto.user.product.ProductUpdateRequest;
 

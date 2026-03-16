@@ -25,4 +25,15 @@
 		)
 	</insert>
 
+	<select id="getOptionsByProductNo" parameterType="long"
+		resultType="com.shop.domain.ProductOption">
+		SELECT
+		product_option_no AS productOptionNo,
+		product_no AS productNo,
+		option_size AS optionSize,
+		color,
+		stock
+		FROM product_option
+		WHERE product_no = #{productNo}
+	</select>
 </mapper>
