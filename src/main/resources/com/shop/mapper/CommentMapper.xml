@@ -4,6 +4,7 @@
 
 <mapper namespace="com.shop.mapper.CommentMapper">
 
+    <!-- 답변 작성 -->
     <insert id="createComment">
         INSERT INTO inquiry_comment (
             inquiry_comment_no, inquiry_no, member_no, content, created_at, delete_yn
@@ -13,6 +14,7 @@
         )
     </insert>
 
+    <!-- 문의글에 달린 답변 목록 조회 (삭제되지 않은 것만, 작성순) -->
     <select id="getCommentsByInquiryNo" resultType="Comment">
         SELECT inquiry_comment_no AS inquiryCommentNo,
                inquiry_no         AS inquiryNo,
@@ -27,10 +29,26 @@
         ORDER BY created_at ASC
     </select>
 
+    <!-- 답변 삭제 (soft delete) -->
     <update id="deleteComment">
         UPDATE inquiry_comment
         SET delete_yn = 'Y'
-        WHERE inquiry_comment_no = #{inquiryCommentNo}
+        WHERE inquiry_comment_no = #{commentNo}
     </update>
+
+    <!-- 답변 번호로 해당 문의 번호 조회 (삭제 후 상태 복구에 사용) -->
+    <select id="getInquiryNoByCommentNo" resultType="Long">
+        SELECT inquiry_no
+        FROM inquiry_comment
+        WHERE inquiry_comment_no = #{commentNo}
+    </select>
+
+    <!-- 특정 문의글의 남은 답변 수 조회 (삭제되지 않은 것만) -->
+    <select id="countCommentsByInquiryNo" resultType="int">
+        SELECT COUNT(*)
+        FROM inquiry_comment
+        WHERE inquiry_no = #{inquiryNo}
+          AND delete_yn = 'N'
+    </select>
 
 </mapper>

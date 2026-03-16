@@ -7,8 +7,8 @@ import java.sql.Timestamp;
 @Data
 public class Comment {
 
-    // 댓글 번호 (PK)
-    private Long commentNo;
+    // 댓글 번호 (PK) - [수정] commentNo → inquiryCommentNo (XML alias와 일치)
+    private Long inquiryCommentNo;
 
     // 게시글 번호 (FK → inquiry.inquiry_no)
     private Long inquiryNo;
