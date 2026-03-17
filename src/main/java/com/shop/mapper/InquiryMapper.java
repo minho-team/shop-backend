@@ -2,6 +2,7 @@ package com.shop.mapper;
 
 import com.shop.domain.Inquiry;
 import com.shop.dto.user.inquiry.InquiryCreateRequest;
+import com.shop.dto.user.inquiry.InquiryPageRequest;
 import com.shop.dto.user.inquiry.UpdateInquiryRequest;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -40,4 +41,28 @@ public interface InquiryMapper {
 
     // 문의 상태 변경 - 답변 등록/삭제 시 자동 업데이트 (답변대기 / 답변완료)
     void updateStatus(Long inquiryNo, String status) throws Exception;
+
+    // =========================================
+    // 전체 문의 페이징 조회 (관리자용 - 상태/카테고리/키워드 필터 포함)
+    // request: page, size, status, category, keyword, startRow, endRow
+    // =========================================
+    List<Inquiry> getInquiryPage(InquiryPageRequest request) throws Exception;
+
+    // =========================================
+    // 전체 문의 건수 조회 (관리자 페이징 계산용)
+    // request: status, category, keyword 필터 적용
+    // =========================================
+    int countInquiry(InquiryPageRequest request) throws Exception;
+
+    // =========================================
+    // 내 문의 페이징 조회 (로그인 회원 - memberNo 기준)
+    // request: page, size, memberNo, startRow, endRow
+    // =========================================
+    List<Inquiry> getMyInquiryPage(InquiryPageRequest request) throws Exception;
+
+    // =========================================
+    // 내 문의 건수 조회 (사용자 페이징 계산용)
+    // memberNo: 로그인한 회원 번호
+    // =========================================
+    int countMyInquiry(Long memberNo) throws Exception;
 }

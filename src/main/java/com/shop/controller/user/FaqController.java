@@ -1,6 +1,7 @@
 package com.shop.controller.user;
 
 import com.shop.dto.user.inquiry.FaqCreateRequest;
+import com.shop.dto.user.inquiry.FaqPageRequest;
 import com.shop.service.user.faq.FaqService;
 
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,33 @@ public class FaqController {
     @GetMapping("/search")
     public ResponseEntity<?> searchFaq(@RequestParam String keyword) {
         return faqService.searchFaq(keyword);
+    }
+
+    // =========================================
+    // FAQ 페이징 조회 API (비로그인 허용)
+    // 사용자/관리자 FAQ 페이지에서 호출
+    // 쿼리 파라미터:
+    //   page: 페이지 번호 (기본값 1)
+    //   size: 페이지당 개수 (기본값 10)
+    //   category: 카테고리 필터 (생략 또는 "전체"면 전체 조회)
+    //   keyword: 검색 키워드 (생략하면 검색 안 함)
+    // 반환값: PageResponse<Faq> { list, totalCount, totalPages, currentPage, pageSize }
+    // =========================================
+    @GetMapping("/page")
+    public ResponseEntity<?> getFaqPage(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String keyword) {
+
+        // FaqPageRequest 객체 생성 후 파라미터 주입
+        FaqPageRequest request = new FaqPageRequest();
+        request.setPage(page);
+        request.setSize(size);
+        request.setCategory(category);
+        request.setKeyword(keyword);
+
+        return faqService.getFaqPage(request);
     }
 
     // =========================================

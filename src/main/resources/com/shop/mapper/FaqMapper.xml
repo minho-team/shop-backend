@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!-- MyBatis Mapper 설정 파일 -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<!-- FaqMapper 인터페이스와 연결되는 Mapper -->
 <mapper namespace="com.shop.mapper.FaqMapper">
 
     <!-- FAQ 전체 조회 (삭제되지 않은 것만, 카테고리·정렬순 기준) -->
@@ -49,6 +46,56 @@
           AND (question LIKE '%' || #{keyword} || '%'
                OR answer LIKE '%' || #{keyword} || '%')
         ORDER BY category, sort_order ASC
+    </select>
+
+    <!-- =========================================
+         FAQ 페이징 조회 (Oracle ROWNUM 방식)
+         카테고리 + 키워드 필터 동적 적용
+         startRow: (page-1)*size, endRow: page*size
+         ========================================= -->
+    <select id="getFaqPage" resultType="Faq">
+        SELECT *
+        FROM (
+            SELECT a.*, ROWNUM AS rnum
+            FROM (
+                SELECT faq_no     AS faqNo,
+                       category,
+                       question,
+                       answer,
+                       sort_order AS sortOrder,
+                       delete_yn  AS deleteYn,
+                       created_at AS createdAt
+                FROM faq
+                WHERE delete_yn = 'N'
+                <if test="category != null and category != '' and category != '전체'">
+                    AND category = #{category}
+                </if>
+                <if test="keyword != null and keyword != ''">
+                    AND (question LIKE '%' || #{keyword} || '%'
+                         OR answer LIKE '%' || #{keyword} || '%')
+                </if>
+                ORDER BY category, sort_order ASC
+            ) a
+            WHERE ROWNUM &lt;= #{endRow}
+        )
+        WHERE rnum &gt; #{startRow}
+    </select>
+
+    <!-- =========================================
+         FAQ 전체 건수 조회 (페이징 계산용)
+         카테고리 + 키워드 필터 동적 적용
+         ========================================= -->
+    <select id="countFaq" resultType="int">
+        SELECT COUNT(*)
+        FROM faq
+        WHERE delete_yn = 'N'
+        <if test="category != null and category != '' and category != '전체'">
+            AND category = #{category}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (question LIKE '%' || #{keyword} || '%'
+                 OR answer LIKE '%' || #{keyword} || '%')
+        </if>
     </select>
 
     <!-- FAQ 등록 (관리자 전용) - 시퀀스로 faq_no 채번 후 INSERT -->
