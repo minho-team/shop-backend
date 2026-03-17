@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.shop.mapper.ReviewMapper">
+
+	<insert id="insertReview" parameterType="com.shop.domain.Review">
+		INSERT INTO review (
+		review_no, member_no, product_no, order_item_no,
+		title, content, rating, image_url
+		) VALUES (
+		seq_review.NEXTVAL, #{memberNo}, #{productNo}, #{orderItemNo},
+		#{title}, #{content}, #{rating}, #{imageUrl, jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<select id="getReviewListByProduct"
+		resultType="com.shop.domain.Review">
+		SELECT * FROM review
+		WHERE product_no = #{productNo}
+		AND delete_yn = 'N'
+		ORDER BY created_at DESC
+	</select>
+
+	<select id="getMyReviewList" resultType="com.shop.domain.Review">
+		SELECT * FROM review
+		WHERE member_no = #{memberNo}
+		AND delete_yn = 'N'
+		ORDER BY created_at DESC
+	</select>
+
+</mapper>
