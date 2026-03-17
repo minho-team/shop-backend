@@ -23,6 +23,6 @@ public interface ProductService {
 
 	public List<ProductListResponse> getAllProductToMainPage() throws Exception;
 
-	public List<ProductListResponseDto> getProductList(Long categoryId) throws Exception;
+	public List<ProductListResponseDto> selectSearchProductList(Integer categoryId, String keyword) throws Exception;
 
 }
