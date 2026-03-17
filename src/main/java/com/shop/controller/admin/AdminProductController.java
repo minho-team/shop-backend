@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.dto.admin.product.AdminProductInsertDTO;
+import com.shop.dto.admin.product.AdminProductListDTO;
 import com.shop.dto.admin.product.AdminProductPageResponseDTO;
 import com.shop.dto.admin.product.AdminProductReadDTO;
 import com.shop.dto.admin.product.AdminProductSearchDTO;
@@ -29,9 +30,10 @@ public class AdminProductController {
 	
 	// 관리자 상품 목록 조회
 	@GetMapping
-	public ResponseEntity<?> getProductList(AdminProductSearchDTO searchDTO) {
+	public ResponseEntity<?> getProductList(AdminProductSearchDTO searchDTO) throws Exception {
 		try {
 			AdminProductPageResponseDTO list = productService.getProductList(searchDTO);
+			log.info("어드민 페이지 리스폰스 dto list:"+list);
 			return ResponseEntity.ok(list);
 		} catch (Exception e) {
 			e.printStackTrace();
