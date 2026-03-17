@@ -2,6 +2,8 @@ package com.shop.service.user.faq;
 
 import com.shop.domain.Faq;
 import com.shop.dto.user.inquiry.FaqCreateRequest;
+import com.shop.dto.user.inquiry.FaqPageRequest;
+import com.shop.dto.user.inquiry.PageResponse;
 import com.shop.mapper.FaqMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -53,6 +55,27 @@ public class FaqServiceImpl implements FaqService {
             return ResponseEntity.ok(list);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("FAQ 검색 실패: " + e.getMessage());
+        }
+    }
+
+    // =========================================
+    // FAQ 페이징 조회 처리
+    // 1. 전체 건수 조회 (countFaq) → totalCount
+    // 2. 현재 페이지 데이터 조회 (getFaqPage) → list
+    // 3. PageResponse로 묶어서 반환
+    // =========================================
+    @Override
+    public ResponseEntity<?> getFaqPage(FaqPageRequest request) {
+        try {
+            // 전체 건수 조회 (페이징 계산용)
+            int totalCount = faqMapper.countFaq(request);
+            // 현재 페이지 데이터 조회
+            List<Faq> list = faqMapper.getFaqPage(request);
+            // PageResponse 생성 후 반환
+            PageResponse<Faq> response = new PageResponse<>(list, totalCount, request.getPage(), request.getSize());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("FAQ 페이징 조회 실패: " + e.getMessage());
         }
     }
 

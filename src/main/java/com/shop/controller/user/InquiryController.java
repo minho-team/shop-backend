@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shop.domain.Member;
 import com.shop.dto.user.inquiry.InquiryCreateRequest;
+import com.shop.dto.user.inquiry.InquiryPageRequest;
 import com.shop.dto.user.inquiry.UpdateInquiryRequest;
 import com.shop.service.user.inquiry.InquiryService;
 import com.shop.service.user.member.MemberService;
@@ -69,6 +71,35 @@ public class InquiryController {
     }
 
     // =========================================
+    // 전체 문의 페이징 조회 API (관리자용)
+    // 쿼리 파라미터:
+    //   page: 페이지 번호 (기본값 1)
+    //   size: 페이지당 개수 (기본값 10)
+    //   status: 상태 필터 (생략 또는 "전체"면 전체 조회)
+    //   category: 카테고리 필터 (생략 또는 "전체"면 전체 조회)
+    //   keyword: 검색 키워드 (생략하면 검색 안 함)
+    // 반환값: PageResponse<Inquiry> { list, totalCount, totalPages, currentPage, pageSize }
+    // =========================================
+    @GetMapping("/page")
+    public ResponseEntity<?> getInquiryPage(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String keyword) {
+
+        // InquiryPageRequest 객체 생성 후 파라미터 주입
+        InquiryPageRequest request = new InquiryPageRequest();
+        request.setPage(page);
+        request.setSize(size);
+        request.setStatus(status);
+        request.setCategory(category);
+        request.setKeyword(keyword);
+
+        return inquiryService.getInquiryPage(request);
+    }
+
+    // =========================================
     // 내 1:1 문의 내역 조회 API (로그인한 회원의 게시글만)
     // =========================================
     @GetMapping("/my")
@@ -78,6 +109,35 @@ public class InquiryController {
             String memberId = authentication.getName();
             Member member = memberService.readOneMember(memberId);
             return inquiryService.readMyInquiry(member.getMemberNo());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("회원 정보 조회 실패: " + e.getMessage());
+        }
+    }
+
+    // =========================================
+    // 내 문의 페이징 조회 API (로그인한 회원)
+    // 쿼리 파라미터:
+    //   page: 페이지 번호 (기본값 1)
+    //   size: 페이지당 개수 (기본값 10)
+    // 반환값: PageResponse<Inquiry> { list, totalCount, totalPages, currentPage, pageSize }
+    // =========================================
+    @GetMapping("/my/page")
+    public ResponseEntity<?> getMyInquiryPage(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Authentication authentication) {
+        try {
+            // 토큰에서 memberId 추출 후 memberNo 변환
+            String memberId = authentication.getName();
+            Member member = memberService.readOneMember(memberId);
+
+            // InquiryPageRequest 객체 생성 후 파라미터 주입
+            InquiryPageRequest request = new InquiryPageRequest();
+            request.setPage(page);
+            request.setSize(size);
+            request.setMemberNo(member.getMemberNo());
+
+            return inquiryService.getMyInquiryPage(request);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("회원 정보 조회 실패: " + e.getMessage());
         }

@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shop.dto.user.inquiry.InquiryCreateRequest;
+import com.shop.dto.user.inquiry.InquiryPageRequest;
 import com.shop.dto.user.inquiry.UpdateInquiryRequest;
 
 import java.util.List;
@@ -33,4 +34,18 @@ public interface InquiryService {
     // 문의 삭제 (관리자 전용 - memberNo 체크 없이 삭제)
     // =========================================
     ResponseEntity<?> adminDeleteInquiry(Long inquiryNo);
+
+    // =========================================
+    // 전체 문의 페이징 조회 (관리자용)
+    // request: page, size, status, category, keyword
+    // 반환값: PageResponse<Inquiry> { list, totalCount, totalPages, currentPage, pageSize }
+    // =========================================
+    ResponseEntity<?> getInquiryPage(InquiryPageRequest request);
+
+    // =========================================
+    // 내 문의 페이징 조회 (로그인한 회원)
+    // request: page, size, memberNo
+    // 반환값: PageResponse<Inquiry> { list, totalCount, totalPages, currentPage, pageSize }
+    // =========================================
+    ResponseEntity<?> getMyInquiryPage(InquiryPageRequest request);
 }
