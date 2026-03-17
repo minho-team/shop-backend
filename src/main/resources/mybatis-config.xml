@@ -4,6 +4,7 @@
 	<!-- mapUnderscoreToCamelCase 프로퍼티 값을 true 로 지정 -->
 	<settings>
 		<setting name="mapUnderscoreToCamelCase" value="true" />
+		<setting name="jdbcTypeForNull" value="NULL" />
 	</settings>
 	<!-- TypeAlias로 맵핑 파일에서 반복적으로 사용될 패키지의 이름을 정의한다. -->
 	<typeAliases>
