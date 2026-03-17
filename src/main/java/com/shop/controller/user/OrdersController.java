@@ -105,26 +105,4 @@ public class OrdersController {
 		}
 	}
 
-	@PutMapping("/{orderNo}")
-	public ResponseEntity<?> updateOrder(@PathVariable Long orderNo, @RequestBody Orders orders) {
-		orders.setOrderNo(orderNo);
-		try {
-			ordersService.updateOrder(orders);
-			return ResponseEntity.ok("주문 수정 완료");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
-		}
-	}
-
-	@DeleteMapping("/{orderNo}")
-	public ResponseEntity<?> deleteOrder(@PathVariable Long orderNo) {
-		try {
-			ordersService.deleteOrder(orderNo);
-			return ResponseEntity.ok("주문 삭제 완료");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
-		}
-	}
 }
