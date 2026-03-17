@@ -42,6 +42,17 @@ public class AdminProductServiceImpl implements AdminProductService{
         // 상품 목록 조회
         List<AdminProductListDTO> list = adminProductMapper.getProductList(searchDTO);
         
+        // 시드 썸네일 경로 보정
+        if (list != null) {
+            for (AdminProductListDTO dto : list) {
+                String fileName = dto.getThumbnailUrl();
+
+                if (fileName != null && !fileName.isBlank() && !fileName.startsWith("/upload/")) {
+                    dto.setThumbnailUrl("/upload/" + fileName);
+                }
+            }
+        }
+        
         // 전체 개수 조회
         int totalCount = adminProductMapper.getProductCount(searchDTO);
         
