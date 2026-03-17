@@ -83,19 +83,13 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductListResponseDto> getProductList(Long categoryId) throws Exception {
-		List<ProductListResponseDto> list = productMapper.selectProductList(categoryId);
-		if (list != null) {
-			for (ProductListResponseDto dto : list) {
-				String fileName = dto.getImageUrl();
-
-				if (fileName != null && !fileName.isBlank()) {
-					dto.setImageUrl("/upload/" + fileName);
-				}
+	public List<ProductListResponseDto> selectSearchProductList(Integer categoryId, String keyword) throws Exception {
+		List<ProductListResponseDto> list = productMapper.selectSearchProductList(categoryId, keyword);
+		for (ProductListResponseDto dto : list) {
+			if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+				dto.setImageUrl("/upload/" + dto.getImageUrl());
 			}
 		}
-
 		return list;
-	}
-
+    }
 }

@@ -56,14 +56,14 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 
 		try {
 			if (jwtUtil.validateToken(token)) {
-				// 토큰에서 유저네임 추출
-				String username = jwtUtil.getUserId(token);
+				// 토큰에서 유저아이디 추출
+				String memberId = jwtUtil.getMemberId(token);
 
 				List<SimpleGrantedAuthority> authorities = Arrays.stream(jwtUtil.getRoles(token))
 						.map(role -> new SimpleGrantedAuthority(role)).collect(Collectors.toList());
 
 				// 인증 세팅을 위한 토큰 객체 만들기
-				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,
+				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(memberId,
 						null, authorities);
 
 				SecurityContextHolder.getContext().setAuthentication(authentication);

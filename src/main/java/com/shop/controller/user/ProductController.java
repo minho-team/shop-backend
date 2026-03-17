@@ -51,17 +51,17 @@ public class ProductController {
 	}
 
 	@GetMapping("/withcategory")
-	public ResponseEntity<List<ProductListResponseDto>> getProductList(
-			@RequestParam(required = false) Long categoryId) {
-		log.info("컨트롤러 들어오는지 확인 :");
-		List<ProductListResponseDto> list = null;
+    public ResponseEntity<?> getProductListWithCategory(
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) String keyword
+    ) {
 		try {
-			list = productService.getProductList(categoryId);
-			log.info("categorylist :" + list);
+			List<ProductListResponseDto> list = productService.selectSearchProductList(categoryId, keyword);
+			return ResponseEntity.ok(list);
 		} catch (Exception e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
 		}
-		return ResponseEntity.ok(list);
-	}
+    }
 
 }

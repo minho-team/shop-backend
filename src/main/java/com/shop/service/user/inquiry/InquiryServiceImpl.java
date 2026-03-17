@@ -4,6 +4,8 @@ import com.shop.domain.Comment;
 import com.shop.domain.Inquiry;
 import com.shop.domain.InquiryFile;
 import com.shop.dto.user.inquiry.InquiryCreateRequest;
+import com.shop.dto.user.inquiry.InquiryPageRequest;
+import com.shop.dto.user.inquiry.PageResponse;
 import com.shop.dto.user.inquiry.UpdateInquiryRequest;
 import com.shop.mapper.CommentMapper;
 import com.shop.mapper.InquiryFileMapper;
@@ -178,6 +180,48 @@ public class InquiryServiceImpl implements InquiryService {
             return ResponseEntity.ok("문의가 삭제되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("문의 삭제 실패: " + e.getMessage());
+        }
+    }
+
+    // =========================================
+    // 전체 문의 페이징 조회 처리 (관리자용)
+    // 1. 전체 건수 조회 (countInquiry) → totalCount
+    // 2. 현재 페이지 데이터 조회 (getInquiryPage) → list
+    // 3. PageResponse로 묶어서 반환
+    // =========================================
+    @Override
+    public ResponseEntity<?> getInquiryPage(InquiryPageRequest request) {
+        try {
+            // 전체 건수 조회 (필터 적용)
+            int totalCount = inquiryMapper.countInquiry(request);
+            // 현재 페이지 데이터 조회
+            List<Inquiry> list = inquiryMapper.getInquiryPage(request);
+            // PageResponse 생성 후 반환
+            PageResponse<Inquiry> response = new PageResponse<>(list, totalCount, request.getPage(), request.getSize());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("문의 페이징 조회 실패: " + e.getMessage());
+        }
+    }
+
+    // =========================================
+    // 내 문의 페이징 조회 처리 (로그인한 회원)
+    // 1. 내 문의 전체 건수 조회 (countMyInquiry) → totalCount
+    // 2. 현재 페이지 데이터 조회 (getMyInquiryPage) → list
+    // 3. PageResponse로 묶어서 반환
+    // =========================================
+    @Override
+    public ResponseEntity<?> getMyInquiryPage(InquiryPageRequest request) {
+        try {
+            // 내 문의 전체 건수 조회
+            int totalCount = inquiryMapper.countMyInquiry(request.getMemberNo());
+            // 현재 페이지 데이터 조회
+            List<Inquiry> list = inquiryMapper.getMyInquiryPage(request);
+            // PageResponse 생성 후 반환
+            PageResponse<Inquiry> response = new PageResponse<>(list, totalCount, request.getPage(), request.getSize());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("내 문의 페이징 조회 실패: " + e.getMessage());
         }
     }
 }

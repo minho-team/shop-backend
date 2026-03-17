@@ -53,15 +53,17 @@ public class AuthController {
 			String accessToken = jwtUtil.createToken(authentication);
 			String refreshToken = jwtUtil.createRefreshToken(authentication);
 
-			// principal의 username => userId를 의미
-			// 인증된 유저의 userId를 기반으로 그 정보를 가져옴, 조인은 비용이 크기에 쿼리를 따로 하나 만듦(권한은 받아오지 않을거임)
+			// principal의 username => memberId를 의미(userdetailsservice를 보면 앎)
+			// 인증된 유저의 memberId를 기반으로 그 정보를 가져옴, 조인은 비용이 크기에 쿼리를 따로 하나 만듦(권한은 받아오지 않을거임)
 			log.info("auth contorlelr:" + authentication.getName());
 			Member member = memberService.readOneMember(authentication.getName());
 			memberService.updateRefreshToken(member.getMemberId(), refreshToken);
 
+			//액세스 쿠키 15분
 			ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken).secure(false).path("/")
-					.httpOnly(true).maxAge(60 * 30).build();
+					.httpOnly(true).maxAge(60 * 15).build();
 
+			//리프레시 쿠키 7일
 			ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken).secure(false)
 					.httpOnly(true).maxAge(60 * 60 * 24 * 7).path("/").build();
 
@@ -106,13 +108,13 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 유효하지 않습니다.");
 		}
 
-		// 토큰에서 userId 추출
-		String userId = jwtUtil.getUserId(refreshToken);
+		// 토큰에서 memberId 추출
+		String memberId = jwtUtil.getMemberId(refreshToken);
 
-		// userId를 기반으로 Member 정보 받아오기
+		// memberId를 기반으로 Member 정보 받아오기
 		Member member = null;
 		try {
-			member = memberService.readOneMemberWithRoles(userId);
+			member = memberService.readOneMemberWithRoles(memberId);
 		} catch (Exception e) {
 			log.info("authcontroller refresh 에러: " + e.getMessage());
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("사용자를 찾을 수 없습니다.");
@@ -124,18 +126,20 @@ public class AuthController {
 		}
 
 		// 새 Access Token 생성
-		Authentication authentication = new UsernamePasswordAuthenticationToken(userId, null,
+		Authentication authentication = new UsernamePasswordAuthenticationToken(memberId, null,
 				member.getMemberRoleList().stream()
 						.map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName()))
 						.collect(Collectors.toList()));
 
 		String newAccessToken = jwtUtil.createToken(authentication);
 
-		// 새 Access Token을 쿠키로 내려줌
-		ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken).httpOnly(true).secure(false) // 일단
-																														// //
-																														// 쿠키보냄)
-				.path("/").maxAge(60 * 30) // 30분
+		// 새 Access Token을 쿠키로 내려줌 (15분짜리)
+		ResponseCookie accessCookie = ResponseCookie
+				.from("accessToken", newAccessToken)
+				.httpOnly(true)
+				.secure(false)
+				.path("/")
+				.maxAge(60*15) // 15분
 				.build();
 
 		response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
@@ -161,15 +165,15 @@ public class AuthController {
 
 		// DB에서 refreshToken 초기화
 		if (authentication != null) { // 로그인 상태인지 확인
-			String userId = authentication.getName(); // detailService에서 세팅된 userId
+			String memberId = authentication.getName(); // detailService에서 세팅된 memberId
 
 			Member member = null;
 
 			try {
-				member = memberService.readOneMember(userId);
+				member = memberService.readOneMember(memberId);
 				log.info("로그아웃 때 받아온 member의 이메일 확인:" + member.getEmail());
 				// 리프레시토큰을 무효화
-				memberService.updateRefreshToken(userId, "");
+				memberService.updateRefreshToken(memberId, "");
 			} catch (Exception e) {
 				e.printStackTrace();
 				log.info("리프레시토큰 무효화 과정에서 에러");
