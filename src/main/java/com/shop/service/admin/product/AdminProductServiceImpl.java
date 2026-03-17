@@ -89,7 +89,110 @@ public class AdminProductServiceImpl implements AdminProductService{
         
         return responseDTO;
 	}
+	
+	@Override
+	@Transactional
+	public void insertProduct(AdminProductInsertDTO dto) {
 
+	    List<String> savedFileNames = new ArrayList<>();
+
+	    try {
+	        log.info("서비스 진입 - product dto: name={}, categoryId={}, price={}, discountRate={}, useYn={}, sameDayDeliveryYn={}",
+	                dto.getName(), dto.getCategoryId(), dto.getPrice(), dto.getDiscountRate(),
+	                dto.getUseYn(), dto.getSameDayDeliveryYn());
+
+	        if (dto.getThumbImage() == null || dto.getThumbImage().isEmpty()) {
+	            throw new IllegalArgumentException("썸네일 이미지는 필수입니다.");
+	        }
+
+	        if (dto.getName() == null || dto.getName().isBlank()) {
+	            throw new IllegalArgumentException("상품명은 필수입니다.");
+	        }
+
+	        if (dto.getCategoryId() == null) {
+	            throw new IllegalArgumentException("카테고리는 필수입니다.");
+	        }
+
+	        if (dto.getPrice() == null) {
+	            throw new IllegalArgumentException("가격은 필수입니다.");
+	        }
+
+	        if (dto.getUseYn() == null || dto.getUseYn().isBlank()) {
+	            dto.setUseYn("Y");
+	        }
+
+	        if (dto.getSameDayDeliveryYn() == null || dto.getSameDayDeliveryYn().isBlank()) {
+	            dto.setSameDayDeliveryYn("N");
+	        }
+
+	        // 파일 저장
+	        String thumbImageName = customFileUtil.saveFile(dto.getThumbImage());
+	        String mainImageName = customFileUtil.saveFile(dto.getMainImage());
+	        List<String> galleryImageNames = customFileUtil.saveFiles(dto.getGalleryImages());
+	        String sizeImageName = customFileUtil.saveFile(dto.getSizeImage());
+
+	        if (thumbImageName != null) savedFileNames.add(thumbImageName);
+	        if (mainImageName != null) savedFileNames.add(mainImageName);
+	        if (galleryImageNames != null && !galleryImageNames.isEmpty()) {
+	            savedFileNames.addAll(galleryImageNames);
+	        }
+	        if (sizeImageName != null) savedFileNames.add(sizeImageName);
+
+	        log.info("DB insert 직전 - dto productNo={}, name={}, price={}, categoryId={}",
+	                dto.getProductNo(), dto.getName(), dto.getPrice(), dto.getCategoryId());
+
+	        // 상품 기본 정보 저장
+	        adminProductMapper.insertProduct(dto);
+
+	        Long productNo = dto.getProductNo();
+
+	        if (productNo == null) {
+	            throw new IllegalStateException("상품 번호 생성에 실패했습니다.");
+	        }
+
+	        // 이미지 저장
+	        insertProductImage(productNo, thumbImageName, "THUMB", 1);
+
+	        if (mainImageName != null) {
+	            insertProductImage(productNo, mainImageName, "MAIN", 1);
+	        }
+
+	        if (galleryImageNames != null && !galleryImageNames.isEmpty()) {
+	            for (int i = 0; i < galleryImageNames.size(); i++) {
+	                insertProductImage(productNo, galleryImageNames.get(i), "GALLERY", i + 1);
+	            }
+	        }
+
+	        if (sizeImageName != null) {
+	            insertProductImage(productNo, sizeImageName, "SIZE", 1);
+	        }
+
+	        // 옵션 저장
+	        if (dto.getOptions() != null && !dto.getOptions().isEmpty()) {
+	            for (AdminProductOptionDTO optionDTO : dto.getOptions()) {
+	                optionDTO.setProductNo(productNo);
+
+	                if (optionDTO.getUseYn() == null || optionDTO.getUseYn().isBlank()) {
+	                    optionDTO.setUseYn("Y");
+	                }
+
+	                adminProductMapper.insertProductOption(optionDTO);
+	            }
+	        }
+
+	    } catch (Exception e) {
+	        log.error("상품 등록 서비스 처리 중 오류", e);
+
+	        if (!savedFileNames.isEmpty()) {
+	            customFileUtil.deleteFiles(savedFileNames);
+	        }
+
+	        throw new RuntimeException("상품 등록 처리 중 오류가 발생했습니다.", e);
+	    }
+	}
+	
+	
+	/*
 	@Override
 	@Transactional
 	public void insertProduct(AdminProductInsertDTO dto) {
@@ -168,7 +271,7 @@ public class AdminProductServiceImpl implements AdminProductService{
 	        throw new RuntimeException("상품 등록 처리 중 오류가 발생했습니다.", e);
 	    }
 	}
-
+*/
 	private void insertProductImage(Long productNo, String imageUrl, String imageType, int sortOrder) {
 	    if (imageUrl == null || imageUrl.trim().isEmpty()) {
 	        return;

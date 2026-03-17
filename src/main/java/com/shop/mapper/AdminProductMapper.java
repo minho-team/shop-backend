@@ -38,7 +38,6 @@ public interface AdminProductMapper {
                             @Param("imageUrl") String imageUrl,
                             @Param("imageType") String imageType,
                             @Param("sortOrder") int sortOrder);
-
     // 상품 옵션 등록
     void insertProductOption(AdminProductOptionDTO optionDTO);
     

@@ -4,10 +4,14 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 //상품 등록 DTO
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AdminProductInsertDTO {
     
 	private Long productNo;
