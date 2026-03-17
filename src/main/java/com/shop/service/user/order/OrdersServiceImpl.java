@@ -31,16 +31,5 @@ public class OrdersServiceImpl implements OrdersService {
 		return mapper.getOneOrder(orderNo);
 	}
 
-	@Override
-	public void updateOrder(Orders orders) {
-		
-		mapper.updateOrder(orders);
-	}
-
-	@Override
-	public void deleteOrder(Long orderNo) {
-		
-		mapper.deleteOrder(orderNo);
-	}
 
 }

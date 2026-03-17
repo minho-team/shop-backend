@@ -1,16 +1,14 @@
 package com.shop.service.admin.order;
 
-import java.util.List;
-
-import com.shop.dto.admin.order.AdminOrderListDTO;
+import com.shop.dto.admin.order.AdminOrderListRequest;
+import com.shop.dto.admin.order.AdminOrderListResponse;
 import com.shop.dto.admin.order.AdminOrderReadDTO;
-import com.shop.dto.admin.order.AdminOrderSearchDTO;
 import com.shop.dto.admin.order.OrderStatusUpdateRequestDTO;
 import com.shop.dto.admin.order.RefundStatusUpdateRequestDTO;
 
 public interface AdminOrderService {
 	
-	List<AdminOrderListDTO> getOrderList(AdminOrderSearchDTO searchDTO) throws Exception;
+    AdminOrderListResponse getOrderList(AdminOrderListRequest request) throws Exception;
 
     AdminOrderReadDTO getOrder(Long orderNo) throws Exception;
 

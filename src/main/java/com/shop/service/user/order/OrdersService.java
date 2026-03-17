@@ -13,9 +13,5 @@ public interface OrdersService {
 
 	Orders getOneOrder(Long orderNo) throws Exception;
 
-	void updateOrder(Orders orders) throws Exception;
-
-	void deleteOrder(Long orderNo) throws Exception;
-	
 	
 }
