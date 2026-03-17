@@ -28,5 +28,6 @@ public interface ProductMapper {
 	// 메인 페이지에서 섬네일과 함께 product 내려주는 매퍼
 	public List<ProductListResponse> getAllProductToMainPage() throws Exception;
 
-	public List<ProductListResponseDto> selectProductList(@Param("categoryId") Long categoryId) throws Exception;
+	public List<ProductListResponseDto> selectSearchProductList(@Param("categoryId") Integer categoryId,
+			@Param("keyword") String keyword) throws Exception;
 }

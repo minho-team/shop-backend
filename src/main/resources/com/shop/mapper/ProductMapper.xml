@@ -73,6 +73,31 @@
 
         ORDER BY p.product_no DESC
     </select>
+    
+    <select id="selectSearchProductList" resultType="com.shop.dto.user.product.ProductListResponseDto">
+    SELECT
+        p.product_no AS productNo,
+        p.name AS name,
+        p.price AS price,
+        p.discount_rate AS discountRate,
+        pi.image_url AS imageUrl,
+        p.category_id AS categoryId
+    FROM product p
+    LEFT JOIN product_img pi
+        ON p.product_no = pi.product_no
+       AND pi.image_type = 'THUMB'
+    WHERE 1 = 1
+      AND p.use_yn = 'Y'
 
+    <if test="categoryId != null">
+        AND p.category_id = #{categoryId}
+    </if>
+
+    <if test="keyword != null and keyword != ''">
+        AND p.name LIKE '%' || #{keyword} || '%'
+    </if>
+
+    ORDER BY p.product_no DESC
+</select>
 
 </mapper>
