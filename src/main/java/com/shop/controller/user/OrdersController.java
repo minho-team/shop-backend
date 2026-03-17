@@ -6,18 +6,18 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.domain.Member;
 import com.shop.domain.OrderItem;
 import com.shop.domain.Orders;
+import com.shop.dto.user.order.OrderResponseDTO;
 import com.shop.service.user.member.MemberService;
 import com.shop.service.user.order.OrderItemService;
 import com.shop.service.user.order.OrdersService;
@@ -48,20 +48,20 @@ public class OrdersController {
 
 	// 로그인된 사용자의 모든 주문 내역을 불러온다
 	@GetMapping
-	public ResponseEntity<?> getAllOrders(Authentication authentication) {
+	public ResponseEntity<?> getAllOrders(Authentication authentication,
+			@RequestParam(value = "page", defaultValue = "1") int page) { // page 파라미터 수신 확인
 
-		// 멤버id는 유니크키이므로 한 튜플을 식별 가능
 		String memberId = authentication.getName();
-
 		try {
 			Member member = memberService.readOneMember(memberId);
-			List<Orders> orderList = ordersService.getAllOrders(member.getMemberNo());
-			log.info("컨트롤러에서 멤버 id:" + member.getMemberNo());
-			log.info("컨트롤러에서 오더리스트:" + orderList);
-			return ResponseEntity.ok(Map.of("orderList", orderList, "memberName", member.getName()));
+
+			// 중요: 반드시 getMyOrderList를 호출해서 OrderResponseDTO를 받아야 함!
+			OrderResponseDTO response = ordersService.getMyOrderList(member.getMemberNo(), page);
+
+			// DTO 자체를 리턴 (이 안에 리스트와 페이지 정보가 다 들어있음)
+			return ResponseEntity.ok(response);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("에러발생");
 		}
 	}
 
