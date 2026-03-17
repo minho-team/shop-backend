@@ -5,6 +5,8 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.shop.domain.Orders;
+import com.shop.dto.admin.order.AdminOrderDto;
+import com.shop.dto.admin.order.AdminOrderListRequest;
 
 @Mapper
 public interface OrdersMapper {
@@ -15,8 +17,6 @@ public interface OrdersMapper {
 
 	Orders getOneOrder(Long orderNo);
 
-	void updateOrder(Orders orders);
 
-	void deleteOrder(Long orderNo);
 	
 }
