@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.shop.domain.Member;
 import com.shop.domain.OrderItem;
 import com.shop.domain.Orders;
+import com.shop.dto.user.order.OrderCreateRequestDTO;
+import com.shop.dto.user.order.OrderCreateResponseDTO;
 import com.shop.dto.user.order.OrderResponseDTO;
 import com.shop.service.user.member.MemberService;
 import com.shop.service.user.order.OrderItemService;
@@ -36,13 +38,29 @@ public class OrdersController {
 	private final OrderItemService orderItemService;
 
 	@PostMapping
-	public ResponseEntity<?> createOrder(@RequestBody Orders orders) {
+	public ResponseEntity<?> createOrder(@RequestBody OrderCreateRequestDTO request, Authentication authentication) {
 		try {
-			ordersService.createOrder(orders);
-			return ResponseEntity.ok("주문 생성 완료");
+			if (authentication == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+			}
+
+			String memberId = authentication.getName();
+			Member member = memberService.readOneMember(memberId);
+
+			if (member == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("회원 정보를 찾을 수 없습니다.");
+			}
+
+			OrderCreateResponseDTO response = ordersService.createOrder(request, member.getMemberNo());
+			return ResponseEntity.ok(response);
+
+		} catch (IllegalArgumentException e) {
+			log.error("주문 생성 유효성 오류", e);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
+			log.error("주문 생성 중 오류", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("주문 생성 실패: " + e.getMessage());
 		}
 	}
 
