@@ -8,7 +8,7 @@ import lombok.Setter;
 public class OrderItemCreateRequestDTO {
 	private Long productOptionNo;
 	private Integer quantity;
-	private Long unitPrice;
+	private Integer unitPrice;
 	private String itemName;
 	private String itemSize;
 	private String itemColor;

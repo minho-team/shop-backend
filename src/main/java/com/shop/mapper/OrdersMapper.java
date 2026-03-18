@@ -14,17 +14,10 @@ public interface OrdersMapper {
 
     // 주문 생성
     void createOrder(Orders orders);
-<<<<<<< Updated upstream
 
     // 특정 회원 전체 주문 조회
     List<Orders> getAllOrders(Long memberNo);
 
-    // 주문 단건 조회
-=======
-    
-    List<Orders> getAllOrders(Long memberNo); 
-    
->>>>>>> Stashed changes
     Orders getOneOrder(Long orderNo);
     
     List<OrderItem> getOrderItemList(Long orderNo);

@@ -72,30 +72,10 @@ public class OrdersServiceImpl implements OrdersService {
 		return new OrderCreateResponseDTO(orders.getOrderNo(), new Date(), orders.getTotalPrice());
 	}
 
-	// [신규] 마이페이지 전용 페이징 메서드
-	@Override
-	public OrderResponseDTO getMyOrderList(Long memberNo, int page) {
-		int size = 10;
-		int startRow = (page - 1) * size + 1;
-		int endRow = page * size;
-
-		List<com.shop.dto.user.order.OrderDTO> list = mapper.getMyOrderList(memberNo, startRow, endRow);
-
-		int totalCount = mapper.getTotalCount(memberNo);
-
-		// DTO 생성자도 List<OrderDTO>를 받도록 되어있는지 확인이 필요합니다.
-		return new OrderResponseDTO(list, totalCount, page, size);
-	}
 
 	@Override
 	public Orders getOneOrder(Long orderNo) {
 		return mapper.getOneOrder(orderNo);
-	}
-
-	// [유지] 기존 전체 조회 메서드 복구 (기존 기능 방해 금지)
-	@Override
-	public List<Orders> getAllOrders(Long memberNo) throws Exception {
-		return mapper.getAllOrders(memberNo);
 	}
 
     // 2. 마이페이지 주문 목록 조회 (페이징 처리)
@@ -129,12 +109,6 @@ public class OrdersServiceImpl implements OrdersService {
                 .build();
     }
 
-    // 4. 단건 조회 
-    @Override
-    @Transactional(readOnly = true)
-    public Orders getOneOrder(Long orderNo) {
-        return mapper.getOneOrder(orderNo);
-    }
 
     // 5. [수정 완료] 전체 주문 내역 조회
     @Override

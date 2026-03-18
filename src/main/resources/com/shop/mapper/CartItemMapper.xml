@@ -55,7 +55,7 @@
                po.color         AS color,
                ci.quantity      AS quantity,
                p.price          AS price,
-               p.sale_price     AS salePrice
+               p.discount_rate     AS discountRate
         FROM cart c
         JOIN cart_item ci       ON c.cart_no          = ci.cart_no
         JOIN product_option po  ON ci.product_option_no = po.product_option_no

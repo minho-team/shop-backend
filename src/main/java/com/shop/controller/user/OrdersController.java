@@ -85,10 +85,11 @@ public class OrdersController {
 	@GetMapping("/{orderNo}")
 	public ResponseEntity<?> getOneOrder(@PathVariable Long orderNo, Authentication authentication) {
 		try {
+			log.info("getOneOrder 진입");
 			// 1. [수정] 서비스의 getOrderDetail을 호출하여 주문+상품 정보를 한 번에 가져옵니다.
 			// 이 안에 이미 order와 items가 다 들어있습니다.
 			OrderDetailResponseDTO detail = ordersService.getOrderDetail(orderNo);
-
+			log.info("OrderDetailResponseDTO detail:"+detail);
 			if (detail == null || detail.getOrder() == null) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("주문 정보를 찾을 수 없습니다.");
 			}

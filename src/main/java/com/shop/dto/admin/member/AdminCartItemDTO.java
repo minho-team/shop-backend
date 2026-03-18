@@ -30,6 +30,6 @@ public class AdminCartItemDTO {
     // 정가
     private Integer price;
 
-    // 할인가 (null이면 정가 표시)
-    private Integer salePrice;
+    // 할인율 (null이면 정가 표시)
+    private Integer discountRate;
 }
