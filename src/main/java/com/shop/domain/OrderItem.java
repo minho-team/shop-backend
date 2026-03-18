@@ -13,5 +13,4 @@ public class OrderItem {
     private String itemName;         // 상품명
     private String itemSize;         // 상품사이즈
     private String itemColor;        // 상품색상
-    private String imageUrl;         // 상품이미지
 }
