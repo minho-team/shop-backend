@@ -3,18 +3,46 @@
 
 <mapper namespace="com.shop.mapper.OrderItemMapper">
 
-    <select id="selectByOrderNo" resultType="com.shop.domain.OrderItem">
-        SELECT 
-            order_item_no,
-            order_no,
-            product_option_no,
-            quantity,
-            unit_price,
-            item_name,
-            item_size,
-            item_color
-        FROM order_item
-        WHERE order_no = #{orderNo}
-    </select>
+	<select id="selectByOrderNo"
+		resultType="com.shop.domain.OrderItem">
+		SELECT
+		order_item_no,
+		order_no,
+		product_option_no,
+		quantity,
+		unit_price,
+		item_name,
+		item_size,
+		item_color
+		FROM order_item
+		WHERE order_no = #{orderNo}
+	</select>
 
+	<insert id="insertOrderItem"
+		parameterType="com.shop.domain.OrderItem">
+		<selectKey keyProperty="orderItemNo" resultType="long"
+			order="BEFORE">
+			SELECT seq_order_item.NEXTVAL FROM dual
+		</selectKey>
+
+		INSERT INTO order_item (
+		order_item_no,
+		order_no,
+		product_option_no,
+		quantity,
+		unit_price,
+		item_name,
+		item_size,
+		item_color
+		) VALUES (
+		#{orderItemNo},
+		#{orderNo},
+		#{productOptionNo},
+		#{quantity},
+		#{unitPrice},
+		#{itemName},
+		#{itemSize},
+		#{itemColor}
+		)
+	</insert>
 </mapper>

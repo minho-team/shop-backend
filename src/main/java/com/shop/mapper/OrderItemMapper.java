@@ -8,4 +8,6 @@ import com.shop.domain.OrderItem;
 public interface OrderItemMapper {
     // XML의 id와 일치해야 함
     List<OrderItem> selectByOrderNo(Long orderNo);
+    
+    void insertOrderItem(OrderItem orderItem);
 }

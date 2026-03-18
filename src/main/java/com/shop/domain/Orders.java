@@ -12,7 +12,7 @@ public class Orders {
 	private String ordererPhoneNumber;
 	private String ordererEmail;
 	private String orderStatus;
-	private Integer totalPrice;
+	private Long totalPrice;
 	private Date createdAt;
 	private Date paidAt;
 	private String receiverName;
