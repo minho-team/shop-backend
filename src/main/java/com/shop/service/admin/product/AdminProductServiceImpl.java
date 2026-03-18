@@ -39,6 +39,20 @@ public class AdminProductServiceImpl implements AdminProductService{
             searchDTO.setSize(10);
         }
         
+        // 카테고리 검색 범위 결정 조건 (검색 조건은 좁은 범위 우선 => 넓은 범위 순서로 코딩)
+        // 소분류 설정 변경이 있는 경우
+        if (searchDTO.getCategoryId() != null && !searchDTO.getCategoryId().toString().isBlank()) {
+            searchDTO.setSearchCategoryId(searchDTO.getCategoryId());
+        // 대분류 설정 변경이 있는 경우
+        } else if (searchDTO.getMainCategoryId() != null) {
+            searchDTO.setSearchCategoryId(searchDTO.getMainCategoryId());
+        // 성별 설정 변경이 있는 경우
+        } else if (searchDTO.getGenderCategoryId() != null) {
+            searchDTO.setSearchCategoryId(searchDTO.getGenderCategoryId());
+        } else {
+            searchDTO.setSearchCategoryId(null);
+        }
+        
         // 상품 목록 조회
         List<AdminProductListDTO> list = adminProductMapper.getProductList(searchDTO);
         

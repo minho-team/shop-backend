@@ -33,6 +33,7 @@ public class AdminProductController {
 	public ResponseEntity<?> getProductList(AdminProductSearchDTO searchDTO) throws Exception {
 		try {
 			AdminProductPageResponseDTO list = productService.getProductList(searchDTO);
+			log.info("searchCategoryId = " + searchDTO.getSearchCategoryId());
 			log.info("어드민 페이지 리스폰스 dto list:"+list);
 			return ResponseEntity.ok(list);
 		} catch (Exception e) {

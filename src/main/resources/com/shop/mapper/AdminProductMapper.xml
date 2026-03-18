@@ -54,8 +54,13 @@
 				AND p.name LIKE '%' || #{keyword} || '%'
 			</if>
 
-			<if test="categoryId != null">
-				AND p.category_id = #{categoryId}
+			<if test="searchCategoryId != null">
+				AND p.category_id IN (
+	        			SELECT category_id
+	        			FROM category
+	        			START WITH category_id = #{searchCategoryId}
+	        			CONNECT BY PRIOR category_id = parent_id
+    				)
 			</if>
 
 			<if test="useYn != null and useYn != ''">
@@ -86,8 +91,13 @@
 				AND p.name LIKE '%' || #{keyword} || '%'
 			</if>
 
-			<if test="categoryId != null">
-				AND p.category_id = #{categoryId}
+			<if test="searchCategoryId != null">
+				AND p.category_id IN (
+	        			SELECT category_id
+	        			FROM category
+	        			START WITH category_id = #{searchCategoryId}
+	        			CONNECT BY PRIOR category_id = parent_id
+    				)
 			</if>
 
 			<if test="useYn != null and useYn != ''">
