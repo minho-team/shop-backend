@@ -1,19 +1,20 @@
 package com.shop.service.user.order;
 
 import java.util.List;
-
-
 import com.shop.domain.Orders;
 import com.shop.dto.user.order.OrderResponseDTO;
+import com.shop.dto.user.order.OrderDetailResponseDTO; 
 
 public interface OrdersService {
 
-	void createOrder(Orders orders) throws Exception;
+    void createOrder(Orders orders) throws Exception;
 
-	List<Orders> getAllOrders(Long memberNo) throws Exception;
-	
-	OrderResponseDTO getMyOrderList(Long memberNo, int page) throws Exception;
+    List<Orders> getAllOrders(Long memberNo) throws Exception;
+    
+    OrderResponseDTO getMyOrderList(Long memberNo, int page) throws Exception;
 
-	Orders getOneOrder(Long orderNo) throws Exception;
+    OrderDetailResponseDTO getOrderDetail(Long orderNo) throws Exception;
+    
+    Orders getOneOrder(Long orderNo);
 
 }

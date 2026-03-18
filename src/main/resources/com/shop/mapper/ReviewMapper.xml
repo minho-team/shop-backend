@@ -3,29 +3,68 @@
 
 <mapper namespace="com.shop.mapper.ReviewMapper">
 
-	<insert id="insertReview" parameterType="com.shop.domain.Review">
+	<insert id="insertReview">
 		INSERT INTO review (
-		review_no, member_no, product_no, order_item_no,
-		title, content, rating, image_url
+		review_no,
+		member_no,
+		product_no,
+		order_item_no,
+		title,
+		content,
+		rating,
+		user_height, user_weight,
+		size_rating, image_url
 		) VALUES (
-		seq_review.NEXTVAL, #{memberNo}, #{productNo}, #{orderItemNo},
-		#{title}, #{content}, #{rating}, #{imageUrl, jdbcType=VARCHAR}
+		seq_review.NEXTVAL,
+		#{memberNo},
+		#{productNo},
+		#{orderItemNo},
+		#{title},
+		#{content},
+		#{rating},
+		#{userHeight}, #{userWeight}, #{sizeRating}, #{imageUrl}
 		)
 	</insert>
 
 	<select id="getReviewListByProduct"
 		resultType="com.shop.domain.Review">
-		SELECT * FROM review
+		SELECT
+		review_no,
+		member_no,
+		product_no,
+		order_item_no,
+		title,
+		content,
+		rating,
+		user_height as userHeight,
+		user_weight as userWeight,
+		size_rating as sizeRating,
+		image_url as imageUrl,
+		like_count as
+		likeCount,
+		created_at as createdAt,
+		updated_at as updatedAt,
+		delete_yn as
+		deleteYn
+		FROM review
 		WHERE product_no = #{productNo}
 		AND delete_yn = 'N'
 		ORDER BY created_at DESC
 	</select>
 
-	<select id="getMyReviewList" resultType="com.shop.domain.Review">
-		SELECT * FROM review
-		WHERE member_no = #{memberNo}
+	<select id="getOneReview" resultType="com.shop.domain.Review">
+		SELECT * FROM review WHERE
+		review_no = #{reviewNo}
+	</select>
+
+	<select id="getOneReviewByOrderItem"
+		resultType="com.shop.domain.Review">
+		SELECT
+		review_no as reviewNo,
+		order_item_no as orderItemNo
+		FROM review
+		WHERE order_item_no = #{orderItemNo}
 		AND delete_yn = 'N'
-		ORDER BY created_at DESC
 	</select>
 
 </mapper>

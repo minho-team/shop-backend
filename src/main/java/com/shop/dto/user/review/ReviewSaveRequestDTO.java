@@ -15,5 +15,11 @@ public class ReviewSaveRequestDTO {
     private String title;
     private String content;
     private int rating;
-    private MultipartFile uploadFile;
+    
+    private Integer userHeight;
+    private Integer userWeight;
+    private String sizeRating;
+    
+    private MultipartFile uploadFile; 
+    private String imageUrl;         
 }
