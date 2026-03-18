@@ -5,8 +5,19 @@ import lombok.Data;
 //상품 검색 DTO
 @Data
 public class AdminProductSearchDTO {
-    private String keyword;
+    
+	// 검색 키워드
+	private String keyword;
+    
+	// 카테고리 1차 검색 (성별)
+    private Long genderCategoryId;
+    // 카테고리 2차 검색 (대분류)
+    private Long mainCategoryId;
+    // 카테고리 3차 검색 (소분류)
     private Long categoryId;
+    // 실제 검색 기준으로 사용할 category_id
+    private Long searchCategoryId;
+    
     private String useYn;
     private String sameDayDeliveryYn;
     
