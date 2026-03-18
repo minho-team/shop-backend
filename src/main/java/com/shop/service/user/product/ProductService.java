@@ -3,6 +3,7 @@ package com.shop.service.user.product;
 import java.util.List;
 
 import com.shop.domain.Product;
+import com.shop.dto.user.product.HomeMainResponse;
 import com.shop.dto.user.product.ProductCreateRequest;
 import com.shop.dto.user.product.ProductDetailResponse;
 import com.shop.dto.user.product.ProductListResponse;
@@ -11,18 +12,24 @@ import com.shop.dto.user.product.ProductUpdateRequest;
 
 public interface ProductService {
 
-	public void insertProduct(ProductCreateRequest dto) throws Exception;
+    void insertProduct(ProductCreateRequest dto) throws Exception;
 
-	public List<Product> getAllProducts() throws Exception;
+    List<Product> getAllProducts() throws Exception;
 
-	public ProductDetailResponse getOneProduct(Long productNo) throws Exception;
+    ProductDetailResponse getOneProduct(Long productNo) throws Exception;
 
-	public void updateProducts(Long productNo, ProductUpdateRequest dto) throws Exception;
+    void updateProducts(Long productNo, ProductUpdateRequest dto) throws Exception;
 
-	public void deleteProduct(Long productNo) throws Exception;
+    void deleteProduct(Long productNo) throws Exception;
 
-	public List<ProductListResponse> getAllProductToMainPage() throws Exception;
+    List<ProductListResponse> getAllProductToMainPage() throws Exception;
 
-	public List<ProductListResponseDto> selectSearchProductList(Integer categoryId, String keyword) throws Exception;
+    List<ProductListResponseDto> selectSearchProductList(
+            Integer categoryId,
+            String keyword,
+            String sort,
+            Boolean discountOnly
+    ) throws Exception;
 
+    HomeMainResponse getHomeMainData() throws Exception;
 }

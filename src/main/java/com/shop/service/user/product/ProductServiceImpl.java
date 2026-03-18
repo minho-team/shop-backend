@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.shop.domain.Product;
 import com.shop.domain.ProductOption;
+import com.shop.dto.user.product.HomeMainResponse;
+import com.shop.dto.user.product.HomeProductCardDto;
 import com.shop.dto.user.product.ProductCreateRequest;
 import com.shop.dto.user.product.ProductDetailResponse;
 import com.shop.dto.user.product.ProductListResponse;
@@ -15,81 +17,106 @@ import com.shop.dto.user.product.ProductUpdateRequest;
 import com.shop.mapper.ProductMapper;
 import com.shop.mapper.ProductOptionMapper;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Service
-@Slf4j
 public class ProductServiceImpl implements ProductService {
-	@Autowired
-	private ProductMapper productMapper;
-	
-	@Autowired
-	private ProductOptionMapper productOptionMapper;
 
-	@Override
-	public void insertProduct(ProductCreateRequest dto) throws Exception {
-		productMapper.insertProduct(dto);
+    @Autowired
+    private ProductMapper productMapper;
 
-	}
+    @Autowired
+    private ProductOptionMapper productOptionMapper;
 
-	@Override
-	public void updateProducts(Long productNo, ProductUpdateRequest dto) {
-		try {
-			productMapper.updateProducts(productNo, dto);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public void insertProduct(ProductCreateRequest dto) throws Exception {
+        productMapper.insertProduct(dto);
+    }
 
-	@Override
-	public void deleteProduct(Long productNo) {
-		try {
-			productMapper.deleteProduct(productNo);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    @Override
+    public void updateProducts(Long productNo, ProductUpdateRequest dto) throws Exception {
+        productMapper.updateProducts(productNo, dto);
+    }
 
-	}
+    @Override
+    public void deleteProduct(Long productNo) throws Exception {
+        productMapper.deleteProduct(productNo);
+    }
 
-	@Override
-	public ProductDetailResponse getOneProduct(Long productNo) throws Exception {
-		Product product = productMapper.getOneProducts(productNo);
-		List<ProductOption> options = productOptionMapper.getOptionsByProductNo(productNo);
+    @Override
+    public ProductDetailResponse getOneProduct(Long productNo) throws Exception {
+        Product product = productMapper.getOneProducts(productNo);
+        List<ProductOption> options = productOptionMapper.getOptionsByProductNo(productNo);
 
-		ProductDetailResponse response = new ProductDetailResponse();
-		response.setProduct(product);
-		response.setOptions(options);
-		
-		return response;
-	}
-	@Override
-	public List<ProductListResponse> getAllProductToMainPage() throws Exception {
-		List<ProductListResponse> list = productMapper.getAllProductToMainPage();
+        ProductDetailResponse response = new ProductDetailResponse();
+        response.setProduct(product);
+        response.setOptions(options);
 
-		for (ProductListResponse dto : list) {
-			if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
-				dto.setImageUrl("/upload/" + dto.getImageUrl());
-			}
-		}
+        return response;
+    }
 
-		return list;
-	}
+    @Override
+    public List<ProductListResponse> getAllProductToMainPage() throws Exception {
+        List<ProductListResponse> list = productMapper.getAllProductToMainPage();
 
-	@Override
-	public List<Product> getAllProducts() throws Exception {
-		return productMapper.getAllProducts();
-	}
+        for (ProductListResponse dto : list) {
+            if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+                dto.setImageUrl("/upload/" + dto.getImageUrl());
+            }
+        }
 
-	@Override
-	public List<ProductListResponseDto> selectSearchProductList(Integer categoryId, String keyword) throws Exception {
-		List<ProductListResponseDto> list = productMapper.selectSearchProductList(categoryId, keyword);
-		for (ProductListResponseDto dto : list) {
-			if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
-				dto.setImageUrl("/upload/" + dto.getImageUrl());
-			}
-		}
-		return list;
+        return list;
+    }
+
+    @Override
+    public List<Product> getAllProducts() throws Exception {
+        return productMapper.getAllProducts();
+    }
+
+    @Override
+    public List<ProductListResponseDto> selectSearchProductList(
+            Integer categoryId,
+            String keyword,
+            String sort,
+            Boolean discountOnly
+    ) throws Exception {
+        List<ProductListResponseDto> list =
+                productMapper.selectSearchProductList(categoryId, keyword, sort, discountOnly);
+
+        for (ProductListResponseDto dto : list) {
+            if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+                dto.setImageUrl("/upload/" + dto.getImageUrl());
+            }
+        }
+
+        return list;
+    }
+
+    @Override
+    public HomeMainResponse getHomeMainData() throws Exception {
+        HomeMainResponse response = new HomeMainResponse();
+
+        List<HomeProductCardDto> newProducts = productMapper.selectHomeNewProducts();
+        List<HomeProductCardDto> bestProducts = productMapper.selectHomeBestProducts();
+        List<HomeProductCardDto> saleProducts = productMapper.selectHomeSaleProducts();
+        List<HomeProductCardDto> recommendProducts = productMapper.selectHomeRecommendProducts();
+
+        normalizeImagePath(newProducts);
+        normalizeImagePath(bestProducts);
+        normalizeImagePath(saleProducts);
+        normalizeImagePath(recommendProducts);
+
+        response.setNewProducts(newProducts);
+        response.setBestProducts(bestProducts);
+        response.setSaleProducts(saleProducts);
+        response.setRecommendProducts(recommendProducts);
+
+        return response;
+    }
+
+    private void normalizeImagePath(List<HomeProductCardDto> list) {
+        for (HomeProductCardDto dto : list) {
+            if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+                dto.setImageUrl("/upload/" + dto.getImageUrl());
+            }
+        }
     }
 }
