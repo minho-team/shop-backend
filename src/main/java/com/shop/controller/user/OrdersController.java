@@ -1,6 +1,5 @@
 package com.shop.controller.user;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -15,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.domain.Member;
-import com.shop.domain.OrderItem;
 import com.shop.domain.Orders;
 import com.shop.dto.user.order.OrderCreateRequestDTO;
 import com.shop.dto.user.order.OrderCreateResponseDTO;
+import com.shop.dto.user.order.OrderDetailResponseDTO;
 import com.shop.dto.user.order.OrderResponseDTO;
 import com.shop.service.user.member.MemberService;
 import com.shop.service.user.order.OrderItemService;
@@ -86,40 +85,37 @@ public class OrdersController {
 	@GetMapping("/{orderNo}")
 	public ResponseEntity<?> getOneOrder(@PathVariable Long orderNo, Authentication authentication) {
 		try {
-			// 1. 주문 상세 정보 조회 (기본 주문 정보)
-			Orders order = ordersService.getOneOrder(orderNo);
+			// 1. [수정] 서비스의 getOrderDetail을 호출하여 주문+상품 정보를 한 번에 가져옵니다.
+			// 이 안에 이미 order와 items가 다 들어있습니다.
+			OrderDetailResponseDTO detail = ordersService.getOrderDetail(orderNo);
 
-			if (order == null) {
+			if (detail == null || detail.getOrder() == null) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("주문 정보를 찾을 수 없습니다.");
 			}
 
-			// 2. 로그인한 사용자의 회원 정보 조회
+			// 2. 로그인 정보 및 권한 체크
 			String memberId = authentication.getName();
 			Member member = memberService.readOneMember(memberId);
 
-			// [보안 검증] 주문 데이터의 회원번호와 현재 로그인한 회원의 번호가 일치하는지 확인
-			if (!order.getMemberNo().equals(member.getMemberNo())) {
+			// 상세 정보 내의 order 객체에서 회원 번호를 확인합니다.
+			if (!detail.getOrder().getMemberNo().equals(member.getMemberNo())) {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).body("본인의 주문 내역만 조회할 수 있습니다.");
 			}
 
-			// 3. 주문 상품(OrderItem) 리스트 조회
-			// 서비스에 해당 메서드(readByOrderNo 등)가 구현되어 있어야 합니다.
-			List<OrderItem> items = orderItemService.readByOrderNo(orderNo);
-
-			// 4. Map을 사용하여 데이터 구조 재구성
+			// 3. 리액트가 기대하는 구조(Map)로 데이터 구성
 			Map<String, Object> resultMap = new java.util.HashMap<>();
-			resultMap.put("order", order); // 주문 마스터 정보
-			resultMap.put("items", items); // 주문 상품 상세 리스트 (추가)
+			resultMap.put("order", detail.getOrder());
+			resultMap.put("items", detail.getItems()); // 여기에 productNo, imageUrl이 꽉 차서 나갑니다!
 
-			// 가입 시 입력한 주문자 주소 정보 (Member 도메인 기준)
+			// 회원 주소 정보 추가
 			resultMap.put("ordererZipCode", member.getZipCode());
 			resultMap.put("ordererBasicAddress", member.getBasicAddress());
 			resultMap.put("ordererDetailAddress", member.getDetailAddress());
 
 			return ResponseEntity.ok(resultMap);
 		} catch (Exception e) {
-			log.error("주문 상세 조회 중 오류 발생: ", e);
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
+			log.error("주문 상세 조회 에러: ", e);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("에러 발생: " + e.getMessage());
 		}
 	}
 

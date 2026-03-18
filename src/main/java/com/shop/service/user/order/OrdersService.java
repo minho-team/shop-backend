@@ -6,10 +6,11 @@ import com.shop.domain.Orders;
 import com.shop.dto.user.order.OrderCreateRequestDTO;
 import com.shop.dto.user.order.OrderCreateResponseDTO;
 import com.shop.dto.user.order.OrderResponseDTO;
+import com.shop.dto.user.order.OrderDetailResponseDTO; 
 
 public interface OrdersService {
 
-	void createOrder(Orders orders) throws Exception;
+    void createOrder(Orders orders) throws Exception;
 
 	OrderCreateResponseDTO createOrder(OrderCreateRequestDTO request, Long memberNo) throws Exception;
 	 
@@ -17,6 +18,8 @@ public interface OrdersService {
 	
 	OrderResponseDTO getMyOrderList(Long memberNo, int page) throws Exception;
 
-	Orders getOneOrder(Long orderNo) throws Exception;
+    OrderDetailResponseDTO getOrderDetail(Long orderNo) throws Exception;
+    
+    Orders getOneOrder(Long orderNo);
 
 }

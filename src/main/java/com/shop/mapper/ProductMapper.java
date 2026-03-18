@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 import com.shop.domain.Product;
+import com.shop.dto.user.product.HomeProductCardDto;
 import com.shop.dto.user.product.ProductCreateRequest;
 import com.shop.dto.user.product.ProductListResponse;
 import com.shop.dto.user.product.ProductListResponseDto;
@@ -12,22 +13,29 @@ import com.shop.dto.user.product.ProductUpdateRequest;
 
 public interface ProductMapper {
 
-	public void insertProduct(ProductCreateRequest dto) throws Exception;
+    void insertProduct(ProductCreateRequest dto) throws Exception;
 
-	// 초기 이미지 넣는 용도
-	public void insertSeedProduct(Product product) throws Exception;
+    void insertSeedProduct(Product product) throws Exception;
 
-	public List<Product> getAllProducts() throws Exception;
+    List<Product> getAllProducts() throws Exception;
 
-	public Product getOneProducts(Long productNo) throws Exception;
+    Product getOneProducts(Long productNo) throws Exception;
 
-	public void updateProducts(Long productNo, ProductUpdateRequest dto) throws Exception;
+    void updateProducts(Long productNo, ProductUpdateRequest dto) throws Exception;
 
-	public void deleteProduct(Long productNo) throws Exception;
+    void deleteProduct(Long productNo) throws Exception;
 
-	// 메인 페이지에서 섬네일과 함께 product 내려주는 매퍼
-	public List<ProductListResponse> getAllProductToMainPage() throws Exception;
+    List<ProductListResponse> getAllProductToMainPage() throws Exception;
 
-	public List<ProductListResponseDto> selectSearchProductList(@Param("categoryId") Integer categoryId,
-			@Param("keyword") String keyword) throws Exception;
+    List<ProductListResponseDto> selectSearchProductList(
+            @Param("categoryId") Integer categoryId,
+            @Param("keyword") String keyword,
+            @Param("sort") String sort,
+            @Param("discountOnly") Boolean discountOnly
+    ) throws Exception;
+
+    List<HomeProductCardDto> selectHomeNewProducts() throws Exception;
+    List<HomeProductCardDto> selectHomeBestProducts() throws Exception;
+    List<HomeProductCardDto> selectHomeSaleProducts() throws Exception;
+    List<HomeProductCardDto> selectHomeRecommendProducts() throws Exception;
 }

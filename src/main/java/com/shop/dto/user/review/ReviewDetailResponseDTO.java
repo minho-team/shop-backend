@@ -15,6 +15,11 @@ public class ReviewDetailResponseDTO {
     private String title;
     private String content;
     private int rating;
+    
+    private Integer userHeight; 
+    private Integer userWeight; 
+    private String sizeRating;  
+    
     private String imageUrl;     
     private int likeCount;
     private Date createdAt;
