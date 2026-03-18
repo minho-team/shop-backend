@@ -4,46 +4,70 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.shop.domain.OrderItem;
 import com.shop.domain.Orders;
+import com.shop.dto.user.order.OrderDetailResponseDTO;
 import com.shop.dto.user.order.OrderResponseDTO;
 import com.shop.mapper.OrdersMapper;
 
 @Service
 public class OrdersServiceImpl implements OrdersService {
 
-	@Autowired
-	private OrdersMapper mapper;
+    @Autowired
+    private OrdersMapper mapper;
 
-	@Override
-	public void createOrder(Orders orders) {
-		mapper.createOrder(orders);
-	}
+    // 1. 주문 생성
+    @Override
+    @Transactional
+    public void createOrder(Orders orders) {
+        mapper.createOrder(orders);
+    }
 
-	// [신규] 마이페이지 전용 페이징 메서드
-	@Override
-	public OrderResponseDTO getMyOrderList(Long memberNo, int page) {
-	    int size = 10; 
-	    int startRow = (page - 1) * size + 1;
-	    int endRow = page * size;
+    // 2. 마이페이지 주문 목록 조회 (페이징 처리)
+    @Override
+    @Transactional(readOnly = true)
+    public OrderResponseDTO getMyOrderList(Long memberNo, int page) {
+        int size = 10;
+        int startRow = (page - 1) * size + 1;
+        int endRow = page * size;
+        
+        // 10개씩 끊어서 가져오기
+        List<com.shop.dto.user.order.OrderDTO> list = mapper.getMyOrderList(memberNo, startRow, endRow);
+        // 전체 주문 개수 가져오기
+        int totalCount = mapper.getTotalCount(memberNo);
+        
+        return new OrderResponseDTO(list, totalCount, page, size);
+    }
 
-	   
-	    List<com.shop.dto.user.order.OrderDTO> list = mapper.getMyOrderList(memberNo, startRow, endRow);
+    // 3. [상세조회 핵심] 주문 정보와 상품 상세 리스트를 DTO에 담아서 반환
+    @Override
+    @Transactional(readOnly = true)
+    public OrderDetailResponseDTO getOrderDetail(Long orderNo) throws Exception {
+        // 주문 마스터 정보 (Orders)
+        Orders order = mapper.getOneOrder(orderNo);
+        // 주문 상세 상품들 (List<OrderItem>)
+        List<OrderItem> items = mapper.getOrderItemList(orderNo); 
+        
+        return OrderDetailResponseDTO.builder()
+                .order(order)
+                .items(items)
+                .build();
+    }
 
-	    int totalCount = mapper.getTotalCount(memberNo);
+    // 4. 단건 조회 
+    @Override
+    @Transactional(readOnly = true)
+    public Orders getOneOrder(Long orderNo) {
+        return mapper.getOneOrder(orderNo);
+    }
 
-	    // DTO 생성자도 List<OrderDTO>를 받도록 되어있는지 확인이 필요합니다.
-	    return new OrderResponseDTO(list, totalCount, page, size);
-	}
-
-	@Override
-	public Orders getOneOrder(Long orderNo) {
-		return mapper.getOneOrder(orderNo);
-	}
-
-	// [유지] 기존 전체 조회 메서드 복구 (기존 기능 방해 금지)
-	@Override
-	public List<Orders> getAllOrders(Long memberNo) throws Exception {
-		return mapper.getAllOrders(memberNo);
-	}
+    // 5. [수정 완료] 전체 주문 내역 조회
+    @Override
+    @Transactional(readOnly = true)
+    public List<Orders> getAllOrders(Long memberNo) throws Exception {
+        // null 대신 매퍼 호출로 변경!
+        return mapper.getAllOrders(memberNo);
+    }
 }

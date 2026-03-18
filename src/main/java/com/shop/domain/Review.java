@@ -9,8 +9,8 @@ import lombok.AllArgsConstructor;
 
 @Getter
 @Setter
-@ToString          
-@NoArgsConstructor 
+@ToString           
+@NoArgsConstructor  
 @AllArgsConstructor
 public class Review {
     private int reviewNo;
@@ -20,6 +20,11 @@ public class Review {
     private String title;
     private String content;
     private int rating;
+        
+    private Integer userHeight;   
+    private Integer userWeight;  
+    private String sizeRating;  
+    
     private String imageUrl;
     private int likeCount;
     private Date createdAt; 

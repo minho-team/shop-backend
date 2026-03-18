@@ -1,12 +1,15 @@
 package com.shop.service.user.review;
 
+import java.io.File;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.shop.domain.Review;
-import com.shop.dto.user.review.ReviewSaveRequestDTO;
 import com.shop.mapper.ReviewMapper;
-import com.shop.util.CustomFileUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,28 +18,38 @@ import lombok.RequiredArgsConstructor;
 public class ReviewServiceImpl implements ReviewService {
 
 	private final ReviewMapper reviewMapper;
-    private final CustomFileUtil fileUtil; // 주입받기
 
-    @Override
-    @Transactional
-    public void registerReview(ReviewSaveRequestDTO dto) {
-        
-        // 1. CustomFileUtil을 사용하여 파일 저장 (C:/upload 폴더에 저장됨)
-        // 저장된 파일명(UUID_파일명.jpg)이 리턴됩니다.
-        String savedName = fileUtil.saveFile(dto.getUploadFile());
+	@Value("${upload.path}") // application.properties의 C:/upload 경로 사용
+	private String uploadPath;
 
-        // 2. VO 객체 생성 및 매핑
-        Review review = new Review();
-        review.setMemberNo(dto.getMemberNo());
-        review.setProductNo(dto.getProductNo());
-        review.setOrderItemNo(dto.getOrderItemNo());
-        review.setTitle(dto.getTitle());
-        review.setContent(dto.getContent());
-        review.setRating(dto.getRating());
-        
-        // 3. DB에는 파일명만 저장
-        review.setImageUrl(savedName);
+	@Override
+	public void registerReview(Review review, MultipartFile file) throws Exception {
 
-        reviewMapper.insertReview(review);
-    }
+		// 1. 파일이 있는 경우 파일 저장 로직 실행
+		if (file != null && !file.isEmpty()) {
+			String originalName = file.getOriginalFilename();
+			String uuid = UUID.randomUUID().toString();
+			String fileName = uuid + "_" + originalName;
+
+			File saveFile = new File(uploadPath, fileName);
+			file.transferTo(saveFile); // 물리적 파일 저장
+
+			review.setImageUrl(fileName); // DB에는 저장된 파일명(또는 경로) 기록
+		}
+
+		// 2. DB에 리뷰 정보 저장
+		reviewMapper.insertReview(review);
+	}
+
+	@Override
+	public List<Review> getReviewListByProduct(int productNo) {
+		return reviewMapper.getReviewListByProduct(productNo);
+	}
+
+	@Override
+	public boolean checkAlreadyReviewed(int orderItemNo) {
+		// order_item_no로 기존 리뷰를 조회하여 존재 여부 반환
+		Review existingReview = reviewMapper.getOneReviewByOrderItem(orderItemNo);
+		return existingReview != null;
+	}
 }
