@@ -8,5 +8,6 @@ public class ProductListResponse {
     private String name;
     private Long price;
     private Long salePrice;
+    private Integer discountRate;
     private String imageUrl;   // 썸네일 이미지
 }
