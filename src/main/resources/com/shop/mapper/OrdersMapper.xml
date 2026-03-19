@@ -48,19 +48,22 @@
 	<!-- 특정 회원 전체 주문 조회 -->
 	<select id="getAllOrders" resultType="com.shop.domain.Orders">
 		SELECT * FROM orders
-		WHERE member_no = #{memberNo}
+		WHERE
+		member_no = #{memberNo}
 		ORDER BY created_at DESC
 	</select>
 
 	<!-- 주문 단건 조회 -->
 	<select id="getOneOrder" resultType="com.shop.domain.Orders">
-		SELECT * FROM orders WHERE order_no = #{orderNo}
+		SELECT * FROM orders WHERE
+		order_no = #{orderNo}
 	</select>
 
 	<!-- 특정 회원 주문 전체 건수 -->
 
 	<select id="getTotalCount" resultType="int">
-		SELECT COUNT(*) FROM orders WHERE member_no = #{memberNo}
+		SELECT COUNT(*) FROM
+		orders WHERE member_no = #{memberNo}
 	</select>
 
 	<!-- 내 주문 페이징 조회 (마이페이지용) -->
@@ -90,15 +93,18 @@
 		SELECT *
 		FROM (
 		SELECT order_no AS orderNo,
-		member_no AS memberNo,
+		member_no AS
+		memberNo,
 		orderer_name AS ordererName,
 		order_status AS orderStatus,
 		total_price AS totalPrice,
 		created_at AS createdAt,
-		refund_status AS refundStatus
+		refund_status AS
+		refundStatus
 		FROM orders
 		WHERE member_no = #{memberNo}
-		ORDER BY created_at DESC
+		ORDER BY
+		created_at DESC
 		)
 		WHERE ROWNUM &lt;= 5
 	</select>
@@ -113,16 +119,19 @@
 		FROM (
 		SELECT a.*, ROWNUM AS rnum
 		FROM (
-		SELECT order_no AS orderNo,
+		SELECT
+		order_no AS orderNo,
 		member_no AS memberNo,
 		orderer_name AS ordererName,
 		order_status AS orderStatus,
 		total_price AS totalPrice,
-		created_at AS createdAt,
+		created_at AS
+		createdAt,
 		refund_status AS refundStatus,
 		receiver_name AS receiverName,
 		receiver_phone_number AS receiverPhoneNumber,
-		receiver_zip_code AS receiverZipCode,
+		receiver_zip_code AS
+		receiverZipCode,
 		receiver_base_address AS receiverBaseAddress,
 		receiver_detail_address AS receiverDetailAddress,
 		message
@@ -130,7 +139,8 @@
 		WHERE member_no = #{memberNo}
 		ORDER BY created_at DESC
 		) a
-		WHERE ROWNUM &lt;= #{endRow}
+		WHERE ROWNUM
+		&lt;= #{endRow}
 		)
 		WHERE rnum &gt; #{startRow}
 	</select>
@@ -139,21 +149,23 @@
 	<!-- 관리자 - 특정 회원 주문 전체 건수 (페이징 계산용) -->
 	<!-- ================================================ -->
 	<select id="countOrdersByMemberNo" resultType="int">
-		SELECT COUNT(*) FROM orders WHERE member_no = #{memberNo}
+		SELECT COUNT(*)
+		FROM orders WHERE member_no = #{memberNo}
 	</select>
 
 	<select id="getOrderItemList"
-		resultType="com.shop.domain.OrderItem">
+		resultType="com.shop.dto.user.order.OrderItemDTO">
 		SELECT
 		order_item_no,
 		order_no,
+		product_no,
 		product_option_no,
 		quantity,
 		unit_price,
 		item_name,
 		item_size,
-		item_color
-		FROM order_item
+		item_color,
+		image_url FROM order_item
 		WHERE order_no = #{orderNo}
 	</select>
 
