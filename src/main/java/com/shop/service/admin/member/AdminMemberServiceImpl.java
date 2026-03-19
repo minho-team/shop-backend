@@ -23,10 +23,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminMemberServiceImpl implements AdminMemberService {
 
-    private final MemberMapper    memberMapper;
-    private final OrdersMapper    ordersMapper;
-    private final InquiryMapper   inquiryMapper;
-    private final CartItemMapper  cartItemMapper;
+    private final MemberMapper   memberMapper;
+    private final OrdersMapper   ordersMapper;
+    private final InquiryMapper  inquiryMapper;
+    private final CartItemMapper cartItemMapper;
 
     // ================================================
     // 회원 목록 페이징 조회
@@ -66,6 +66,8 @@ public class AdminMemberServiceImpl implements AdminMemberService {
 
     // ================================================
     // 회원 정보 수정
+    // [수정] gender, birthday 세팅 추가
+    //        기존에 누락되어 수정해도 DB에 반영되지 않던 문제 해결
     // ================================================
     @Override
     public void updateMember(Long memberNo, AdminMemberUpdateRequest request) throws Exception {
@@ -75,6 +77,8 @@ public class AdminMemberServiceImpl implements AdminMemberService {
         member.setNickName(request.getNickName());
         member.setEmail(request.getEmail());
         member.setPhoneNumber(request.getPhoneNumber());
+        member.setGender(request.getGender());           // [추가]
+        member.setBirthday(request.getBirthday());       // [추가]
         member.setZipCode(request.getZipCode());
         member.setBasicAddress(request.getBasicAddress());
         member.setDetailAddress(request.getDetailAddress());
@@ -123,5 +127,4 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     public List<AdminCartItemDTO> getMemberCartItems(Long memberNo) throws Exception {
         return cartItemMapper.selectCartItemsWithProductByMemberNo(memberNo);
     }
-
 }

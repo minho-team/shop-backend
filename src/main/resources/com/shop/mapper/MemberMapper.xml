@@ -155,16 +155,21 @@
 		WHERE member_no = #{memberNo}
 	</update>
 
-	<!-- ================================================ -->
-	<!-- 관리자 - 회원 정보 수정                           -->
-	<!-- memberNo로 대상 특정, 수정 가능한 항목만 업데이트  -->
-	<!-- ================================================ -->
+	<!-- ================================================        -->
+	<!-- 관리자 - 회원 정보 수정                                  -->
+	<!-- memberNo로 대상 특정, 수정 가능한 항목만 업데이트         -->
+	<!-- [수정] gender, birthday 컬럼 추가                        -->
+	<!--        기존에 누락되어 수정 페이지에서 성별/생년월일이     -->
+	<!--        저장되지 않던 문제 해결                            -->
+	<!-- ================================================        -->
 	<update id="updateMember" parameterType="Member">
 		UPDATE member
 		SET name                = #{name},
 		    nick_name           = #{nickName},
 		    email               = #{email},
 		    phone_number        = #{phoneNumber},
+		    gender              = #{gender},
+		    birthday            = #{birthday},
 		    zip_code            = #{zipCode},
 		    basic_address       = #{basicAddress},
 		    detail_address      = #{detailAddress},

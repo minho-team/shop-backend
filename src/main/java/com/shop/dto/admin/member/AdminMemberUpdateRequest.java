@@ -1,42 +1,30 @@
 package com.shop.dto.admin.member;
 
+import java.time.LocalDate;
 import lombok.Data;
 
-// ================================================
-// 관리자 회원 정보 수정 요청 DTO
-// 관리자가 수정 가능한 항목만 포함
-// (아이디, 비밀번호, 가입일 등 핵심 보안 정보는 수정 불가)
-// ================================================
 @Data
 public class AdminMemberUpdateRequest {
 
-    // 이름
-    private String name;
+    // 기본 정보
+    private String    name;
+    private String    nickName;
+    private String    email;
+    private String    phoneNumber;
 
-    // 닉네임
-    private String nickName;
+    // [추가] 성별 (M / F / null)
+    private String    gender;
 
-    // 이메일
-    private String email;
+    // [추가] 생년월일 (프론트에서 "YYYY-MM-DD" 문자열로 전송 → LocalDate 자동 변환)
+    private LocalDate birthday;
 
-    // 전화번호
-    private String phoneNumber;
+    // 주소 정보
+    private String    zipCode;
+    private String    basicAddress;
+    private String    detailAddress;
 
-    // 우편번호
-    private String zipCode;
-
-    // 기본 주소
-    private String basicAddress;
-
-    // 상세 주소
-    private String detailAddress;
-
-    // 은행명
-    private String bankName;
-
-    // 계좌번호
-    private String bankCode;
-
-    // 예금주
-    private String accountHolderName;
+    // 계좌 정보
+    private String    bankName;
+    private String    bankCode;
+    private String    accountHolderName;
 }
