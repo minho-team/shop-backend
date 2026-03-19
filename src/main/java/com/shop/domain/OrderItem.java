@@ -6,12 +6,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class OrderItem {
-    private int orderItemNo;
-    private long orderNo;        
-    private long productOptionNo;
+    private Long orderItemNo;
+    private Long orderNo;        
+    private Long productOptionNo;
     private Integer productNo;   
-    private int quantity;
-    private int unitPrice;
+    private Integer quantity;
+    private Integer unitPrice;
     private String itemName;
     private String itemSize;
     private String itemColor;

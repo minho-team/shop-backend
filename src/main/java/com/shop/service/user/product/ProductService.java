@@ -16,6 +16,7 @@ public interface ProductService {
 
     List<Product> getAllProducts() throws Exception;
 
+    //상품의 정보와 상품옵션을 가져오는 함수
     ProductDetailResponse getOneProduct(Long productNo) throws Exception;
 
     void updateProducts(Long productNo, ProductUpdateRequest dto) throws Exception;

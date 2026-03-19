@@ -25,7 +25,7 @@ public class ProductImageController {
 	public ResponseEntity<?> getProductMainAndThumbImages(@PathVariable Long productNo) {
 		try {
 
-			log.info("컨트롤러로 넘어온 productNo:" + productNo);
+			log.info("product ImageController로 넘어온 productNo:" + productNo);
 			ProductImageListDTO result = productImageService.getProductMainAndThumbImages(productNo);
 
 			if (result.getImages() == null || result.getImages().isEmpty()) {

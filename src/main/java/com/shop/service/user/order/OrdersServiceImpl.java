@@ -18,79 +18,94 @@ import com.shop.mapper.OrderItemMapper;
 import com.shop.mapper.OrdersMapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrdersServiceImpl implements OrdersService {
 
-    private final OrdersMapper mapper;
-    private final OrderItemMapper orderItemMapper;
+	private final OrdersMapper mapper;
+	private final OrderItemMapper orderItemMapper;
 
-    @Override
-    @Transactional
-    public OrderCreateResponseDTO createOrder(OrderCreateRequestDTO request, Long memberNo) throws Exception {
-        if (request.getItems() == null || request.getItems().isEmpty()) {
-            throw new IllegalArgumentException("주문 상품이 없습니다.");
-        }
+	// 주문서 작성 페이지에서 결제하기 버튼을 누르면 작동되는 함수
+	@Override
+	@Transactional
+	public OrderCreateResponseDTO createOrder(OrderCreateRequestDTO request, Long memberNo) throws Exception {
+		if (request.getItems() == null || request.getItems().isEmpty()) {
+			throw new IllegalArgumentException("주문 상품이 없습니다.");
+		}
 
-        Orders orders = new Orders();
-        orders.setMemberNo(memberNo);
-        orders.setOrdererName(request.getOrdererName());
-        orders.setOrdererPhoneNumber(request.getOrdererPhoneNumber());
-        orders.setOrdererEmail(request.getOrdererEmail());
-        orders.setTotalPrice(request.getTotalPrice());
-        orders.setReceiverName(request.getReceiverName());
-        orders.setReceiverPhoneNumber(request.getReceiverPhoneNumber());
-        orders.setReceiverZipCode(request.getReceiverZipCode());
-        orders.setReceiverBaseAddress(request.getReceiverBaseAddress());
-        orders.setReceiverDetailAddress(request.getReceiverDetailAddress());
-        orders.setMessage(request.getMessage());
+		Orders orders = new Orders();
+		orders.setMemberNo(memberNo);
+		orders.setOrdererName(request.getOrdererName());
+		orders.setOrdererPhoneNumber(request.getOrdererPhoneNumber());
+		orders.setOrdererEmail(request.getOrdererEmail());
+		orders.setTotalPrice(request.getTotalPrice());
+		orders.setReceiverName(request.getReceiverName());
+		orders.setReceiverPhoneNumber(request.getReceiverPhoneNumber());
+		orders.setReceiverZipCode(request.getReceiverZipCode());
+		orders.setReceiverBaseAddress(request.getReceiverBaseAddress());
+		orders.setReceiverDetailAddress(request.getReceiverDetailAddress());
+		orders.setMessage(request.getMessage());
 
-        mapper.createOrder(orders);
+		mapper.createOrder(orders);
 
-        for (OrderItemCreateRequestDTO itemRequest : request.getItems()) {
-            OrderItem orderItem = new OrderItem();
-                        
-            if (orders.getOrderNo() != null) {
-                orderItem.setOrderNo(orders.getOrderNo().intValue());
-            }
-                        
-            if (itemRequest.getProductOptionNo() != null) {
-                orderItem.setProductOptionNo(itemRequest.getProductOptionNo().intValue());
-            }
+		for (OrderItemCreateRequestDTO itemRequest : request.getItems()) {
+			OrderItem orderItem = new OrderItem();
 
-            orderItem.setQuantity(itemRequest.getQuantity());
-            orderItem.setUnitPrice(itemRequest.getUnitPrice());
-            orderItem.setItemName(itemRequest.getItemName());
-            orderItem.setItemSize(itemRequest.getItemSize());
-            orderItem.setItemColor(itemRequest.getItemColor());
+			if (orders.getOrderNo() != null) {
+				log.info("(OrdersServiceImpl) getOrderNo가 null이 아니면");
+				orderItem.setOrderNo(orders.getOrderNo());
+			}
 
-            orderItemMapper.insertOrderItem(orderItem);
-        }
+			if (itemRequest.getProductOptionNo() != null) {
+				orderItem.setProductOptionNo(itemRequest.getProductOptionNo());
+			}
 
-        return new OrderCreateResponseDTO(orders.getOrderNo(), new Date(), orders.getTotalPrice());
-    }
+			orderItem.setQuantity(itemRequest.getQuantity());
+			orderItem.setUnitPrice(itemRequest.getUnitPrice());
+			orderItem.setItemName(itemRequest.getItemName());
+			orderItem.setItemSize(itemRequest.getItemSize());
+			orderItem.setItemColor(itemRequest.getItemColor());
 
-    @Override
-    @Transactional(readOnly = true)
-    public OrderResponseDTO getMyOrderList(Long memberNo, int page) {
-        int size = 10;
-        int startRow = (page - 1) * size + 1;
-        int endRow = page * size;
-        List<OrderDTO> list = mapper.getMyOrderList(memberNo, startRow, endRow);
-        int totalCount = mapper.getTotalCount(memberNo);
-        return new OrderResponseDTO(list, totalCount, page, size);
-    }
+			orderItemMapper.insertOrderItem(orderItem);
+		}
 
-    @Override
-    @Transactional(readOnly = true)
-    public OrderDetailResponseDTO getOrderDetail(Long orderNo) throws Exception {
-        Orders order = mapper.getOneOrder(orderNo);
-        List<OrderItem> items = mapper.getOrderItemList(orderNo); 
-        return OrderDetailResponseDTO.builder().order(order).items(items).build();
-    }
+		return new OrderCreateResponseDTO(orders.getOrderNo(), new Date(), orders.getTotalPrice());
+	}
 
-    @Override public void createOrder(Orders orders) { mapper.createOrder(orders); }
-    @Override public Orders getOneOrder(Long orderNo) { return mapper.getOneOrder(orderNo); }
-    @Override public List<Orders> getAllOrders(Long memberNo) { return mapper.getAllOrders(memberNo); }
+	@Override
+	@Transactional(readOnly = true)
+	public OrderResponseDTO getMyOrderList(Long memberNo, int page) {
+		int size = 10;
+		int startRow = (page - 1) * size + 1;
+		int endRow = page * size;
+		List<OrderDTO> list = mapper.getMyOrderList(memberNo, startRow, endRow);
+		int totalCount = mapper.getTotalCount(memberNo);
+		return new OrderResponseDTO(list, totalCount, page, size);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public OrderDetailResponseDTO getOrderDetail(Long orderNo) throws Exception {
+		Orders order = mapper.getOneOrder(orderNo);
+		List<OrderItem> items = mapper.getOrderItemList(orderNo);
+		return OrderDetailResponseDTO.builder().order(order).items(items).build();
+	}
+
+	@Override
+	public void createOrder(Orders orders) {
+		mapper.createOrder(orders);
+	}
+
+	@Override
+	public Orders getOneOrder(Long orderNo) {
+		return mapper.getOneOrder(orderNo);
+	}
+
+	@Override
+	public List<Orders> getAllOrders(Long memberNo) {
+		return mapper.getAllOrders(memberNo);
+	}
 }

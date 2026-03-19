@@ -49,6 +49,8 @@ public class ProductServiceImpl implements ProductService {
         productMapper.deleteProduct(productNo);
     }
 
+    
+    //상품 상세페이지에서 상품의 정보(product)와 상품 옵션(product_option)을 가져옴 
     @Override
     public ProductDetailResponse getOneProduct(Long productNo) throws Exception {
         Product product = productMapper.getOneProducts(productNo);
