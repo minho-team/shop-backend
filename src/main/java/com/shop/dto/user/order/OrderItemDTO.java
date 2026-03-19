@@ -1,15 +1,15 @@
-package com.shop.domain;
+package com.shop.dto.user.order;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class OrderItem {
+public class OrderItemDTO {
     private int orderItemNo;
-    private long orderNo;        
-    private long productOptionNo;
-    private Integer productNo;   
+    private long orderNo;
+    private Integer productNo;  
+    private Long productOptionNo; 
     private int quantity;
     private int unitPrice;
     private String itemName;

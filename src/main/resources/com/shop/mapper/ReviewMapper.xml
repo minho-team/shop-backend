@@ -12,8 +12,10 @@
 		title,
 		content,
 		rating,
-		user_height, user_weight,
-		size_rating, image_url
+		user_height,
+		user_weight,
+		size_rating,
+		image_url
 		) VALUES (
 		seq_review.NEXTVAL,
 		#{memberNo},
@@ -22,30 +24,31 @@
 		#{title},
 		#{content},
 		#{rating},
-		#{userHeight}, #{userWeight}, #{sizeRating}, #{imageUrl}
+		#{userHeight},
+		#{userWeight},
+		#{sizeRating},
+		#{imageUrl}
 		)
 	</insert>
 
 	<select id="getReviewListByProduct"
 		resultType="com.shop.domain.Review">
 		SELECT
-		review_no,
-		member_no,
-		product_no,
-		order_item_no,
+		review_no AS reviewNo,
+		member_no AS memberNo,
+		product_no AS productNo,
+		order_item_no AS orderItemNo,
 		title,
 		content,
 		rating,
-		user_height as userHeight,
-		user_weight as userWeight,
-		size_rating as sizeRating,
-		image_url as imageUrl,
-		like_count as
-		likeCount,
-		created_at as createdAt,
-		updated_at as updatedAt,
-		delete_yn as
-		deleteYn
+		user_height AS userHeight,
+		user_weight AS userWeight,
+		size_rating AS sizeRating,
+		image_url AS imageUrl,
+		like_count AS likeCount,
+		created_at AS createdAt,
+		updated_at AS updatedAt,
+		delete_yn AS deleteYn
 		FROM review
 		WHERE product_no = #{productNo}
 		AND delete_yn = 'N'
@@ -53,15 +56,32 @@
 	</select>
 
 	<select id="getOneReview" resultType="com.shop.domain.Review">
-		SELECT * FROM review WHERE
-		review_no = #{reviewNo}
+		SELECT
+		review_no AS reviewNo,
+		member_no AS memberNo,
+		product_no AS productNo,
+		order_item_no AS orderItemNo,
+		title,
+		content,
+		rating,
+		user_height AS userHeight,
+		user_weight AS userWeight,
+		size_rating AS sizeRating,
+		image_url AS imageUrl,
+		like_count AS likeCount,
+		created_at AS createdAt,
+		updated_at AS updatedAt,
+		delete_yn AS deleteYn
+		FROM review
+		WHERE review_no = #{reviewNo}
 	</select>
 
 	<select id="getOneReviewByOrderItem"
 		resultType="com.shop.domain.Review">
 		SELECT
-		review_no as reviewNo,
-		order_item_no as orderItemNo
+		review_no AS reviewNo,
+		order_item_no AS orderItemNo,
+		product_no AS productNo
 		FROM review
 		WHERE order_item_no = #{orderItemNo}
 		AND delete_yn = 'N'
