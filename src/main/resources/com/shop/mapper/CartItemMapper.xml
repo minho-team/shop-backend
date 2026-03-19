@@ -2,66 +2,130 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.shop.mapper.CartItemMapper">
 
-    <!-- 장바구니 아이템 추가 -->
-    <insert id="addCartItem">
-        INSERT INTO cart_item(cart_item_no, cart_no, product_option_no, quantity)
-        VALUES (seq_cart_item.nextval, #{cartNo}, #{productOptionNo}, #{quantity})
-    </insert>
+	<!-- 장바구니 아이템 추가 -->
+	<insert id="addCartItem">
+		INSERT INTO cart_item(cart_item_no, cart_no,
+		product_option_no, quantity)
+		VALUES (seq_cart_item.nextval, #{cartNo},
+		#{productOptionNo},
+		#{quantity})
+	</insert>
 
-    <!-- 장바구니 아이템 단건 삭제 -->
-    <delete id="deleteCartItem">
-        DELETE FROM cart_item WHERE cart_item_no = #{cartItemNo}
-    </delete>
+	<!-- 장바구니 아이템 단건 삭제 -->
+	<delete id="deleteCartItem" parameterType="long">
+		DELETE FROM cart_item
+		WHERE cart_item_no = #{cartItemNo}
+	</delete>
 
-    <!-- 장바구니 아이템 전체 삭제 -->
-    <delete id="deleteAllCartItem">
-        DELETE FROM cart_item
-    </delete>
+	<!-- 장바구니 아이템 전체 삭제 -->
+	<delete id="deleteAllCartItem" parameterType="long">
+		DELETE FROM
+		cart_item
+		WHERE cart_no = #{cartNo}
+	</delete>
 
-    <!-- 장바구니 아이템 수량 수정 -->
-    <update id="updateCartItem">
-        UPDATE cart_item SET quantity = #{quantity}
-        WHERE cart_item_no = #{cartItemNo}
-    </update>
+	<!-- 장바구니 아이템 수량 수정 -->
+	<update id="updateCartItem">
+		UPDATE cart_item SET quantity = #{quantity}
+		WHERE
+		cart_item_no = #{cartItemNo}
+	</update>
 
-    <!-- 전체 장바구니 아이템 조회 -->
-    <select id="readAllCartItem">
-        SELECT * FROM cart_item
-    </select>
+	<!-- 전체 장바구니 아이템 조회 -->
+	<select id="readAllCartItem"
+		resultType="com.shop.domain.CartItem">
+		SELECT cart_item_no,
+		cart_no,
+		product_option_no,
+		quantity,
+		created_at
+		FROM cart_item
+	</select>
 
-    <!-- ================================================ -->
-    <!-- 관리자 - 특정 회원 장바구니 담긴 상품 종류 수     -->
-    <!-- cart → cart_item JOIN으로 memberNo 기준 카운트    -->
-    <!-- ================================================ -->
-    <select id="countCartItemByMemberNo" parameterType="long" resultType="int">
-        SELECT COUNT(ci.cart_item_no)
-        FROM cart c
-        JOIN cart_item ci ON c.cart_no = ci.cart_no
-        WHERE c.member_no = #{memberNo}
-    </select>
+	<!-- 회원 번호로 장바구니 아이템 조회 -->
+	<select id="readCartItemByMemberNo" parameterType="long"
+		resultType="com.shop.dto.user.cart.CartItemResponseDTO">
+		SELECT
+		ci.cart_item_no AS cartItemNo,
+		ci.cart_no AS cartNo,
+		ci.product_option_no AS productOptionNo,
+		ci.quantity AS quantity,
+		ci.created_at AS createdAt,
+		p.name AS productName,
+		po.color AS color,
+		po.option_size AS sizeName,
+		p.price AS price,
+		pi.image_url AS imageUrl
+		FROM cart_item ci
+		JOIN cart c
+		ON ci.cart_no = c.cart_no
+		JOIN product_option po
+		ON ci.product_option_no = po.product_option_no
+		JOIN product p
+		ON po.product_no = p.product_no
+		LEFT JOIN product_img pi
+		ON p.product_no = pi.product_no
+		AND pi.image_type =
+		'THUMB'
+		AND pi.sort_order = 1
+		WHERE c.member_no = #{memberNo}
+		ORDER BY ci.cart_item_no DESC
+	</select>
 
-    <!-- ================================================ -->
-    <!-- 관리자 - 특정 회원 장바구니 상품 목록 상세 조회   -->
-    <!-- cart → cart_item → product_option → product JOIN  -->
-    <!-- 상품명, 옵션(사이즈/색상), 수량, 가격 함께 조회   -->
-    <!-- ================================================ -->
-    <select id="selectCartItemsWithProductByMemberNo"
-            parameterType="long"
-            resultType="com.shop.dto.admin.member.AdminCartItemDTO">
-        SELECT ci.cart_item_no   AS cartItemNo,
-               p.product_no     AS productNo,
-               p.name           AS productName,
-               po.option_size   AS optionSize,
-               po.color         AS color,
-               ci.quantity      AS quantity,
-               p.price          AS price,
-               p.discount_rate     AS discountRate
-        FROM cart c
-        JOIN cart_item ci       ON c.cart_no          = ci.cart_no
-        JOIN product_option po  ON ci.product_option_no = po.product_option_no
-        JOIN product p          ON po.product_no       = p.product_no
-        WHERE c.member_no = #{memberNo}
-        ORDER BY ci.cart_item_no DESC
-    </select>
+	<!-- 장바구니에 같은 옵션 상품이 이미 있는지 조회 -->
+	<select id="findByCartNoAndProductOptionNo"
+		parameterType="com.shop.domain.CartItem"
+		resultType="com.shop.domain.CartItem">
+		SELECT cart_item_no,
+		cart_no,
+		product_option_no,
+		quantity,
+		created_at
+		FROM cart_item
+		WHERE cart_no = #{cartNo}
+		AND product_option_no
+		= #{productOptionNo}
+	</select>
+
+	<!-- ================================================ -->
+	<!-- 관리자 - 특정 회원 장바구니 담긴 상품 종류 수 -->
+	<!-- cart → cart_item JOIN으로 memberNo 기준 카운트 -->
+	<!-- ================================================ -->
+	<select id="countCartItemByMemberNo" parameterType="long"
+		resultType="int">
+		SELECT COUNT(ci.cart_item_no)
+		FROM cart c
+		JOIN cart_item ci
+		ON c.cart_no = ci.cart_no
+		WHERE c.member_no = #{memberNo}
+	</select>
+
+	<!-- ================================================ -->
+	<!-- 관리자 - 특정 회원 장바구니 상품 목록 상세 조회 -->
+	<!-- cart → cart_item → product_option → product JOIN -->
+	<!-- 상품명, 옵션(사이즈/색상), 수량, 가격 함께 조회 -->
+	<!-- ================================================ -->
+	<select id="selectCartItemsWithProductByMemberNo"
+		parameterType="long"
+		resultType="com.shop.dto.admin.member.AdminCartItemDTO">
+		SELECT ci.cart_item_no AS cartItemNo,
+		p.product_no AS
+		productNo,
+		p.name AS productName,
+		po.option_size AS optionSize,
+		po.color
+		AS color,
+		ci.quantity AS quantity,
+		p.price AS price,
+		p.discount_rate AS
+		discountRate
+		FROM cart c
+		JOIN cart_item ci ON c.cart_no = ci.cart_no
+		JOIN product_option po ON ci.product_option_no = po.product_option_no
+		JOIN product p ON po.product_no = p.product_no
+		WHERE c.member_no =
+		#{memberNo}
+		ORDER BY ci.cart_item_no DESC
+	</select>
 
 </mapper>
