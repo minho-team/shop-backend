@@ -1,6 +1,9 @@
 package com.shop.service.user.product;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,11 @@ import com.shop.mapper.ProductOptionMapper;
 
 @Service
 public class ProductServiceImpl implements ProductService {
+
+    private static final List<String> SPRING_SALE_KEYWORDS = Arrays.asList(
+            "가디건", "니트", "스웨트셔츠", "셔츠", "긴팔", "긴바지"
+    );
+    private static final int SPRING_SALE_RATE = 10;
 
     @Autowired
     private ProductMapper productMapper;
@@ -44,6 +52,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDetailResponse getOneProduct(Long productNo) throws Exception {
         Product product = productMapper.getOneProducts(productNo);
+        applySeasonalDiscount(product);
         List<ProductOption> options = productOptionMapper.getOptionsByProductNo(productNo);
 
         ProductDetailResponse response = new ProductDetailResponse();
@@ -58,6 +67,12 @@ public class ProductServiceImpl implements ProductService {
         List<ProductListResponse> list = productMapper.getAllProductToMainPage();
 
         for (ProductListResponse dto : list) {
+            applySeasonalDiscount(dto);
+
+            if (dto.getPrice() != null) {
+                dto.setSalePrice(calculateSalePrice(dto.getPrice(), dto.getDiscountRate()));
+            }
+
             if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
                 dto.setImageUrl("/upload/" + dto.getImageUrl());
             }
@@ -79,12 +94,25 @@ public class ProductServiceImpl implements ProductService {
             Boolean discountOnly
     ) throws Exception {
         List<ProductListResponseDto> list =
-                productMapper.selectSearchProductList(categoryId, keyword, sort, discountOnly);
+                productMapper.selectSearchProductList(categoryId, keyword, sort, false);
 
         for (ProductListResponseDto dto : list) {
+            applySeasonalDiscount(dto);
+
             if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
                 dto.setImageUrl("/upload/" + dto.getImageUrl());
             }
+        }
+
+        if (Boolean.TRUE.equals(discountOnly)) {
+            list = list.stream()
+                    .filter(dto -> dto.getDiscountRate() != null && dto.getDiscountRate() > 0)
+                    .collect(Collectors.toList());
+        }
+
+        if ("sale".equals(sort)) {
+            list.sort(Comparator.comparing(ProductListResponseDto::getDiscountRate,
+                    Comparator.nullsLast(Comparator.reverseOrder())));
         }
 
         return list;
@@ -96,8 +124,18 @@ public class ProductServiceImpl implements ProductService {
 
         List<HomeProductCardDto> newProducts = productMapper.selectHomeNewProducts();
         List<HomeProductCardDto> bestProducts = productMapper.selectHomeBestProducts();
-        List<HomeProductCardDto> saleProducts = productMapper.selectHomeSaleProducts();
         List<HomeProductCardDto> recommendProducts = productMapper.selectHomeRecommendProducts();
+
+        newProducts.forEach(this::applySeasonalDiscount);
+        bestProducts.forEach(this::applySeasonalDiscount);
+        recommendProducts.forEach(this::applySeasonalDiscount);
+
+        List<HomeProductCardDto> saleProducts = productMapper.selectSearchProductList(null, null, "new", false).stream()
+                .peek(this::applySeasonalDiscount)
+                .filter(dto -> dto.getDiscountRate() != null && dto.getDiscountRate() > 0)
+                .limit(8)
+                .map(this::toHomeProductCardDto)
+                .collect(Collectors.toList());
 
         normalizeImagePath(newProducts);
         normalizeImagePath(bestProducts);
@@ -118,5 +156,70 @@ public class ProductServiceImpl implements ProductService {
                 dto.setImageUrl("/upload/" + dto.getImageUrl());
             }
         }
+    }
+
+    private void applySeasonalDiscount(Product product) {
+        if (product == null) {
+            return;
+        }
+        product.setDiscountRate(resolveSeasonalDiscountRate(product.getName()));
+    }
+
+    private void applySeasonalDiscount(ProductListResponse product) {
+        if (product == null) {
+            return;
+        }
+        int discountRate = resolveSeasonalDiscountRate(product.getName());
+        product.setDiscountRate(discountRate);
+
+        if (product.getPrice() != null) {
+            product.setSalePrice(calculateSalePrice(product.getPrice(), discountRate));
+        }
+    }
+
+    private void applySeasonalDiscount(ProductListResponseDto product) {
+        if (product == null) {
+            return;
+        }
+        product.setDiscountRate(resolveSeasonalDiscountRate(product.getName()));
+    }
+
+    private void applySeasonalDiscount(HomeProductCardDto product) {
+        if (product == null) {
+            return;
+        }
+        product.setDiscountRate(resolveSeasonalDiscountRate(product.getName()));
+    }
+
+    private HomeProductCardDto toHomeProductCardDto(ProductListResponseDto product) {
+        HomeProductCardDto dto = new HomeProductCardDto();
+        dto.setProductNo(product.getProductNo());
+        dto.setName(product.getName());
+        dto.setPrice(product.getPrice());
+        dto.setDiscountRate(product.getDiscountRate());
+        dto.setImageUrl(product.getImageUrl());
+        dto.setSameDayDeliveryYn(product.getSameDayDeliveryYn());
+        return dto;
+    }
+
+    private int resolveSeasonalDiscountRate(String productName) {
+        if (productName == null || productName.isBlank()) {
+            return 0;
+        }
+
+        return SPRING_SALE_KEYWORDS.stream()
+                .anyMatch(productName::contains)
+                ? SPRING_SALE_RATE
+                : 0;
+    }
+
+    private Long calculateSalePrice(Long price, Integer discountRate) {
+        if (price == null) {
+            return null;
+        }
+        if (discountRate == null || discountRate <= 0) {
+            return price;
+        }
+        return price * (100 - discountRate) / 100;
     }
 }
