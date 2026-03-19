@@ -2,37 +2,51 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.shop.mapper.CartMapper">
 
-    <insert id="createCart" parameterType="Cart">
-    	<selectKey keyProperty="cartNo" resultType="long" order="BEFORE">
-    		SELECT seq_cart.NEXTVAL FROM dual
-    	</selectKey>
-        INSERT INTO cart(cart_no, member_no) VALUES(#{cartNo}, #{memberNo})
-    </insert>
+	<insert id="createCart" parameterType="com.shop.domain.Cart">
+		<selectKey keyProperty="cartNo" resultType="long"
+			order="BEFORE">
+			SELECT seq_cart.NEXTVAL FROM dual
+		</selectKey>
+		INSERT INTO cart (cart_no, member_no)
+		VALUES (#{cartNo}, #{memberNo})
+	</insert>
 
-    <update id="updateCart" parameterType="com.shop.domain.Cart">
-        UPDATE cart SET member_no = #{memberNo} WHERE cart_no = #{cartNo}
-    </update>
+	<update id="updateCart" parameterType="com.shop.domain.Cart">
+		UPDATE cart
+		SET member_no = #{memberNo}
+		WHERE cart_no = #{cartNo}
+	</update>
 
-    <delete id="deleteCart" parameterType="long">
-        DELETE FROM cart WHERE cart_no = #{cartNo}
-    </delete>
+	<delete id="deleteCart" parameterType="long">
+		DELETE FROM cart
+		WHERE cart_no = #{cartNo}
+	</delete>
 
-    <select id="readCart" parameterType="long" resultType="com.shop.domain.Cart">
-        SELECT * FROM cart WHERE cart_no = #{cartNo}
-    </select>
-    
-    <select id="readCartByMemberNo" parameterType="long" resultType="com.shop.domain.Cart">
-        SELECT * FROM cart WHERE member_no = #{memberNo}
-    </select>
+	<select id="readCart" parameterType="long"
+		resultType="com.shop.domain.Cart">
+		SELECT cart_no, member_no, created_at
+		FROM cart
+		WHERE cart_no = #{cartNo}
+	</select>
 
-    <select id="readAllCart" resultType="com.shop.domain.Cart">
-        SELECT * FROM cart
-    </select>
+	<select id="readCartByMemberNo" parameterType="long"
+		resultType="com.shop.domain.Cart">
+		SELECT cart_no, member_no, created_at
+		FROM cart
+		WHERE member_no = #{memberNo}
+	</select>
 
-    <select id="readOneMemberByCartNo" parameterType="long" resultType="com.shop.domain.Member">
-        SELECT m.* FROM member m
-        JOIN cart c ON m.member_no = c.member_no
-        WHERE c.cart_no = #{cartNo}
-    </select>
+	<select id="readAllCart" resultType="com.shop.domain.Cart">
+		SELECT cart_no, member_no, created_at
+		FROM cart
+	</select>
+
+	<select id="readOneMemberByCartNo" parameterType="long"
+		resultType="com.shop.domain.Member">
+		SELECT m.*
+		FROM member m
+		JOIN cart c ON m.member_no = c.member_no
+		WHERE c.cart_no = #{cartNo}
+	</select>
 
 </mapper>

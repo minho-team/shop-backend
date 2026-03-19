@@ -8,7 +8,7 @@ import com.shop.dto.user.cart.CartItemAddRequest;
 
 public interface CartService {
 
-    void createCart(Long memberNo, CartItemAddRequest dto) throws Exception;
+    void createCart(Long memberNo) throws Exception;
 
     void updateCart(Cart cart) throws Exception;
 
