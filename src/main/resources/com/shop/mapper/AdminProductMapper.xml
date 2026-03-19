@@ -53,7 +53,8 @@
 			<if test="keyword != null and keyword != ''">
 				AND p.name LIKE '%' || #{keyword} || '%'
 			</if>
-
+			
+			<!-- searchCategoryId 기준으로 하위 카테고리 전체 포함 검색 -->
 			<if test="searchCategoryId != null">
 				AND p.category_id IN (
 	        			SELECT category_id
@@ -91,6 +92,7 @@
 				AND p.name LIKE '%' || #{keyword} || '%'
 			</if>
 
+			<!-- searchCategoryId 기준으로 하위 카테고리 전체 포함 검색 -->
 			<if test="searchCategoryId != null">
 				AND p.category_id IN (
 	        			SELECT category_id
@@ -116,58 +118,53 @@
 		resultType="com.shop.dto.admin.product.AdminProductDetailDTO">
 
 		SELECT
-		p.product_no,
-		p.name,
-		p.price,
-		p.discount_rate,
-		TRUNC((p.price - (p.price * p.discount_rate / 100)) / 100) * 100 AS
-		sale_price,
-		p.category_id,
-		p.description,
-		p.use_yn,
-		p.same_day_delivery_yn,
-		p.view_count,
-		p.created_at,
-		p.updated_at
-		FROM
-		product p
+			p.product_no,
+			p.name,
+			p.price,
+			p.discount_rate,
+			TRUNC((p.price - (p.price * p.discount_rate / 100)) / 100) * 100 AS
+			sale_price,
+			p.category_id,
+			p.description,
+			p.use_yn,
+			p.same_day_delivery_yn,
+			p.view_count,
+			p.created_at,
+			p.updated_at
+		FROM product p
 		WHERE p.product_no = #{productNo}
 
 	</select>
 
-	<!-- ========================= 관리자 상품 이미지 목록 조회 ========================== -->
+	<!-- ========================= 상품 이미지 목록 조회 ========================== -->
 	<select id="getProductImages" parameterType="long"
 		resultType="com.shop.dto.admin.product.AdminProductImageDTO">
 
 		SELECT
-		product_img_no,
-		product_no,
-		image_url,
-		image_type,
-		sort_order
+			product_img_no,
+			product_no,
+			image_url,
+			image_type,
+			sort_order
 		FROM product_img
 		WHERE product_no = #{productNo}
-		ORDER BY
-		sort_order ASC, product_img_no ASC
-
+		ORDER BY sort_order ASC, product_img_no ASC
 	</select>
 
-	<!-- ========================= 관리자 상품 옵션 목록 조회 ========================== -->
+	<!-- ========================= 상품 옵션 목록 조회 ========================== -->
 	<select id="getProductOptions" parameterType="long"
 		resultType="com.shop.dto.admin.product.AdminProductOptionDTO">
 
 		SELECT
-		product_option_no,
-		product_no,
-		option_size,
-		color,
-		stock,
-		use_yn
+			product_option_no,
+			product_no,
+			option_size,
+			color,
+			stock,
+			use_yn
 		FROM product_option
 		WHERE product_no = #{productNo}
-		ORDER BY
-		product_option_no ASC
-
+		ORDER BY product_option_no ASC
 	</select>
 
 	<!-- 상품 등록 -->
@@ -180,48 +177,48 @@
 		</selectKey>
 
 		INSERT INTO product (
-		product_no,
-		name,
-		price,
-		discount_rate,
-		category_id,
-		description,
-		use_yn,
-		created_at,
-		updated_at,
-		view_count,
-		same_day_delivery_yn
+			product_no,
+			name,
+			price,
+			discount_rate,
+			category_id,
+			description,
+			use_yn,
+			created_at,
+			updated_at,
+			view_count,
+			same_day_delivery_yn
 		) VALUES (
-		#{productNo, jdbcType=NUMERIC},
-		#{name,
-		jdbcType=VARCHAR},
-		#{price, jdbcType=NUMERIC},
-		#{discountRate,
-		jdbcType=NUMERIC},
-		#{categoryId, jdbcType=NUMERIC},
-		#{description,
-		jdbcType=VARCHAR},
-		#{useYn, jdbcType=VARCHAR},
-		SYSTIMESTAMP,
-		SYSTIMESTAMP,
-		0,
-		#{sameDayDeliveryYn, jdbcType=VARCHAR}
+			#{productNo, jdbcType=NUMERIC},
+			#{name,
+			jdbcType=VARCHAR},
+			#{price, jdbcType=NUMERIC},
+			#{discountRate,
+			jdbcType=NUMERIC},
+			#{categoryId, jdbcType=NUMERIC},
+			#{description,
+			jdbcType=VARCHAR},
+			#{useYn, jdbcType=VARCHAR},
+			SYSTIMESTAMP,
+			SYSTIMESTAMP,
+			0,
+			#{sameDayDeliveryYn, jdbcType=VARCHAR}
 		)
 	</insert>
 
 	<insert id="insertProductImage">
 		INSERT INTO product_img (
-		product_img_no,
-		product_no,
-		image_url,
-		image_type,
-		sort_order
+			product_img_no,
+			product_no,
+			image_url,
+			image_type,
+			sort_order
 		) VALUES (
-		seq_product_img.NEXTVAL,
-		#{productNo},
-		#{imageUrl},
-		#{imageType},
-		#{sortOrder}
+			seq_product_img.NEXTVAL,
+			#{productNo},
+			#{imageUrl},
+			#{imageType},
+			#{sortOrder}
 		)
 	</insert>
 
@@ -229,24 +226,69 @@
 	<insert id="insertProductOption"
 		parameterType="com.shop.dto.admin.product.AdminProductOptionDTO">
 		INSERT INTO product_option (
-		product_option_no,
-		product_no,
-		option_size,
-		color,
-		stock,
-		use_yn
+			product_option_no,
+			product_no,
+			option_size,
+			color,
+			stock,
+			use_yn
 		) VALUES (
-		seq_product_option.NEXTVAL,
-		#{productNo, jdbcType=NUMERIC},
-		#{optionSize, jdbcType=VARCHAR},
-		#{color, jdbcType=VARCHAR},
-		#{stock,
-		jdbcType=NUMERIC},
-		#{useYn, jdbcType=VARCHAR}
+			seq_product_option.NEXTVAL,
+			#{productNo, jdbcType=NUMERIC},
+			#{optionSize, jdbcType=VARCHAR},
+			#{color, jdbcType=VARCHAR},
+			#{stock,
+			jdbcType=NUMERIC},
+			#{useYn, jdbcType=VARCHAR}
 		)
 	</insert>
+	
+	<!-- ========================= 상품 기본정보 수정 ========================== -->
+	<update id="updateProductBasic">
+	    UPDATE product
+	    SET
+	        name = #{dto.productName},
+	        price = #{dto.price},
+	        discount_rate = #{dto.discountRate},
+	        use_yn = #{dto.useYn},
+	        same_day_delivery_yn = #{dto.sameDayDeliveryYn},
+	        updated_at = SYSTIMESTAMP
+	    WHERE product_no = #{productNo}
+	</update>
+	
+	<!-- ============== 상품 옵션 조회 (Null 여부 확인용) ============== -->
+	<select id="getProductOption" resultType="com.shop.dto.admin.product.AdminProductOptionDTO">
+	    SELECT
+	        product_option_no,
+	        product_no,
+	        option_size,
+	        color,
+	        stock,
+	        use_yn
+	    FROM product_option
+	    WHERE product_no = #{productNo} 
+	      AND product_option_no = #{productOptionNo}
+	</select>
 
-
+	<!-- ========================= 상품 옵션 수정 ========================== -->
+	<update id="updateProductOption">
+	    UPDATE product_option
+	    SET
+	        color = #{dto.color},
+	        option_size = #{dto.optionSize},
+	        stock = #{dto.stock},
+	        use_yn = #{dto.useYn}
+	    WHERE product_no = #{productNo} 
+	      AND product_option_no = #{productOptionNo}
+	</update>
+	
+	<!-- ========================= 상품 옵션 삭제 ========================== -->
+	<delete id="deleteProductOption">
+	    DELETE FROM product_option
+	    WHERE product_no = #{productNo}
+	      AND product_option_no = #{productOptionNo}
+	</delete>
+	
 </mapper>
 
 

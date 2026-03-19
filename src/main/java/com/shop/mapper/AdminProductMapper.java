@@ -5,11 +5,13 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.shop.dto.admin.product.AdminProductBasicUpdateDTO;
 import com.shop.dto.admin.product.AdminProductDetailDTO;
 import com.shop.dto.admin.product.AdminProductImageDTO;
 import com.shop.dto.admin.product.AdminProductInsertDTO;
 import com.shop.dto.admin.product.AdminProductListDTO;
 import com.shop.dto.admin.product.AdminProductOptionDTO;
+import com.shop.dto.admin.product.AdminProductOptionRequestDTO;
 import com.shop.dto.admin.product.AdminProductSearchDTO;
 
 @Mapper
@@ -41,4 +43,21 @@ public interface AdminProductMapper {
     // 상품 옵션 등록
     void insertProductOption(AdminProductOptionDTO optionDTO);
     
+    // 상품 기본정보 수정
+	void updateProductBasic(@Param("productNo")Long productNo, 
+							@Param("dto")AdminProductBasicUpdateDTO dto);
+	
+	// 상품 옵션 조회 (Null 여부 확인용)
+	AdminProductOptionDTO getProductOption(@Param("productNo") Long productNo,
+            								  @Param("productOptionNo") Long productOptionNo);
+	// 상품 옵션 수정
+	void updateProductOption(@Param("productNo") Long productNo,
+				            @Param("productOptionNo") Long productOptionNo,
+				            @Param("dto") AdminProductOptionRequestDTO dto);
+	
+	// 상품 옵션 삭제
+	void deleteProductOption(@Param("productNo") Long productNo,
+            					@Param("productOptionNo") Long productOptionNo);
+    
+	
 }

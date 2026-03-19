@@ -6,11 +6,13 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.shop.dto.admin.product.AdminProductBasicUpdateDTO;
 import com.shop.dto.admin.product.AdminProductDetailDTO;
 import com.shop.dto.admin.product.AdminProductImageDTO;
 import com.shop.dto.admin.product.AdminProductInsertDTO;
 import com.shop.dto.admin.product.AdminProductListDTO;
 import com.shop.dto.admin.product.AdminProductOptionDTO;
+import com.shop.dto.admin.product.AdminProductOptionRequestDTO;
 import com.shop.dto.admin.product.AdminProductPageResponseDTO;
 import com.shop.dto.admin.product.AdminProductReadDTO;
 import com.shop.dto.admin.product.AdminProductSearchDTO;
@@ -28,6 +30,7 @@ public class AdminProductServiceImpl implements AdminProductService{
 	private final AdminProductMapper adminProductMapper;
 	private final CustomFileUtil customFileUtil;
 	
+	// 관리자 상품 목록 조회
 	@Override
 	public AdminProductPageResponseDTO getProductList(AdminProductSearchDTO searchDTO) {
 		// page 기본값 보정
@@ -39,7 +42,9 @@ public class AdminProductServiceImpl implements AdminProductService{
             searchDTO.setSize(10);
         }
         
-        // 카테고리 검색 범위 결정 조건 (검색 조건은 좁은 범위 우선 => 넓은 범위 순서로 코딩)
+        /* 카테고리 검색 범위 결정 조건 (검색 조건은 좁은 범위 우선 => 넓은 범위 순서로 코딩)
+         * 가장 마지막으로 선택된 카테고리를 실제 검색 기준으로 사용
+         */
         // 소분류 설정 변경이 있는 경우
         if (searchDTO.getCategoryId() != null && !searchDTO.getCategoryId().toString().isBlank()) {
             searchDTO.setSearchCategoryId(searchDTO.getCategoryId());
@@ -83,7 +88,8 @@ public class AdminProductServiceImpl implements AdminProductService{
         
         return responseDTO;
 	}
-
+	
+	// 상품 상세 조회
 	@Override
 	public AdminProductReadDTO getProduct(Long productNo) {
 		// 상품 기본 정보 조회
@@ -115,6 +121,7 @@ public class AdminProductServiceImpl implements AdminProductService{
         return responseDTO;
 	}
 	
+	// 상품 등록
 	@Override
 	@Transactional
 	public void insertProduct(AdminProductInsertDTO dto) {
@@ -216,6 +223,109 @@ public class AdminProductServiceImpl implements AdminProductService{
 	    }
 	}
 	
+	// 상품 기본정보 수정
+	@Override
+	@Transactional
+	public void updateProductsBasic(Long productNo, AdminProductBasicUpdateDTO dto) {
+		
+		// 유효성 검사
+		if (productNo == null) {
+	        throw new IllegalArgumentException("상품번호가 없습니다.");
+	    }
+
+	    if (dto.getProductName() == null || dto.getProductName().trim().isEmpty()) {
+	        throw new IllegalArgumentException("상품명은 필수입니다.");
+	    }
+
+	    if (dto.getPrice() == null || dto.getPrice() < 0) {
+	        throw new IllegalArgumentException("가격은 0 이상이어야 합니다.");
+	    }
+
+	    if (dto.getDiscountRate() == null || dto.getDiscountRate() < 0 || dto.getDiscountRate() > 100) {
+	        throw new IllegalArgumentException("할인율은 0~100 사이여야 합니다.");
+	    }
+
+	    if (!"Y".equals(dto.getUseYn()) && !"N".equals(dto.getUseYn())) {
+	        throw new IllegalArgumentException("판매여부(useYn)는 Y 또는 N만 가능합니다.");
+	    }
+
+	    if (!"Y".equals(dto.getSameDayDeliveryYn()) && !"N".equals(dto.getSameDayDeliveryYn())) {
+	        throw new IllegalArgumentException("당일배송여부는 Y 또는 N만 가능합니다.");
+	    }
+
+	    AdminProductDetailDTO product = adminProductMapper.getProduct(productNo);
+	    
+	    if (product == null) {
+	        throw new IllegalArgumentException("존재하지 않는 상품입니다.");
+	    }
+
+	    adminProductMapper.updateProductBasic(productNo, dto);
+		
+	}
+	
+	// 상품 옵션 수정
+	@Override
+	@Transactional
+	public void updateProductOption(Long productNo, Long productOptionNo, AdminProductOptionRequestDTO dto) {
+		
+		// 유효성 검사
+		if (productNo == null) {
+	        throw new IllegalArgumentException("상품번호가 없습니다.");
+	    }
+
+	    if (productOptionNo == null) {
+	        throw new IllegalArgumentException("옵션번호가 없습니다.");
+	    }
+
+	    if (dto.getColor() == null || dto.getColor().trim().isEmpty()) {
+	        throw new IllegalArgumentException("색상은 필수입니다.");
+	    }
+
+	    if (dto.getOptionSize() == null || dto.getOptionSize().trim().isEmpty()) {
+	        throw new IllegalArgumentException("사이즈는 필수입니다.");
+	    }
+
+	    if (dto.getStock() == null || dto.getStock() < 0) {
+	        throw new IllegalArgumentException("재고는 0 이상이어야 합니다.");
+	    }
+
+	    if (!"Y".equals(dto.getUseYn()) && !"N".equals(dto.getUseYn())) {
+	        throw new IllegalArgumentException("사용여부는 Y 또는 N만 가능합니다.");
+	    }
+	    
+	    // NULL 옵션 방어
+	    AdminProductOptionDTO option = adminProductMapper.getProductOption(productNo, productOptionNo);
+	    if (option == null) {
+	        throw new IllegalArgumentException("존재하지 않는 옵션입니다.");
+	    }
+
+	    adminProductMapper.updateProductOption(productNo, productOptionNo, dto);	
+		
+	}
+	
+	// 상품 옵션 삭제
+	@Override
+	@Transactional
+	public void deleteProductOption(Long productNo, Long productOptionNo) {
+		
+		// 유효성 검사
+	    if (productNo == null) {
+	        throw new IllegalArgumentException("상품번호가 없습니다.");
+	    }
+
+	    if (productOptionNo == null) {
+	        throw new IllegalArgumentException("옵션번호가 없습니다.");
+	    }
+
+	    // NULL 옵션 방어
+	    AdminProductOptionDTO option = adminProductMapper.getProductOption(productNo, productOptionNo);
+	    if (option == null) {
+	        throw new IllegalArgumentException("존재하지 않는 옵션입니다.");
+	    }
+
+	    adminProductMapper.deleteProductOption(productNo, productOptionNo);
+		
+	}
 	
 	/*
 	@Override
@@ -304,6 +414,12 @@ public class AdminProductServiceImpl implements AdminProductService{
 
 	    adminProductMapper.insertProductImage(productNo, imageUrl, imageType, sortOrder);
 	}
+
+	
+
+	
+
+	
 
 	
 }
