@@ -158,14 +158,13 @@
 		SELECT
 		order_item_no,
 		order_no,
-		product_no,
 		product_option_no,
 		quantity,
 		unit_price,
 		item_name,
 		item_size,
-		item_color,
-		image_url FROM order_item
+		item_color
+		FROM order_item
 		WHERE order_no = #{orderNo}
 	</select>
 
