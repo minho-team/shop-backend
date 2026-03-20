@@ -15,5 +15,5 @@ import lombok.NoArgsConstructor;
 public class OrderDetailResponseDTO {
     private Orders order;
     
-    private List<OrderItem> items;
+    private List<OrderItemDTO> items;
 }

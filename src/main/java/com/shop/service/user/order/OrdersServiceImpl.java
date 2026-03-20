@@ -13,6 +13,7 @@ import com.shop.dto.user.order.OrderCreateResponseDTO;
 import com.shop.dto.user.order.OrderDTO;
 import com.shop.dto.user.order.OrderDetailResponseDTO;
 import com.shop.dto.user.order.OrderItemCreateRequestDTO;
+import com.shop.dto.user.order.OrderItemDTO;
 import com.shop.dto.user.order.OrderResponseDTO;
 import com.shop.mapper.OrderItemMapper;
 import com.shop.mapper.OrdersMapper;
@@ -89,9 +90,24 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	@Transactional(readOnly = true)
 	public OrderDetailResponseDTO getOrderDetail(Long orderNo) throws Exception {
-		Orders order = mapper.getOneOrder(orderNo);
-		List<OrderItem> items = mapper.getOrderItemList(orderNo);
-		return OrderDetailResponseDTO.builder().order(order).items(items).build();
+Orders order = mapper.getOneOrder(orderNo);
+		
+		// 1. DTO 리스트로 데이터를 받아옵니다 (Mapper 반환 타입 확인 필수)
+		List<OrderItemDTO> items = mapper.getOrderItemList(orderNo);
+		
+		// 2. 다른 페이지와 동일하게 이미지 URL에 /upload/ 경로를 붙여줍니다.
+		if (items != null) {
+			for (OrderItemDTO item : items) {
+				if (item.getImageUrl() != null && !item.getImageUrl().isBlank()) {
+					item.setImageUrl("/upload/" + item.getImageUrl());
+				}
+			}
+		}
+		
+		return OrderDetailResponseDTO.builder()
+				.order(order)
+				.items(items)
+				.build();
 	}
 
 	@Override

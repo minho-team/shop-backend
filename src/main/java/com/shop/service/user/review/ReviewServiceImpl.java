@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shop.domain.Review;
+import com.shop.dto.user.review.MyReviewResponseDTO;
 import com.shop.mapper.ReviewMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -51,5 +52,10 @@ public class ReviewServiceImpl implements ReviewService {
 		// order_item_no로 기존 리뷰를 조회하여 존재 여부 반환
 		Review existingReview = reviewMapper.getOneReviewByOrderItem(orderItemNo);
 		return existingReview != null;
+	}
+	
+	@Override
+	public List<MyReviewResponseDTO> getMyReviews(Long memberNo) {
+	    return reviewMapper.selectReviewsByMemberNo(memberNo);
 	}
 }
