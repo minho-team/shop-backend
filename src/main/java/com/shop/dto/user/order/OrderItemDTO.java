@@ -10,9 +10,10 @@ import lombok.Builder;
 @AllArgsConstructor
 @Builder
 public class OrderItemDTO {
-    private Long orderItemNo;     
+	private Long orderItemNo;     
     private Long orderNo;         
     private Long productOptionNo; 
+    private Long productNo;       // product_option 테이블에서 조인하여 획득
     
     private int quantity;         
     private long unitPrice;   
@@ -21,5 +22,5 @@ public class OrderItemDTO {
     private String itemSize;      
     private String itemColor;     
     
-    private String imageUrl;      
+    private String imageUrl;      // product_img 테이블에서 조인하여 획득   
 }

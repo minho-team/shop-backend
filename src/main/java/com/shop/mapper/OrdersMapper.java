@@ -6,8 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.shop.domain.Orders;
-import com.shop.domain.OrderItem; 
 import com.shop.dto.user.order.OrderDTO;
+import com.shop.dto.user.order.OrderItemDTO;
 
 @Mapper
 public interface OrdersMapper {
@@ -20,7 +20,7 @@ public interface OrdersMapper {
 
     Orders getOneOrder(Long orderNo);
     
-    List<OrderItem> getOrderItemList(Long orderNo);
+    List<OrderItemDTO> getOrderItemList(Long orderNo);
 
     // 특정 회원 주문 전체 건수
     int getTotalCount(@Param("memberNo") Long memberNo);

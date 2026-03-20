@@ -20,4 +20,7 @@ public class OrderItem {
     private String itemName;      
     private String itemSize;     
     private String itemColor;     
+    
+    private Long productNo;
+    private String imageUrl;
 }

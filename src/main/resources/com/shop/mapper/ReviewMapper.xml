@@ -54,7 +54,8 @@
 		#{userWeight},
 		#{sizeRating},
 		#{imageUrl},
-		0, SYSTIMESTAMP, 'N' )
+		0, SYSTIMESTAMP,
+		'N' )
 	</insert>
 
 	<select id="getReviewListByProduct" parameterType="long"
@@ -62,11 +63,13 @@
 		SELECT
 		review_no, member_no, product_no, order_item_no,
 		title, content, rating, user_height, user_weight,
-		size_rating, image_url, like_count, created_at, updated_at, delete_yn
+		size_rating,
+		image_url, like_count, created_at, updated_at, delete_yn
 		FROM review
 		WHERE product_no = #{productNo}
 		AND delete_yn = 'N'
-		ORDER BY created_at DESC
+		ORDER BY created_at
+		DESC
 	</select>
 
 	<select id="getOneReview" parameterType="long"
@@ -74,7 +77,8 @@
 		SELECT
 		review_no, member_no, product_no, order_item_no,
 		title, content, rating, user_height, user_weight,
-		size_rating, image_url, like_count, created_at, updated_at, delete_yn
+		size_rating,
+		image_url, like_count, created_at, updated_at, delete_yn
 		FROM review
 		WHERE review_no = #{reviewNo}
 	</select>
@@ -84,8 +88,24 @@
 		SELECT
 		review_no, order_item_no, product_no
 		FROM review
-		WHERE order_item_no = #{orderItemNo}
+		WHERE
+		order_item_no = #{orderItemNo}
 		AND delete_yn = 'N'
+	</select>
+
+	<select id="selectReviewsByMemberNo"
+		resultType="com.shop.dto.user.review.MyReviewResponseDTO">
+		SELECT
+		r.review_no AS reviewNo,
+		r.product_no AS productNo,
+		oi.item_name AS itemName,
+		r.content AS content,
+		r.rating AS rating,
+		r.created_at AS createdAt
+		FROM review r
+		INNER JOIN order_item oi ON r.order_item_no = oi.order_item_no
+		WHERE r.member_no = #{memberNo}
+		ORDER BY r.created_at DESC
 	</select>
 
 </mapper>
