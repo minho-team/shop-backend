@@ -1,5 +1,7 @@
 package com.shop.service.user.member;
 
+import java.util.Map;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,6 +93,46 @@ public class MemberServiceImpl implements MemberService {
 		memberMapper.insertAdminRole(mr1);
 		memberMapper.insertAdminRole(mr2);
 		
+	}
+
+	@Override
+	public Member getOrCreateKakaoMember(Map<String, Object> kakaoUserInfo) throws Exception {
+		 Object idObj = kakaoUserInfo.get("id");
+		    if (idObj == null) {
+		        throw new RuntimeException("카카오 사용자 id가 없습니다.");
+		    }
+
+		    String kakaoId = String.valueOf(idObj);
+		    String memberId = "k_" + kakaoId;
+
+		    Member existingMember = null;
+		    try {
+		        existingMember = memberMapper.readOneMember(memberId);
+		    } catch (Exception e) {
+		        // 없으면 아래에서 생성
+		    }
+
+		    if (existingMember != null) {
+		        return memberMapper.readOneMemberWithRoles(memberId);
+		    }
+
+		    String tempPassword = java.util.UUID.randomUUID().toString();
+
+		    String nickname = "kakao_" + kakaoId;
+
+		    Member newMember = new Member();
+		    newMember.setMemberId(memberId);
+		    newMember.setPassword(passwordEncoder.encode(tempPassword));
+		    newMember.setName(nickname);
+		    newMember.setNickName(nickname);
+		    newMember.setEmail(null);
+		    newMember.setPhoneNumber(null);
+		    newMember.setProvider("KAKAO");
+
+		    memberMapper.insertKakaoMember(newMember);
+		    memberMapper.insertRoleByMemberNo(newMember.getMemberNo(), "USER");
+
+		    return memberMapper.readOneMemberWithRoles(memberId);
 	}
 
 

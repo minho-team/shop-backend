@@ -30,6 +30,11 @@ public interface MemberMapper {
 
 	// 관리자 역할 추가
 	void insertAdminRole(MemberRole mr) throws Exception;
+	
+	void insertKakaoMember(Member member) throws Exception;
+	
+	void insertRoleByMemberNo(@Param("memberNo") Long memberNo, @Param("roleName") String roleName) throws Exception;
+	
 
 	// ================================================
 	// 관리자 - 전체 회원 수 조회 (페이징 계산용)

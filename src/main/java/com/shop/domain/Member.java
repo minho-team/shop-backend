@@ -33,6 +33,7 @@ public class Member {
 	private String bankCode;
 	private String accountHolderName;
 	private String status;
+	private String provider;
 
 	// user_role 테이블 매핑용
 	private List<MemberRole> memberRoleList;

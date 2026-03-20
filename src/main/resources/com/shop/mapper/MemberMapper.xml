@@ -4,43 +4,46 @@
 
 	<resultMap type="MemberRole" id="roleMap">
 		<result property="memberRoleNo" column="member_role_no" />
-		<result property="memberNo"     column="member_no" />
-		<result property="roleName"     column="role_name" />
+		<result property="memberNo" column="member_no" />
+		<result property="roleName" column="role_name" />
 	</resultMap>
 
 	<resultMap type="Member" id="memberMap">
-		<id     property="memberNo"           column="member_no" />
-		<result property="memberId"           column="member_id" />
-		<result property="password"           column="password" />
-		<result property="name"               column="name" />
-		<result property="nickName"           column="nick_name" />
-		<result property="email"              column="email" />
-		<result property="phoneNumber"        column="phone_number" />
-		<result property="zipCode"            column="zip_code" />
-		<result property="basicAddress"       column="basic_address" />
-		<result property="detailAddress"      column="detail_address" />
-		<result property="gender"             column="gender" />
-		<result property="birthday"           column="birthday" />
-		<result property="refreshToken"       column="refresh_token" />
-		<result property="createdAt"          column="created_at" />
-		<result property="purchaseCount"      column="purchase_count" />
-		<result property="bankName"           column="bank_name" />
-		<result property="bankCode"           column="bank_code" />
-		<result property="accountHolderName"  column="account_holder_name" />
-		<result property="status"             column="status" />
+		<id property="memberNo" column="member_no" />
+		<result property="memberId" column="member_id" />
+		<result property="password" column="password" />
+		<result property="name" column="name" />
+		<result property="nickName" column="nick_name" />
+		<result property="email" column="email" />
+		<result property="phoneNumber" column="phone_number" />
+		<result property="zipCode" column="zip_code" />
+		<result property="basicAddress" column="basic_address" />
+		<result property="detailAddress" column="detail_address" />
+		<result property="gender" column="gender" />
+		<result property="birthday" column="birthday" />
+		<result property="refreshToken" column="refresh_token" />
+		<result property="createdAt" column="created_at" />
+		<result property="purchaseCount" column="purchase_count" />
+		<result property="bankName" column="bank_name" />
+		<result property="bankCode" column="bank_code" />
+		<result property="accountHolderName"
+			column="account_holder_name" />
+		<result property="status" column="status" />
+		<result property="provider" column="provider" />
 		<collection property="memberRoleList" resultMap="roleMap" />
 	</resultMap>
 
 	<!-- memberId로 회원 + 역할 목록 함께 조회 (JWT 인증용) -->
 	<select id="readOneMemberWithRoles" resultMap="memberMap">
 		SELECT
-			m.member_no, m.member_id, m.password, m.name, m.nick_name, m.email,
-			m.phone_number, m.zip_code, m.basic_address, m.detail_address,
-			m.gender, m.birthday, m.refresh_token, m.created_at, m.purchase_count,
-			m.bank_name, m.bank_code, m.account_holder_name, m.status,
-			r.member_role_no, r.role_name
+		m.member_no, m.member_id, m.password, m.name, m.nick_name, m.email,
+		m.phone_number, m.zip_code, m.basic_address, m.detail_address,
+		m.gender, m.birthday, m.refresh_token, m.created_at, m.purchase_count,
+		m.bank_name, m.bank_code, m.account_holder_name, m.status,m.provider,
+		r.member_role_no, r.role_name
 		FROM member m
-		JOIN member_role r ON m.member_no = r.member_no
+		JOIN member_role r ON
+		m.member_no = r.member_no
 		WHERE m.member_id = #{memberId}
 	</select>
 
@@ -57,41 +60,74 @@
 
 	<!-- 회원가입 -->
 	<insert id="register">
-		<selectKey keyProperty="memberNo" resultType="long" order="BEFORE">
+		<selectKey keyProperty="memberNo" resultType="long"
+			order="BEFORE">
 			SELECT seq_member.NEXTVAL FROM dual
 		</selectKey>
 		INSERT INTO member (
-			member_no, member_id, password, name, nick_name, email, phone_number,
-			zip_code, basic_address, detail_address, gender, birthday,
-			bank_name, bank_code, account_holder_name
+		member_no, member_id, password, name, nick_name, email, phone_number,
+		zip_code, basic_address, detail_address, gender, birthday,
+		bank_name, bank_code, account_holder_name
 		) VALUES (
-			#{memberNo}, #{memberId}, #{password}, #{name}, #{nickName}, #{email}, #{phoneNumber},
-			#{zipCode}, #{basicAddress}, #{detailAddress}, #{gender}, #{birthday},
-			#{bankName}, #{bankCode}, #{accountHolderName}
+		#{memberNo}, #{memberId}, #{password}, #{name}, #{nickName}, #{email},
+		#{phoneNumber},
+		#{zipCode}, #{basicAddress}, #{detailAddress}, #{gender}, #{birthday},
+		#{bankName}, #{bankCode}, #{accountHolderName}
 		)
 	</insert>
 
 	<!-- 회원 역할 추가 -->
 	<insert id="insertRole">
-		INSERT INTO member_role VALUES (seq_member_role.NEXTVAL, #{memberNo}, #{roleName})
+		INSERT INTO member_role VALUES
+		(seq_member_role.NEXTVAL, #{memberNo}, #{roleName})
 	</insert>
 
 	<!-- 관리자 계정 등록 -->
 	<insert id="insertAdmin">
-		INSERT INTO member (member_no, member_id, password, name, nick_name, email, phone_number)
-		VALUES (#{memberNo}, #{memberId}, #{password}, #{name}, #{nickName}, #{email}, #{phoneNumber})
+		INSERT INTO member (member_no, member_id, password,
+		name, nick_name, email, phone_number)
+		VALUES (#{memberNo}, #{memberId},
+		#{password}, #{name}, #{nickName}, #{email}, #{phoneNumber})
+	</insert>
+
+	<!-- 카카오 맴버 인서트 -->
+	<insert id="insertKakaoMember">
+		<selectKey keyProperty="memberNo" resultType="long"
+			order="BEFORE">
+			SELECT seq_member.NEXTVAL FROM dual
+		</selectKey>
+
+		INSERT INTO member (
+		member_no, member_id, password, name, nick_name,
+		email, phone_number, provider
+		) VALUES (
+		#{memberNo}, #{memberId}, #{password}, #{name}, #{nickName},
+		#{email}, #{phoneNumber}, #{provider}
+		)
+	</insert>
+
+	<!-- memberNo를 기반으로 권한 인서트 -->
+	<insert id="insertRoleByMemberNo">
+		INSERT INTO member_role (
+		member_role_no, member_no, role_name
+		) VALUES (
+		seq_member_role.NEXTVAL, #{memberNo}, #{roleName}
+		)
 	</insert>
 
 	<!-- 관리자 역할 추가 -->
 	<insert id="insertAdminRole">
-		INSERT INTO member_role VALUES (#{memberRoleNo}, #{memberNo}, #{roleName})
+		INSERT INTO member_role VALUES (#{memberRoleNo},
+		#{memberNo}, #{roleName})
 	</insert>
 
 	<!-- ================================================ -->
-	<!-- 관리자 - 전체 회원 수 조회 (페이징 계산용)          -->
-	<!-- status, keyword 조건이 있으면 WHERE절에 추가됨     -->
+	<!-- 관리자 - 전체 회원 수 조회 (페이징 계산용) -->
+	<!-- status, keyword 조건이 있으면 WHERE절에 추가됨 -->
 	<!-- ================================================ -->
-	<select id="selectMemberCount" parameterType="com.shop.dto.admin.member.AdminMemberSearchDTO" resultType="int">
+	<select id="selectMemberCount"
+		parameterType="com.shop.dto.admin.member.AdminMemberSearchDTO"
+		resultType="int">
 		SELECT COUNT(*)
 		FROM member
 		<where>
@@ -100,48 +136,52 @@
 			</if>
 			<if test="keyword != null and keyword != ''">
 				AND (member_id LIKE '%' || #{keyword} || '%'
-				     OR name    LIKE '%' || #{keyword} || '%')
+				OR name LIKE '%' || #{keyword} || '%')
 			</if>
 		</where>
 	</select>
 
 	<!-- ================================================ -->
-	<!-- 관리자 - 회원 목록 페이징 조회 (5개씩)             -->
-	<!-- status, keyword 조건 선택적 적용                  -->
-	<!-- 최신 가입순(created_at DESC) 정렬                 -->
+	<!-- 관리자 - 회원 목록 페이징 조회 (5개씩) -->
+	<!-- status, keyword 조건 선택적 적용 -->
+	<!-- 최신 가입순(created_at DESC) 정렬 -->
 	<!-- ================================================ -->
-	<select id="selectMemberList" parameterType="com.shop.dto.admin.member.AdminMemberSearchDTO" resultMap="memberMap">
+	<select id="selectMemberList"
+		parameterType="com.shop.dto.admin.member.AdminMemberSearchDTO"
+		resultMap="memberMap">
 		SELECT *
 		FROM (
-			SELECT m.*, ROWNUM AS rn
-			FROM (
-				SELECT member_no, member_id, name, nick_name, email,
-				       phone_number, created_at, purchase_count, status
-				FROM member
-				<where>
-					<if test="status != null and status != ''">
-						AND status = #{status}
-					</if>
-					<if test="keyword != null and keyword != ''">
-						AND (member_id LIKE '%' || #{keyword} || '%'
-						     OR name    LIKE '%' || #{keyword} || '%')
-					</if>
-				</where>
-				ORDER BY created_at DESC
-			) m
-			WHERE ROWNUM &lt;= #{endRow}
+		SELECT m.*, ROWNUM AS rn
+		FROM (
+		SELECT member_no, member_id, name, nick_name, email,
+		phone_number, created_at, purchase_count, status
+		FROM member
+		<where>
+			<if test="status != null and status != ''">
+				AND status = #{status}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND (member_id LIKE '%' || #{keyword} || '%'
+				OR name LIKE '%' || #{keyword} || '%')
+			</if>
+		</where>
+		ORDER BY created_at DESC
+		) m
+		WHERE ROWNUM &lt;= #{endRow}
 		)
 		WHERE rn &gt;= #{startRow}
 	</select>
 
 	<!-- ================================================ -->
-	<!-- 관리자 - 회원 번호로 단건 상세 조회               -->
+	<!-- 관리자 - 회원 번호로 단건 상세 조회 -->
 	<!-- ================================================ -->
-	<select id="selectMemberByNo" parameterType="long" resultMap="memberMap">
-		SELECT member_no, member_id, name, nick_name, email, phone_number,
-		       zip_code, basic_address, detail_address, gender, birthday,
-		       created_at, purchase_count, bank_name, bank_code,
-		       account_holder_name, status
+	<select id="selectMemberByNo" parameterType="long"
+		resultMap="memberMap">
+		SELECT member_no, member_id, name, nick_name, email,
+		phone_number,
+		zip_code, basic_address, detail_address, gender, birthday,
+		created_at, purchase_count, bank_name, bank_code,
+		account_holder_name, status
 		FROM member
 		WHERE member_no = #{memberNo}
 	</select>
@@ -152,39 +192,42 @@
 	<update id="updateMemberStatus">
 		UPDATE member
 		SET status = #{status}
-		WHERE member_no = #{memberNo}
+		WHERE member_no =
+		#{memberNo}
 	</update>
 
-	<!-- ================================================        -->
-	<!-- 관리자 - 회원 정보 수정                                  -->
-	<!-- memberNo로 대상 특정, 수정 가능한 항목만 업데이트         -->
-	<!-- [수정] gender, birthday 컬럼 추가                        -->
-	<!--        기존에 누락되어 수정 페이지에서 성별/생년월일이     -->
-	<!--        저장되지 않던 문제 해결                            -->
-	<!-- ================================================        -->
+	<!-- ================================================ -->
+	<!-- 관리자 - 회원 정보 수정 -->
+	<!-- memberNo로 대상 특정, 수정 가능한 항목만 업데이트 -->
+	<!-- [수정] gender, birthday 컬럼 추가 -->
+	<!-- 기존에 누락되어 수정 페이지에서 성별/생년월일이 -->
+	<!-- 저장되지 않던 문제 해결 -->
+	<!-- ================================================ -->
 	<update id="updateMember" parameterType="Member">
 		UPDATE member
-		SET name                = #{name},
-		    nick_name           = #{nickName},
-		    email               = #{email},
-		    phone_number        = #{phoneNumber},
-		    gender              = #{gender},
-		    birthday            = #{birthday},
-		    zip_code            = #{zipCode},
-		    basic_address       = #{basicAddress},
-		    detail_address      = #{detailAddress},
-		    bank_name           = #{bankName},
-		    bank_code           = #{bankCode},
-		    account_holder_name = #{accountHolderName}
+		SET name =
+		#{name},
+		nick_name = #{nickName},
+		email = #{email},
+		phone_number = #{phoneNumber},
+		gender = #{gender},
+		birthday = #{birthday},
+		zip_code = #{zipCode},
+		basic_address = #{basicAddress},
+		detail_address = #{detailAddress},
+		bank_name = #{bankName},
+		bank_code = #{bankCode},
+		account_holder_name = #{accountHolderName}
 		WHERE member_no = #{memberNo}
 	</update>
 
 	<!-- ================================================ -->
-	<!-- 관리자 - 회원 삭제 (하드 딜리트)                  -->
-	<!-- 주문 내역 있는 회원은 FK 제약으로 삭제 불가        -->
+	<!-- 관리자 - 회원 삭제 (하드 딜리트) -->
+	<!-- 주문 내역 있는 회원은 FK 제약으로 삭제 불가 -->
 	<!-- ================================================ -->
 	<delete id="deleteMember" parameterType="long">
-		DELETE FROM member WHERE member_no = #{memberNo}
+		DELETE FROM member WHERE
+		member_no = #{memberNo}
 	</delete>
 
 </mapper>
