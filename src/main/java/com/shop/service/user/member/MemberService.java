@@ -1,5 +1,7 @@
 package com.shop.service.user.member;
 
+import java.util.Map;
+
 import com.shop.domain.Member;
 import com.shop.dto.user.auth.RegisterRequestDto;
 
@@ -14,5 +16,7 @@ public interface MemberService {
 	public void register(RegisterRequestDto dto) throws Exception;
 	
 	public void insertAdmin(Member member) throws Exception;
+	
+	Member getOrCreateKakaoMember(Map<String, Object> kakaoUserInfo)throws Exception;
 
 }

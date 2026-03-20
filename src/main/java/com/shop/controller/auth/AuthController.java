@@ -5,14 +5,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,13 +21,13 @@ import com.shop.domain.Member;
 import com.shop.dto.user.auth.RegisterRequestDto;
 import com.shop.security.JwtUtil;
 import com.shop.security.domain.LoginDto;
+import com.shop.service.user.auth.KakaoService;
 import com.shop.service.user.member.MemberService;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -41,6 +39,7 @@ public class AuthController {
 	private final AuthenticationManager authenticationManager;
 	private final JwtUtil jwtUtil;
 	private final MemberService memberService;
+	private final KakaoService kakaoService;
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginDto dto, HttpServletResponse response) {
@@ -206,14 +205,13 @@ public class AuthController {
 	    try {
 	        Member member = memberService.readOneMember(memberId);
 	        
-	        Map<String, Object> result = Map.of(
-	            "memberId", memberId,
-	            "memberName", member.getName(),
-	            "memberNo", member.getMemberNo(), // 리액트 if(!user.memberNo) 통과를 위해 추가
-	            "roles", authentication.getAuthorities().stream()
-	                    .map(a -> a.getAuthority())
-	                    .toList()
-	        );
+	        Map<String, Object> result = new java.util.HashMap<>();
+	        result.put("memberId", memberId);
+	        result.put("memberName", member.getName());
+	        result.put("memberNo", member.getMemberNo());
+	        result.put("roles", authentication.getAuthorities().stream()
+	                .map(a -> a.getAuthority())
+	                .toList());
 
 	        log.info("멤버의 권한 리스트:" + result.get("roles"));
 	        return ResponseEntity.ok(result);
@@ -221,6 +219,57 @@ public class AuthController {
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("auth 컨트롤러에서 get Me 실패");
+	    }
+	}
+	
+	@PostMapping("/kakao")
+	public ResponseEntity<?> kakaoLogin(@RequestBody Map<String, String> body, HttpServletResponse response) {
+	    try {
+	        String code = body.get("code");
+
+	        if (code == null || code.isBlank()) {
+	            return ResponseEntity.badRequest().body("인가코드가 없습니다.");
+	        }
+
+	        String kakaoAccessToken = kakaoService.getAccessToken(code);
+	        Map<String, Object> kakaoUserInfo = kakaoService.getKakaoUserInfo(kakaoAccessToken);
+
+	        Member member = memberService.getOrCreateKakaoMember(kakaoUserInfo);
+
+	        Authentication authentication = new UsernamePasswordAuthenticationToken(
+	                member.getMemberId(),
+	                null,
+	                member.getMemberRoleList().stream()
+	                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName()))
+	                        .collect(Collectors.toList())
+	        );
+
+	        String accessToken = jwtUtil.createToken(authentication);
+	        String refreshToken = jwtUtil.createRefreshToken(authentication);
+
+	        memberService.updateRefreshToken(member.getMemberId(), refreshToken);
+
+	        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+	                .secure(false)
+	                .httpOnly(true)
+	                .path("/")
+	                .maxAge(60 * 15)
+	                .build();
+
+	        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+	                .secure(false)
+	                .httpOnly(true)
+	                .path("/")
+	                .maxAge(60 * 60 * 24 * 7)
+	                .build();
+
+	        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+	        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+	        return ResponseEntity.ok(Map.of("message", "카카오 로그인 성공"));
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("카카오 로그인 실패: " + e.getMessage());
 	    }
 	}
 
