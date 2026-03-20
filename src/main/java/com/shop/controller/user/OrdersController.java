@@ -65,17 +65,20 @@ public class OrdersController {
 
 	// 로그인된 사용자의 모든 주문 내역을 불러온다
 	@GetMapping
-	public ResponseEntity<?> getAllOrders(Authentication authentication,
+	public ResponseEntity<?> getMyOrderList(Authentication authentication,
 			@RequestParam(value = "page", defaultValue = "1") int page) { // page 파라미터 수신 확인
 
+		log.info("orders컨트롤러의 getMyOrderList");
 		String memberId = authentication.getName();
 		try {
 			Member member = memberService.readOneMember(memberId);
+			log.info("orders컨트롤러의 getMyOrderList결과1:" + page);
 
 			// 중요: 반드시 getMyOrderList를 호출해서 OrderResponseDTO를 받아야 함!
 			OrderResponseDTO response = ordersService.getMyOrderList(member.getMemberNo(), page);
-
+			log.info("orders컨트롤러의 getMyOrderList결과2:" + response);
 			// DTO 자체를 리턴 (이 안에 리스트와 페이지 정보가 다 들어있음)
+
 			return ResponseEntity.ok(response);
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("에러발생");

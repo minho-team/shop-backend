@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shop.domain.Review;
+import com.shop.dto.user.review.MyReviewResponseDTO;
 
 public interface ReviewService {
     
@@ -13,4 +14,6 @@ public interface ReviewService {
     List<Review> getReviewListByProduct(int productNo);
     
     boolean checkAlreadyReviewed(int orderItemNo);
+    
+    List<MyReviewResponseDTO> getMyReviews(Long memberNo);
 }

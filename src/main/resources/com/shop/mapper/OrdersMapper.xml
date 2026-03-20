@@ -66,25 +66,24 @@
 		orders WHERE member_no = #{memberNo}
 	</select>
 
-	<!-- 내 주문 페이징 조회 (마이페이지용) -->
-	<select id="getMyOrderList"
-		resultType="com.shop.dto.user.order.OrderDTO">
-        <![CDATA[
-        SELECT * FROM (
-            SELECT
-                o.order_no      AS orderNo,
-                o.member_no     AS memberNo,
-                o.orderer_name  AS ordererName,
-                o.total_price   AS totalPrice,
-                o.order_status  AS orderStatus,
-                o.created_at    AS createdAt,
-                ROW_NUMBER() OVER (ORDER BY o.created_at DESC) AS rn
-            FROM orders o
-            WHERE member_no = #{memberNo}
-        )
-        WHERE rn >= #{startRow} AND rn <= #{endRow}
-        ]]>
-	</select>
+	<!-- 사용자 - 내 주문 페이징 조회 (마이페이지용) -->
+	<select id="getMyOrderList" resultType="com.shop.dto.user.order.OrderDTO">
+    <![CDATA[
+    SELECT * FROM (
+        SELECT
+            o.order_no      AS orderNo,
+            o.member_no     AS memberNo,
+            o.orderer_name  AS ordererName,
+            o.total_price   AS totalPrice,
+            o.order_status  AS orderStatus,
+            o.created_at    AS createdAt,
+            ROW_NUMBER() OVER (ORDER BY o.created_at DESC) AS rn
+        FROM orders o
+        WHERE member_no = #{memberNo}
+    )
+    WHERE rn >= #{startRow} AND rn <= #{endRow}
+    ]]>
+</select>
 
 
 	<!-- 관리자 - 특정 회원 최근 주문 5건 (회원 상세 요약용) -->
@@ -153,19 +152,25 @@
 		FROM orders WHERE member_no = #{memberNo}
 	</select>
 
-	<select id="getOrderItemList"
-		resultType="com.shop.dto.user.order.OrderItemDTO">
-		SELECT
-		order_item_no,
-		order_no,
-		product_option_no,
-		quantity,
-		unit_price,
-		item_name,
-		item_size,
-		item_color
-		FROM order_item
-		WHERE order_no = #{orderNo}
-	</select>
+	<select id="getOrderItemList" resultType="com.shop.dto.user.order.OrderItemDTO">
+    SELECT
+        oi.order_item_no      AS orderItemNo,
+        oi.order_no           AS orderNo,
+        oi.product_option_no  AS productOptionNo,
+        po.product_no         AS productNo,
+        oi.quantity           AS quantity,
+        oi.unit_price         AS unitPrice,
+        oi.item_name          AS itemName,
+        oi.item_size          AS itemSize,
+        oi.item_color         AS itemColor,
+        pi.image_url          AS imageUrl
+    FROM order_item oi
+    INNER JOIN product_option po 
+        ON oi.product_option_no = po.product_option_no
+    LEFT JOIN product_img pi 
+        ON po.product_no = pi.product_no 
+        AND pi.image_type = 'THUMB'
+    WHERE oi.order_no = #{orderNo}
+</select>
 
 </mapper>

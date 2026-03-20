@@ -12,7 +12,26 @@
 		<result property="itemName" column="item_name" />
 		<result property="itemSize" column="item_size" />
 		<result property="itemColor" column="item_color" />
+		<result property="productNo" column="product_no" />
+		<result property="imageUrl" column="image_url" />
 	</resultMap>
+
+	<select id="selectByOrderNo" parameterType="long"
+		resultMap="orderItemMap">
+		SELECT
+		order_item_no,
+		order_no,
+		product_option_no,
+		quantity,
+		unit_price,
+		item_name,
+		item_size,
+		item_color
+		FROM
+		order_item
+		WHERE order_no = #{orderNo}
+	</select>
+
 
 	<insert id="insertOrderItem"
 		parameterType="com.shop.domain.OrderItem">
@@ -30,6 +49,7 @@
 		item_name,
 		item_size,
 		item_color
+		
 		) VALUES (
 		#{orderItemNo},
 		#{orderNo},
@@ -42,23 +62,10 @@
 		)
 	</insert>
 
-	<select id="selectByOrderNo" parameterType="long"
-		resultMap="orderItemMap">
-		SELECT
-		order_item_no,
-		order_no,
-		product_option_no,
-		quantity,
-		unit_price,
-		item_name,
-		item_size,
-		item_color
-		FROM order_item
-		WHERE order_no = #{orderNo}
-	</select>
 
 	<delete id="deleteByOrderNo" parameterType="long">
-		DELETE FROM order_item
+		DELETE FROM
+		order_item
 		WHERE order_no = #{orderNo}
 	</delete>
 
