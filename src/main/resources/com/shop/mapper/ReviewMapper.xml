@@ -3,7 +3,30 @@
 
 <mapper namespace="com.shop.mapper.ReviewMapper">
 
-	<insert id="insertReview">
+	<resultMap id="reviewMap" type="com.shop.domain.Review">
+		<id property="reviewNo" column="review_no" />
+		<result property="memberNo" column="member_no" />
+		<result property="productNo" column="product_no" />
+		<result property="orderItemNo" column="order_item_no" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="rating" column="rating" />
+		<result property="userHeight" column="user_height" />
+		<result property="userWeight" column="user_weight" />
+		<result property="sizeRating" column="size_rating" />
+		<result property="imageUrl" column="image_url" />
+		<result property="likeCount" column="like_count" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+		<result property="deleteYn" column="delete_yn" />
+	</resultMap>
+
+	<insert id="insertReview" parameterType="com.shop.domain.Review">
+		<selectKey keyProperty="reviewNo" resultType="long"
+			order="BEFORE">
+			SELECT seq_review.NEXTVAL FROM dual
+		</selectKey>
+
 		INSERT INTO review (
 		review_no,
 		member_no,
@@ -15,9 +38,12 @@
 		user_height,
 		user_weight,
 		size_rating,
-		image_url
+		image_url,
+		like_count,
+		created_at,
+		delete_yn
 		) VALUES (
-		seq_review.NEXTVAL,
+		#{reviewNo},
 		#{memberNo},
 		#{productNo},
 		#{orderItemNo},
@@ -27,61 +53,36 @@
 		#{userHeight},
 		#{userWeight},
 		#{sizeRating},
-		#{imageUrl}
-		)
+		#{imageUrl},
+		0, SYSTIMESTAMP, 'N' )
 	</insert>
 
-	<select id="getReviewListByProduct"
-		resultType="com.shop.domain.Review">
+	<select id="getReviewListByProduct" parameterType="long"
+		resultMap="reviewMap">
 		SELECT
-		review_no AS reviewNo,
-		member_no AS memberNo,
-		product_no AS productNo,
-		order_item_no AS orderItemNo,
-		title,
-		content,
-		rating,
-		user_height AS userHeight,
-		user_weight AS userWeight,
-		size_rating AS sizeRating,
-		image_url AS imageUrl,
-		like_count AS likeCount,
-		created_at AS createdAt,
-		updated_at AS updatedAt,
-		delete_yn AS deleteYn
+		review_no, member_no, product_no, order_item_no,
+		title, content, rating, user_height, user_weight,
+		size_rating, image_url, like_count, created_at, updated_at, delete_yn
 		FROM review
 		WHERE product_no = #{productNo}
 		AND delete_yn = 'N'
 		ORDER BY created_at DESC
 	</select>
 
-	<select id="getOneReview" resultType="com.shop.domain.Review">
+	<select id="getOneReview" parameterType="long"
+		resultMap="reviewMap">
 		SELECT
-		review_no AS reviewNo,
-		member_no AS memberNo,
-		product_no AS productNo,
-		order_item_no AS orderItemNo,
-		title,
-		content,
-		rating,
-		user_height AS userHeight,
-		user_weight AS userWeight,
-		size_rating AS sizeRating,
-		image_url AS imageUrl,
-		like_count AS likeCount,
-		created_at AS createdAt,
-		updated_at AS updatedAt,
-		delete_yn AS deleteYn
+		review_no, member_no, product_no, order_item_no,
+		title, content, rating, user_height, user_weight,
+		size_rating, image_url, like_count, created_at, updated_at, delete_yn
 		FROM review
 		WHERE review_no = #{reviewNo}
 	</select>
 
-	<select id="getOneReviewByOrderItem"
-		resultType="com.shop.domain.Review">
+	<select id="getOneReviewByOrderItem" parameterType="long"
+		resultMap="reviewMap">
 		SELECT
-		review_no AS reviewNo,
-		order_item_no AS orderItemNo,
-		product_no AS productNo
+		review_no, order_item_no, product_no
 		FROM review
 		WHERE order_item_no = #{orderItemNo}
 		AND delete_yn = 'N'
