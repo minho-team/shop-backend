@@ -34,6 +34,9 @@ public class CartItemController {
 	// 장바구니에 상품 추가
 	@PostMapping()
 	public ResponseEntity<?> addCartItem(Authentication authentication, @RequestBody CartItemAddRequest request) {
+		if (authentication == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+		}
 		try {
 			String userId = authentication.getName();
 			Member member = memberService.readOneMember(userId);
@@ -61,6 +64,9 @@ public class CartItemController {
 	// 장바구니 상품 전부 삭제
 	@DeleteMapping()
 	public ResponseEntity<?> deleteAllCartItem(Authentication authentication) {
+		if (authentication == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+		}
 		try {
 			String userId = authentication.getName();
 			Member member = memberService.readOneMember(userId);
@@ -75,11 +81,15 @@ public class CartItemController {
 
 	// 각 물건의 수량변경
 	@PutMapping("/{cartItemNo}")
-	public ResponseEntity<?> updateCartItem(Authentication authentication, @PathVariable Long cartItemNo,  @RequestParam int cartQty) {
+	public ResponseEntity<?> updateCartItem(Authentication authentication, @PathVariable Long cartItemNo,
+			@RequestParam int cartQty) {
+		if (authentication == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+		}
 		try {
-			 String userId = authentication.getName();
-	            Member member = memberService.readOneMember(userId);
-	            
+			String userId = authentication.getName();
+			Member member = memberService.readOneMember(userId);
+
 			cartItemService.updateCartItem(member.getMemberNo(), cartItemNo, cartQty);
 			return ResponseEntity.ok("수량이 변경되었습니다.");
 		} catch (Exception e) {
@@ -91,6 +101,9 @@ public class CartItemController {
 	// 장바구니에 있는 물건들 읽어오기
 	@GetMapping()
 	public ResponseEntity<?> readMyCartItems(Authentication authentication) {
+		if (authentication == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+		}
 		try {
 			String userId = authentication.getName();
 			Member member = memberService.readOneMember(userId);
