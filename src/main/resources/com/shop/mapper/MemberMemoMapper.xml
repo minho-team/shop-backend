@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.MemberMemoMapper">
+
+    <!-- DB 컬럼명 → Java 필드명 매핑 -->
+    <resultMap type="com.shop.domain.MemberMemo" id="memoMap">
+        <id     property="memoNo"    column="memo_no"    />
+        <result property="memberNo"  column="member_no"  />
+        <result property="content"   column="content"    />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <!-- ================================================ -->
+    <!-- 메모 저장                                         -->
+    <!-- createdAt은 DB에서 SYSTIMESTAMP로 자동 처리       -->
+    <!-- ================================================ -->
+    <insert id="insertMemo" parameterType="com.shop.domain.MemberMemo">
+        <selectKey keyProperty="memoNo" resultType="long" order="BEFORE">
+            SELECT seq_member_memo.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO member_memo (memo_no, member_no, content, created_at)
+        VALUES (#{memoNo}, #{memberNo}, #{content}, SYSTIMESTAMP)
+    </insert>
+
+    <!-- ================================================ -->
+    <!-- 특정 회원 메모 전체 조회 (최신순)                 -->
+    <!-- ================================================ -->
+    <select id="selectMemosByMemberNo" resultMap="memoMap">
+        SELECT memo_no, member_no, content, created_at
+        FROM member_memo
+        WHERE member_no = #{memberNo}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- ================================================ -->
+    <!-- 메모 삭제                                         -->
+    <!-- ================================================ -->
+    <delete id="deleteMemo">
+        DELETE FROM member_memo
+        WHERE memo_no = #{memoNo}
+    </delete>
+
+</mapper>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.CouponMapper">
+
+    <!-- 쿠폰 resultMap -->
+    <resultMap type="com.shop.domain.Coupon" id="couponMap">
+        <id     property="couponNo"      column="coupon_no" />
+        <result property="couponName"    column="coupon_name" />
+        <result property="discountType"  column="discount_type" />
+        <result property="discountValue" column="discount_value" />
+        <result property="deleteYn"      column="delete_yn" />  <!-- N=정상, Y=삭제 -->
+        <result property="createdAt"     column="created_at" />
+    </resultMap>
+
+    <!-- 회원 쿠폰 resultMap
+         start_at / end_at 은 coupon 테이블이 아닌 member_coupon 에서 가져옴
+         (발급 시 유효기간을 지정하는 방식으로 변경) -->
+    <resultMap type="com.shop.domain.MemberCoupon" id="memberCouponMap">
+        <id     property="memberCouponNo" column="member_coupon_no" />
+        <result property="memberNo"       column="member_no" />
+        <result property="couponNo"       column="coupon_no" />
+        <result property="usedYn"         column="used_yn" />       <!-- 사용 여부 (N=미사용, Y=사용) -->
+        <result property="usedAt"         column="used_at" />       <!-- 사용 일시 -->
+        <result property="issuedAt"       column="issued_at" />     <!-- 발급 일시 -->
+        <result property="startAt"        column="start_at" />      <!-- 유효 시작일 (member_coupon) -->
+        <result property="endAt"          column="end_at" />        <!-- 유효 종료일 (member_coupon) -->
+        <result property="couponName"     column="coupon_name" />   <!-- 쿠폰명 (JOIN) -->
+        <result property="discountType"   column="discount_type" /> <!-- 할인 유형 (JOIN) -->
+        <result property="discountValue"  column="discount_value" /><!-- 할인 값 (JOIN) -->
+    </resultMap>
+
+    <!-- 쿠폰 생성 (날짜 없음 - 발급 시 지정) -->
+    <insert id="insertCoupon" parameterType="com.shop.domain.Coupon">
+        <selectKey keyProperty="couponNo" resultType="long" order="BEFORE">
+            SELECT seq_coupon.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO coupon (
+            coupon_no, coupon_name, discount_type, discount_value,
+            delete_yn, created_at
+        ) VALUES (
+            #{couponNo}, #{couponName}, #{discountType}, #{discountValue},
+            'N', SYSTIMESTAMP
+        )
+    </insert>
+
+    <!-- 전체 쿠폰 목록 조회 (delete_yn = 'N' 인 것만, 최신순) -->
+    <select id="selectAllCoupons" resultMap="couponMap">
+        SELECT coupon_no, coupon_name, discount_type, discount_value,
+               delete_yn, created_at
+        FROM coupon
+        WHERE delete_yn = 'N'
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 쿠폰 단건 조회 -->
+    <select id="selectCouponByNo" parameterType="long" resultMap="couponMap">
+        SELECT coupon_no, coupon_name, discount_type, discount_value,
+               delete_yn, created_at
+        FROM coupon
+        WHERE coupon_no = #{couponNo}
+    </select>
+
+    <!-- 쿠폰 소프트 삭제 여부 변경 (N=정상, Y=삭제) -->
+    <update id="updateCouponDeleteYn">
+        UPDATE coupon
+        SET delete_yn = #{deleteYn}
+        WHERE coupon_no = #{couponNo}
+    </update>
+
+    <!-- 쿠폰 하드 삭제 (발급된 쿠폰 없을 때만 가능 - FK 제약) -->
+    <delete id="deleteCoupon" parameterType="long">
+        DELETE FROM coupon
+        WHERE coupon_no = #{couponNo}
+    </delete>
+
+    <!-- 만료 쿠폰 자동 소프트 삭제 (스케줄러용, delete_yn = 'Y') -->
+    <update id="updateExpiredCoupons">
+        UPDATE coupon
+        SET delete_yn = 'Y'
+        WHERE delete_yn = 'N'
+          AND coupon_no IN (
+              SELECT coupon_no FROM member_coupon
+              WHERE end_at IS NOT NULL
+                AND end_at &lt; SYSTIMESTAMP
+          )
+    </update>
+
+    <!-- 특정 회원에게 쿠폰 발급 (유효기간 start_at / end_at 은 발급 시 지정) -->
+    <insert id="insertMemberCoupon" parameterType="com.shop.domain.MemberCoupon">
+        <selectKey keyProperty="memberCouponNo" resultType="long" order="BEFORE">
+            SELECT seq_member_coupon.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO member_coupon (
+            member_coupon_no, member_no, coupon_no,
+            used_yn, issued_at, start_at, end_at
+        ) VALUES (
+            #{memberCouponNo}, #{memberNo}, #{couponNo},
+            'N', SYSTIMESTAMP, #{startAt}, #{endAt}
+        )
+    </insert>
+
+    <!-- 특정 회원 보유 쿠폰 목록 조회
+         start_at / end_at 은 member_coupon 에서 가져옴 -->
+    <select id="selectMemberCouponsByMemberNo" parameterType="long" resultMap="memberCouponMap">
+        SELECT mc.member_coupon_no, mc.member_no, mc.coupon_no,
+               mc.used_yn, mc.used_at, mc.issued_at,
+               mc.start_at, mc.end_at,
+               c.coupon_name, c.discount_type, c.discount_value
+        FROM member_coupon mc
+        JOIN coupon c ON mc.coupon_no = c.coupon_no
+        WHERE mc.member_no = #{memberNo}
+        ORDER BY mc.issued_at DESC
+    </select>
+
+    <!-- 특정 회원 보유 쿠폰 수 -->
+    <select id="countMemberCouponsByMemberNo" parameterType="long" resultType="int">
+        SELECT COUNT(*)
+        FROM member_coupon
+        WHERE member_no = #{memberNo}
+    </select>
+
+    <!-- 회원 보유 쿠폰 삭제 (하드 딜리트) -->
+    <delete id="deleteMemberCoupon" parameterType="long">
+        DELETE FROM member_coupon
+        WHERE member_coupon_no = #{memberCouponNo}
+    </delete>
+
+    <!-- 회원 보유 쿠폰 만료 처리 (used_yn = 'Y', used_at = 현재시각) -->
+    <update id="expireMemberCoupon" parameterType="long">
+        UPDATE member_coupon
+        SET used_yn = 'Y',
+            used_at = SYSTIMESTAMP
+        WHERE member_coupon_no = #{memberCouponNo}
+    </update>
+
+</mapper>

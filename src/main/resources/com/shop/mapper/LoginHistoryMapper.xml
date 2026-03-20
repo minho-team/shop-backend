@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.LoginHistoryMapper">
+
+    <!-- DB 컬럼명 → Java 필드명 매핑 -->
+    <resultMap type="com.shop.domain.LoginHistory" id="loginHistoryMap">
+        <id     property="logNo"     column="log_no"     />
+        <result property="memberNo"  column="member_no"  />
+        <result property="loginAt"   column="login_at"   />
+        <result property="ipAddress" column="ip_address" />
+    </resultMap>
+
+    <!-- ================================================ -->
+    <!-- 로그인 이력 저장                                  -->
+    <!-- loginAt은 DB에서 SYSTIMESTAMP로 자동 처리         -->
+    <!-- ================================================ -->
+    <insert id="insertLoginHistory" parameterType="com.shop.domain.LoginHistory">
+        <selectKey keyProperty="logNo" resultType="long" order="BEFORE">
+            SELECT seq_login_history.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO login_history (log_no, member_no, login_at, ip_address)
+        VALUES (#{logNo}, #{memberNo}, SYSTIMESTAMP, #{ipAddress})
+    </insert>
+
+    <!-- ================================================ -->
+    <!-- 특정 회원 로그인 이력 페이징 조회 (최신순)         -->
+    <!-- ================================================ -->
+    <select id="selectLoginHistoryByMemberNo" resultMap="loginHistoryMap">
+        SELECT *
+        FROM (
+            SELECT lh.*, ROWNUM AS rn
+            FROM (
+                SELECT log_no, member_no, login_at, ip_address
+                FROM login_history
+                WHERE member_no = #{memberNo}
+                ORDER BY login_at DESC
+            ) lh
+            WHERE ROWNUM &lt;= #{endRow}
+        )
+        WHERE rn &gt;= #{startRow}
+    </select>
+
+    <!-- ================================================ -->
+    <!-- 특정 회원 로그인 이력 총 건수                     -->
+    <!-- ================================================ -->
+    <select id="countLoginHistoryByMemberNo" resultType="int">
+        SELECT COUNT(*)
+        FROM login_history
+        WHERE member_no = #{memberNo}
+    </select>
+
+</mapper>
