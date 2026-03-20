@@ -1,33 +1,34 @@
 package com.shop.domain;
 
-import java.util.Date; 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import java.time.LocalDateTime; 
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 
-@Getter
-@Setter
-@ToString           
-@NoArgsConstructor  
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Review {
-    private int reviewNo;
-    private int memberNo;
-    private int productNo;
-    private int orderItemNo;
+    private Long reviewNo;
+    private Long memberNo;
+    private Long productNo;
+    private Long orderItemNo;
+    
     private String title;
     private String content;
     private int rating;
-        
+    
     private Integer userHeight;   
     private Integer userWeight;  
     private String sizeRating;  
     
     private String imageUrl;
     private int likeCount;
-    private Date createdAt; 
-    private Date updatedAt;  
-    private String deleteYn;
+    
+    private LocalDateTime createdAt; 
+    private LocalDateTime updatedAt;  
+    
+    private String deleteYn; 
 }

@@ -1,6 +1,6 @@
 package com.shop.dto.user.review;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -9,9 +9,9 @@ import lombok.ToString;
 @Setter
 @ToString
 public class ReviewDetailResponseDTO {
-    private int reviewNo;
+    private Long reviewNo;        
     private String memberName;   
-    private String productName; 
+    private String productName;  
     private String title;
     private String content;
     private int rating;
@@ -22,5 +22,5 @@ public class ReviewDetailResponseDTO {
     
     private String imageUrl;     
     private int likeCount;
-    private Date createdAt;
+    private LocalDateTime createdAt;
 }

@@ -9,9 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 @ToString
 public class ReviewSaveRequestDTO {
-    private int memberNo;
-    private int productNo;
-    private int orderItemNo;
+    private Long memberNo;       
+    private Long productNo;      
+    private Long orderItemNo;   
     private String title;
     private String content;
     private int rating;
@@ -20,6 +20,7 @@ public class ReviewSaveRequestDTO {
     private Integer userWeight;
     private String sizeRating;
     
+    // 파일 업로드 처리용
     private MultipartFile uploadFile; 
-    private String imageUrl;         
+    private String imageUrl;
 }

@@ -1,19 +1,23 @@
 package com.shop.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class OrderItem {
-    private Long orderItemNo;
+    private Long orderItemNo;   
     private Long orderNo;        
-    private Long productOptionNo;
-    private Integer productNo;   
-    private Integer quantity;
-    private Integer unitPrice;
-    private String itemName;
-    private String itemSize;
-    private String itemColor;
-    private String imageUrl;
+    private Long productOptionNo; 
+    
+    private int quantity;         
+    private long unitPrice;      
+    
+    private String itemName;      
+    private String itemSize;     
+    private String itemColor;     
 }
