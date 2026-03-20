@@ -55,7 +55,10 @@
 		po.color AS color,
 		po.option_size AS sizeName,
 		p.price AS price,
-		pi.image_url AS imageUrl
+		CASE
+		WHEN img.image_url IS NOT NULL THEN '/upload/' || img.image_url
+		ELSE NULL
+		END AS imageUrl
 		FROM cart_item ci
 		JOIN cart c
 		ON ci.cart_no = c.cart_no
@@ -63,11 +66,23 @@
 		ON ci.product_option_no = po.product_option_no
 		JOIN product p
 		ON po.product_no = p.product_no
-		LEFT JOIN product_img pi
-		ON p.product_no = pi.product_no
-		AND pi.image_type =
-		'THUMB'
-		AND pi.sort_order = 1
+		LEFT JOIN (
+		SELECT product_no, image_url
+		FROM (
+		SELECT
+		pi.product_no,
+		pi.image_url,
+		ROW_NUMBER() OVER (
+		PARTITION BY pi.product_no
+		ORDER BY
+		CASE WHEN pi.image_type = 'THUMB' THEN 0 ELSE 1 END,
+		NVL(pi.sort_order, 9999)
+		) AS rn
+		FROM product_img pi
+		)
+		WHERE rn = 1
+		) img
+		ON p.product_no = img.product_no
 		WHERE c.member_no = #{memberNo}
 		ORDER BY ci.cart_item_no DESC
 	</select>
