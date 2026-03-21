@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.shop.domain.Cart;
 import com.shop.domain.Member;
-import com.shop.mapper.CartMapper;
+import com.shop.mapper.user.CartMapper;
 
 import lombok.RequiredArgsConstructor;
 

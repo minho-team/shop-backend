@@ -4,7 +4,7 @@ import com.shop.domain.Faq;
 import com.shop.dto.user.inquiry.FaqCreateRequest;
 import com.shop.dto.user.inquiry.FaqPageRequest;
 import com.shop.dto.user.inquiry.PageResponse;
-import com.shop.mapper.FaqMapper;
+import com.shop.mapper.user.FaqMapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

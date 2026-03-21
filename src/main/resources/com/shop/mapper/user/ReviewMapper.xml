@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.shop.mapper.user.ReviewMapper">
+
+	<resultMap id="reviewMap" type="com.shop.domain.Review">
+		<id property="reviewNo" column="review_no" />
+		<result property="memberNo" column="member_no" />
+		<result property="productNo" column="product_no" />
+		<result property="orderItemNo" column="order_item_no" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="rating" column="rating" />
+		<result property="userHeight" column="user_height" />
+		<result property="userWeight" column="user_weight" />
+		<result property="sizeRating" column="size_rating" />
+		<result property="imageUrl" column="image_url" />
+		<result property="likeCount" column="like_count" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+		<result property="deleteYn" column="delete_yn" />
+	</resultMap>
+
+	<insert id="insertReview" parameterType="com.shop.domain.Review">
+		<selectKey keyProperty="reviewNo" resultType="long"
+			order="BEFORE">
+			SELECT seq_review.NEXTVAL FROM dual
+		</selectKey>
+
+		INSERT INTO review (
+		review_no,
+		member_no,
+		product_no,
+		order_item_no,
+		title,
+		content,
+		rating,
+		user_height,
+		user_weight,
+		size_rating,
+		image_url,
+		like_count,
+		created_at,
+		delete_yn
+		) VALUES (
+		#{reviewNo},
+		#{memberNo},
+		#{productNo},
+		#{orderItemNo},
+		#{title},
+		#{content},
+		#{rating},
+		#{userHeight},
+		#{userWeight},
+		#{sizeRating},
+		#{imageUrl},
+		0, SYSTIMESTAMP,
+		'N' )
+	</insert>
+
+	<select id="getReviewListByProduct" parameterType="long"
+		resultMap="reviewMap">
+		SELECT
+		review_no, member_no, product_no, order_item_no,
+		title, content, rating, user_height, user_weight,
+		size_rating,
+		image_url, like_count, created_at, updated_at, delete_yn
+		FROM review
+		WHERE product_no = #{productNo}
+		AND delete_yn = 'N'
+		ORDER BY created_at
+		DESC
+	</select>
+
+	<select id="getOneReview" parameterType="long"
+		resultMap="reviewMap">
+		SELECT
+		review_no, member_no, product_no, order_item_no,
+		title, content, rating, user_height, user_weight,
+		size_rating,
+		image_url, like_count, created_at, updated_at, delete_yn
+		FROM review
+		WHERE review_no = #{reviewNo}
+	</select>
+
+	<select id="getOneReviewByOrderItem" parameterType="long"
+		resultMap="reviewMap">
+		SELECT
+		review_no, order_item_no, product_no
+		FROM review
+		WHERE
+		order_item_no = #{orderItemNo}
+		AND delete_yn = 'N'
+	</select>
+
+	<select id="selectReviewsByMemberNo"
+		resultType="com.shop.dto.user.review.MyReviewResponseDTO">
+		SELECT
+		r.review_no AS reviewNo,
+		r.product_no AS productNo,
+		oi.item_name AS itemName,
+		r.content AS content,
+		r.rating AS rating,
+		r.created_at AS createdAt
+		FROM review r
+		INNER JOIN order_item oi ON r.order_item_no = oi.order_item_no
+		WHERE r.member_no = #{memberNo}
+		ORDER BY r.created_at DESC
+	</select>
+
+</mapper>

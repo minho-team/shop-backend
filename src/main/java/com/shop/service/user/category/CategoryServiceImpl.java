@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.shop.dto.user.category.HomeCategoryMenuDto;
-import com.shop.mapper.CategoryMapper;
+import com.shop.mapper.user.CategoryMapper;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {

@@ -15,8 +15,8 @@ import com.shop.dto.user.order.OrderDetailResponseDTO;
 import com.shop.dto.user.order.OrderItemCreateRequestDTO;
 import com.shop.dto.user.order.OrderItemDTO;
 import com.shop.dto.user.order.OrderResponseDTO;
-import com.shop.mapper.OrderItemMapper;
-import com.shop.mapper.OrdersMapper;
+import com.shop.mapper.user.OrderItemMapper;
+import com.shop.mapper.user.OrdersMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

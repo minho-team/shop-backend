@@ -3,7 +3,8 @@ package com.shop.service.user.order;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import com.shop.domain.OrderItem;
-import com.shop.mapper.OrderItemMapper;
+import com.shop.mapper.user.OrderItemMapper;
+
 import lombok.RequiredArgsConstructor;
 
 @Service

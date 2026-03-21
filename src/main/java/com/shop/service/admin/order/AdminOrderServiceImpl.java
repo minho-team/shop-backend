@@ -13,7 +13,7 @@ import com.shop.dto.admin.order.AdminOrderReadDTO;
 import com.shop.dto.admin.order.OrderStatusUpdateRequestDTO;
 import com.shop.dto.admin.order.PageResponseDto;
 import com.shop.dto.admin.order.RefundStatusUpdateRequestDTO;
-import com.shop.mapper.AdminOrderMapper;
+import com.shop.mapper.admin.AdminOrderMapper;
 
 @Service
 public class AdminOrderServiceImpl implements AdminOrderService {

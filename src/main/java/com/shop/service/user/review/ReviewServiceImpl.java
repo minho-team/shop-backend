@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.shop.domain.Review;
 import com.shop.dto.user.review.MyReviewResponseDTO;
-import com.shop.mapper.ReviewMapper;
+import com.shop.mapper.user.ReviewMapper;
 
 import lombok.RequiredArgsConstructor;
 
