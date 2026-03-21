@@ -14,13 +14,13 @@ public class OrderItem {
     private Long orderNo;        
     private Long productOptionNo; 
     
-    private int quantity;         
-    private long unitPrice;      
+    private Integer quantity;         
+    private Integer unitPrice;      
     
     private String itemName;      
     private String itemSize;     
     private String itemColor;     
     
-    private Long productNo;
-    private String imageUrl;
+    private String orderItemStatus;
+    private Integer refundedQuantity;
 }

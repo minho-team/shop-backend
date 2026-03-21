@@ -90,11 +90,11 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	@Transactional(readOnly = true)
 	public OrderDetailResponseDTO getOrderDetail(Long orderNo) throws Exception {
-Orders order = mapper.getOneOrder(orderNo);
-		
+		Orders order = mapper.getOneOrder(orderNo);
+
 		// 1. DTO 리스트로 데이터를 받아옵니다 (Mapper 반환 타입 확인 필수)
 		List<OrderItemDTO> items = mapper.getOrderItemList(orderNo);
-		
+
 		// 2. 다른 페이지와 동일하게 이미지 URL에 /upload/ 경로를 붙여줍니다.
 		if (items != null) {
 			for (OrderItemDTO item : items) {
@@ -103,11 +103,8 @@ Orders order = mapper.getOneOrder(orderNo);
 				}
 			}
 		}
-		
-		return OrderDetailResponseDTO.builder()
-				.order(order)
-				.items(items)
-				.build();
+
+		return OrderDetailResponseDTO.builder().order(order).items(items).build();
 	}
 
 	@Override

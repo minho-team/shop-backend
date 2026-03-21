@@ -14,13 +14,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.domain.Member;
-import com.shop.domain.Orders;
 import com.shop.dto.user.order.OrderCreateRequestDTO;
 import com.shop.dto.user.order.OrderCreateResponseDTO;
 import com.shop.dto.user.order.OrderDetailResponseDTO;
+import com.shop.dto.user.order.OrderItemDTO;
 import com.shop.dto.user.order.OrderResponseDTO;
 import com.shop.service.user.member.MemberService;
-import com.shop.service.user.order.OrderItemService;
 import com.shop.service.user.order.OrdersService;
 
 import lombok.RequiredArgsConstructor;
@@ -34,7 +33,6 @@ public class OrdersController {
 
 	private final OrdersService ordersService;
 	private final MemberService memberService;
-	private final OrderItemService orderItemService;
 
 	@PostMapping
 	public ResponseEntity<?> createOrder(@RequestBody OrderCreateRequestDTO request, Authentication authentication) {
@@ -109,7 +107,11 @@ public class OrdersController {
 			// 3. 리액트가 기대하는 구조(Map)로 데이터 구성
 			Map<String, Object> resultMap = new java.util.HashMap<>();
 			resultMap.put("order", detail.getOrder());
-			resultMap.put("items", detail.getItems()); // 여기에 productNo, imageUrl이 꽉 차서 나갑니다!
+			resultMap.put("items", detail.getItems());
+			
+			for(OrderItemDTO item : detail.getItems()) {
+				log.info("item내려가는지"+item.getOrderItemStatus());
+			}
 
 			// 회원 주소 정보 추가
 			resultMap.put("ordererZipCode", member.getZipCode());
