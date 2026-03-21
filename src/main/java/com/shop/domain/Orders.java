@@ -1,7 +1,6 @@
 package com.shop.domain;
 
-import java.util.Date;
-
+import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
@@ -13,16 +12,13 @@ public class Orders {
 	private String ordererEmail;
 	private String orderStatus;
 	private Long totalPrice;
-	private Date createdAt;
-	private Date paidAt;
+	private LocalDateTime createdAt;
+	private LocalDateTime paidAt;
 	private String receiverName;
 	private String receiverPhoneNumber;
 	private String receiverZipCode;
 	private String receiverBaseAddress;
 	private String receiverDetailAddress;
 	private String message;
-	private String refundStatus;
-	private Date refundRequestedAt;
-	private Date refundedAt;
 	
 }
