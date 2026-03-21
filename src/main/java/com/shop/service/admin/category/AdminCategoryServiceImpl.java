@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.shop.dto.admin.category.AdminCategoryListDTO;
-import com.shop.mapper.AdminCategoryMapper;
+import com.shop.mapper.admin.AdminCategoryMapper;
 
 import lombok.RequiredArgsConstructor;
 

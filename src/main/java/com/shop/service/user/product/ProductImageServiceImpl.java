@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.shop.dto.user.product.ProductImageDTO;
 import com.shop.dto.user.product.ProductImageListDTO;
-import com.shop.mapper.ProductImageMapper;
+import com.shop.mapper.user.ProductImageMapper;
 
 import lombok.RequiredArgsConstructor;
 

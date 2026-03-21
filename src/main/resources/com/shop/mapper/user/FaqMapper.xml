@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.shop.mapper.user.FaqMapper">
+
+    <!-- FAQ 전체 조회 (삭제되지 않은 것만, 카테고리·정렬순 기준) -->
+    <select id="readAllFaq" resultType="Faq">
+        SELECT faq_no     AS faqNo,
+               category,
+               question,
+               answer,
+               sort_order AS sortOrder,
+               delete_yn  AS deleteYn,
+               created_at AS createdAt
+        FROM faq
+        WHERE delete_yn = 'N'
+        ORDER BY category, sort_order ASC
+    </select>
+
+    <!-- 카테고리별 FAQ 조회 -->
+    <select id="readFaqByCategory" resultType="Faq">
+        SELECT faq_no     AS faqNo,
+               category,
+               question,
+               answer,
+               sort_order AS sortOrder,
+               delete_yn  AS deleteYn,
+               created_at AS createdAt
+        FROM faq
+        WHERE delete_yn = 'N'
+          AND category = #{category}
+        ORDER BY sort_order ASC
+    </select>
+
+    <!-- FAQ 키워드 검색 (질문 또는 답변에 키워드 포함) -->
+    <select id="searchFaq" resultType="Faq">
+        SELECT faq_no     AS faqNo,
+               category,
+               question,
+               answer,
+               sort_order AS sortOrder,
+               delete_yn  AS deleteYn,
+               created_at AS createdAt
+        FROM faq
+        WHERE delete_yn = 'N'
+          AND (question LIKE '%' || #{keyword} || '%'
+               OR answer LIKE '%' || #{keyword} || '%')
+        ORDER BY category, sort_order ASC
+    </select>
+
+    <!-- =========================================
+         FAQ 페이징 조회 (Oracle ROWNUM 방식)
+         카테고리 + 키워드 필터 동적 적용
+         startRow: (page-1)*size, endRow: page*size
+         ========================================= -->
+    <select id="getFaqPage" resultType="Faq">
+        SELECT *
+        FROM (
+            SELECT a.*, ROWNUM AS rnum
+            FROM (
+                SELECT faq_no     AS faqNo,
+                       category,
+                       question,
+                       answer,
+                       sort_order AS sortOrder,
+                       delete_yn  AS deleteYn,
+                       created_at AS createdAt
+                FROM faq
+                WHERE delete_yn = 'N'
+                <if test="category != null and category != '' and category != '전체'">
+                    AND category = #{category}
+                </if>
+                <if test="keyword != null and keyword != ''">
+                    AND (question LIKE '%' || #{keyword} || '%'
+                         OR answer LIKE '%' || #{keyword} || '%')
+                </if>
+                ORDER BY category, sort_order ASC
+            ) a
+            WHERE ROWNUM &lt;= #{endRow}
+        )
+        WHERE rnum &gt; #{startRow}
+    </select>
+
+    <!-- =========================================
+         FAQ 전체 건수 조회 (페이징 계산용)
+         카테고리 + 키워드 필터 동적 적용
+         ========================================= -->
+    <select id="countFaq" resultType="int">
+        SELECT COUNT(*)
+        FROM faq
+        WHERE delete_yn = 'N'
+        <if test="category != null and category != '' and category != '전체'">
+            AND category = #{category}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (question LIKE '%' || #{keyword} || '%'
+                 OR answer LIKE '%' || #{keyword} || '%')
+        </if>
+    </select>
+
+    <!-- FAQ 등록 (관리자 전용) - 시퀀스로 faq_no 채번 후 INSERT -->
+    <insert id="createFaq">
+        <selectKey keyProperty="faqNo" resultType="Long" order="BEFORE">
+            SELECT seq_faq.nextval FROM dual
+        </selectKey>
+        INSERT INTO faq (
+            faq_no, category, question, answer, sort_order, delete_yn, created_at
+        )
+        VALUES (
+            #{faqNo}, #{category}, #{question}, #{answer}, #{sortOrder}, 'N', SYSTIMESTAMP
+        )
+    </insert>
+
+    <!-- FAQ 삭제 (관리자 전용, soft delete) - delete_yn을 Y로 변경 -->
+    <update id="deleteFaq">
+        UPDATE faq
+        SET delete_yn = 'Y'
+        WHERE faq_no = #{faqNo}
+    </update>
+
+</mapper>

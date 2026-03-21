@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.shop.mapper.admin.AdminCategoryMapper">
+
+    <select id="getCategoryList" resultType="com.shop.dto.admin.category.AdminCategoryListDTO">
+        SELECT
+            c.category_id AS categoryId,
+            c.name AS name,
+            c.parent_id AS parentId,
+            c.created_at AS createdAt,
+            c.use_yn AS useYn,
+            CASE
+                WHEN c.parent_id IS NULL THEN 1
+                WHEN p.parent_id IS NULL THEN 2
+                ELSE 3
+            END AS depth
+        FROM category c
+        LEFT JOIN category p
+            ON c.parent_id = p.category_id
+        ORDER BY c.category_id
+    </select>
+
+</mapper>

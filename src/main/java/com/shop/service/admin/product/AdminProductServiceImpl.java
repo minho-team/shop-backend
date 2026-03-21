@@ -16,7 +16,7 @@ import com.shop.dto.admin.product.AdminProductOptionRequestDTO;
 import com.shop.dto.admin.product.AdminProductPageResponseDTO;
 import com.shop.dto.admin.product.AdminProductReadDTO;
 import com.shop.dto.admin.product.AdminProductSearchDTO;
-import com.shop.mapper.AdminProductMapper;
+import com.shop.mapper.admin.AdminProductMapper;
 import com.shop.util.CustomFileUtil;
 
 import lombok.RequiredArgsConstructor;

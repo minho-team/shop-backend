@@ -17,8 +17,8 @@ import com.shop.dto.user.product.ProductDetailResponse;
 import com.shop.dto.user.product.ProductListResponse;
 import com.shop.dto.user.product.ProductListResponseDto;
 import com.shop.dto.user.product.ProductUpdateRequest;
-import com.shop.mapper.ProductMapper;
-import com.shop.mapper.ProductOptionMapper;
+import com.shop.mapper.user.ProductMapper;
+import com.shop.mapper.user.ProductOptionMapper;
 
 @Service
 public class ProductServiceImpl implements ProductService {

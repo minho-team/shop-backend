@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.shop.domain.Member;
 import com.shop.domain.MemberRole;
 import com.shop.dto.user.auth.RegisterRequestDto;
-import com.shop.mapper.MemberMapper;
+import com.shop.mapper.user.MemberMapper;
 
 import lombok.RequiredArgsConstructor;
 

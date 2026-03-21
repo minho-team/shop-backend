@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.user.ProductImageMapper">
+
+
+	<!-- 초기 이미지 넣는 쿼리 -->
+	<insert id="insertSeedProductImg" parameterType="ProductImage">
+		<selectKey keyProperty="productImgNo" resultType="long"
+			order="BEFORE">
+			SELECT seq_product_img.nextval FROM dual
+		</selectKey>
+
+		INSERT INTO product_img (
+		product_img_no,
+		product_no,
+		image_url,
+		image_type,
+		sort_order
+		) VALUES (
+		#{productImgNo},
+		#{productNo},
+		#{imageUrl},
+		#{imageType},
+		#{sortOrder}
+		)
+	</insert>
+
+	<!-- 상품 상세 페이지에서 이미지 받아오는 쿼리 -->
+	<select id="getProductMainAndThumbImages"
+		resultType="com.shop.dto.user.product.ProductImageDTO">
+		SELECT
+		product_img_no AS productImgNo,
+		product_no AS productNo,
+		image_url AS imageUrl,
+		image_type AS imageType,
+		sort_order AS sortOrder
+		FROM product_img
+		WHERE product_no = #{productNo}
+		AND image_type IN ('MAIN', 'THUMB')
+		ORDER BY
+		CASE image_type
+		WHEN 'MAIN' THEN 1
+		WHEN 'THUMB' THEN 2
+		ELSE 3
+		END,
+		sort_order ASC
+	</select>
+</mapper>

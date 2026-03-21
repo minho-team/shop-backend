@@ -7,9 +7,9 @@ import com.shop.dto.user.inquiry.InquiryCreateRequest;
 import com.shop.dto.user.inquiry.InquiryPageRequest;
 import com.shop.dto.user.inquiry.PageResponse;
 import com.shop.dto.user.inquiry.UpdateInquiryRequest;
-import com.shop.mapper.CommentMapper;
-import com.shop.mapper.InquiryFileMapper;
-import com.shop.mapper.InquiryMapper;
+import com.shop.mapper.user.CommentMapper;
+import com.shop.mapper.user.InquiryFileMapper;
+import com.shop.mapper.user.InquiryMapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

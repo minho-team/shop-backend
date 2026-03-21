@@ -8,7 +8,7 @@ import com.shop.domain.Cart;
 import com.shop.domain.CartItem;
 import com.shop.dto.user.cart.CartItemAddRequest;
 import com.shop.dto.user.cart.CartItemResponseDTO;
-import com.shop.mapper.CartItemMapper;
+import com.shop.mapper.user.CartItemMapper;
 
 import lombok.RequiredArgsConstructor;
 

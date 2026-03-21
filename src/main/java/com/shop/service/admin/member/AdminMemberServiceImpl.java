@@ -12,10 +12,10 @@ import com.shop.dto.admin.member.AdminMemberDetailResponse;
 import com.shop.dto.admin.member.AdminMemberSearchDTO;
 import com.shop.dto.admin.member.AdminMemberUpdateRequest;
 import com.shop.dto.user.inquiry.PageResponse;
-import com.shop.mapper.CartItemMapper;
-import com.shop.mapper.InquiryMapper;
-import com.shop.mapper.MemberMapper;
-import com.shop.mapper.OrdersMapper;
+import com.shop.mapper.admin.AdminMemberMapper;
+import com.shop.mapper.user.CartItemMapper;
+import com.shop.mapper.user.InquiryMapper;
+import com.shop.mapper.user.OrdersMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,108 +23,109 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminMemberServiceImpl implements AdminMemberService {
 
-    private final MemberMapper   memberMapper;
-    private final OrdersMapper   ordersMapper;
-    private final InquiryMapper  inquiryMapper;
-    private final CartItemMapper cartItemMapper;
+	private final AdminMemberMapper adminMemberMapper;
+	private final OrdersMapper ordersMapper;
+	private final InquiryMapper inquiryMapper;
+	private final CartItemMapper cartItemMapper;
 
-    // ================================================
-    // 회원 목록 페이징 조회
-    // ================================================
-    @Override
-    public PageResponse<Member> getMemberList(AdminMemberSearchDTO dto) throws Exception {
-        dto.setStartRow((dto.getPage() - 1) * dto.getSize() + 1);
-        dto.setEndRow(dto.getPage() * dto.getSize());
-        int totalCount = memberMapper.selectMemberCount(dto);
-        List<Member> list = memberMapper.selectMemberList(dto);
-        return new PageResponse<>(list, totalCount, dto.getPage(), dto.getSize());
-    }
+	// ================================================
+	// 회원 목록 페이징 조회
+	// ================================================
+	@Override
+	public PageResponse<Member> getMemberList(AdminMemberSearchDTO dto) throws Exception {
+		dto.setStartRow((dto.getPage() - 1) * dto.getSize() + 1);
+		dto.setEndRow(dto.getPage() * dto.getSize());
+		int totalCount = adminMemberMapper.selectMemberCount(dto);
+		List<Member> list = adminMemberMapper.selectMemberList(dto);
+		return new PageResponse<>(list, totalCount, dto.getPage(), dto.getSize());
+	}
 
-    // ================================================
-    // 회원 상세 조회
-    // 기본정보 + 최근 주문 5건 + 최근 문의 3건 + 장바구니 수량
-    // ================================================
-    @Override
-    public AdminMemberDetailResponse getMemberDetail(Long memberNo) throws Exception {
-        Member member = memberMapper.selectMemberByNo(memberNo);
-        if (member == null) throw new Exception("존재하지 않는 회원입니다. memberNo=" + memberNo);
+	// ================================================
+	// 회원 상세 조회
+	// 기본정보 + 최근 주문 5건 + 최근 문의 3건 + 장바구니 수량
+	// ================================================
+	@Override
+	public AdminMemberDetailResponse getMemberDetail(Long memberNo) throws Exception {
+		Member member = adminMemberMapper.selectMemberByNo(memberNo);
+		if (member == null)
+			throw new Exception("존재하지 않는 회원입니다. memberNo=" + memberNo);
 
-        List<Orders>  recentOrders    = ordersMapper.selectRecentOrdersByMemberNo(memberNo);
-        List<Inquiry> recentInquiries = inquiryMapper.selectRecentInquiriesByMemberNo(memberNo);
-        int           cartItemCount   = cartItemMapper.countCartItemByMemberNo(memberNo);
+		List<Orders> recentOrders = ordersMapper.selectRecentOrdersByMemberNo(memberNo);
+		List<Inquiry> recentInquiries = inquiryMapper.selectRecentInquiriesByMemberNo(memberNo);
+		int cartItemCount = cartItemMapper.countCartItemByMemberNo(memberNo);
 
-        return new AdminMemberDetailResponse(member, recentOrders, recentInquiries, cartItemCount);
-    }
+		return new AdminMemberDetailResponse(member, recentOrders, recentInquiries, cartItemCount);
+	}
 
-    // ================================================
-    // 회원 상태 변경
-    // ================================================
-    @Override
-    public void updateMemberStatus(Long memberNo, String status) throws Exception {
-        memberMapper.updateMemberStatus(memberNo, status);
-    }
+	// ================================================
+	// 회원 상태 변경
+	// ================================================
+	@Override
+	public void updateMemberStatus(Long memberNo, String status) throws Exception {
+		adminMemberMapper.updateMemberStatus(memberNo, status);
+	}
 
-    // ================================================
-    // 회원 정보 수정
-    // [수정] gender, birthday 세팅 추가
-    //        기존에 누락되어 수정해도 DB에 반영되지 않던 문제 해결
-    // ================================================
-    @Override
-    public void updateMember(Long memberNo, AdminMemberUpdateRequest request) throws Exception {
-        Member member = new Member();
-        member.setMemberNo(memberNo);
-        member.setName(request.getName());
-        member.setNickName(request.getNickName());
-        member.setEmail(request.getEmail());
-        member.setPhoneNumber(request.getPhoneNumber());
-        member.setGender(request.getGender());           // [추가]
-        member.setBirthday(request.getBirthday());       // [추가]
-        member.setZipCode(request.getZipCode());
-        member.setBasicAddress(request.getBasicAddress());
-        member.setDetailAddress(request.getDetailAddress());
-        member.setBankName(request.getBankName());
-        member.setBankCode(request.getBankCode());
-        member.setAccountHolderName(request.getAccountHolderName());
-        memberMapper.updateMember(member);
-    }
+	// ================================================
+	// 회원 정보 수정
+	// [수정] gender, birthday 세팅 추가
+	// 기존에 누락되어 수정해도 DB에 반영되지 않던 문제 해결
+	// ================================================
+	@Override
+	public void updateMember(Long memberNo, AdminMemberUpdateRequest request) throws Exception {
+		Member member = new Member();
+		member.setMemberNo(memberNo);
+		member.setName(request.getName());
+		member.setNickName(request.getNickName());
+		member.setEmail(request.getEmail());
+		member.setPhoneNumber(request.getPhoneNumber());
+		member.setGender(request.getGender()); // [추가]
+		member.setBirthday(request.getBirthday()); // [추가]
+		member.setZipCode(request.getZipCode());
+		member.setBasicAddress(request.getBasicAddress());
+		member.setDetailAddress(request.getDetailAddress());
+		member.setBankName(request.getBankName());
+		member.setBankCode(request.getBankCode());
+		member.setAccountHolderName(request.getAccountHolderName());
+		adminMemberMapper.updateMember(member);
+	}
 
-    // ================================================
-    // 회원 삭제
-    // ================================================
-    @Override
-    public void deleteMember(Long memberNo) throws Exception {
-        memberMapper.deleteMember(memberNo);
-    }
+	// ================================================
+	// 회원 삭제
+	// ================================================
+	@Override
+	public void deleteMember(Long memberNo) throws Exception {
+		adminMemberMapper.deleteMember(memberNo);
+	}
 
-    // ================================================
-    // 특정 회원 주문 목록 페이징 조회 (5개씩)
-    // ================================================
-    @Override
-    public PageResponse<Orders> getMemberOrderPage(Long memberNo, int page, int size) throws Exception {
-        int startRow   = (page - 1) * size + 1;
-        int endRow     = page * size;
-        int totalCount = ordersMapper.countOrdersByMemberNo(memberNo);
-        List<Orders> list = ordersMapper.selectOrderPageByMemberNo(memberNo, startRow, endRow);
-        return new PageResponse<>(list, totalCount, page, size);
-    }
+	// ================================================
+	// 특정 회원 주문 목록 페이징 조회 (5개씩)
+	// ================================================
+	@Override
+	public PageResponse<Orders> getMemberOrderPage(Long memberNo, int page, int size) throws Exception {
+		int startRow = (page - 1) * size + 1;
+		int endRow = page * size;
+		int totalCount = ordersMapper.countOrdersByMemberNo(memberNo);
+		List<Orders> list = ordersMapper.selectOrderPageByMemberNo(memberNo, startRow, endRow);
+		return new PageResponse<>(list, totalCount, page, size);
+	}
 
-    // ================================================
-    // 특정 회원 문의 목록 페이징 조회 (5개씩)
-    // ================================================
-    @Override
-    public PageResponse<Inquiry> getMemberInquiryPage(Long memberNo, int page, int size) throws Exception {
-        int startRow   = (page - 1) * size + 1;
-        int endRow     = page * size;
-        int totalCount = inquiryMapper.countInquiryByMemberNo(memberNo);
-        List<Inquiry> list = inquiryMapper.selectInquiryPageByMemberNo(memberNo, startRow, endRow);
-        return new PageResponse<>(list, totalCount, page, size);
-    }
+	// ================================================
+	// 특정 회원 문의 목록 페이징 조회 (5개씩)
+	// ================================================
+	@Override
+	public PageResponse<Inquiry> getMemberInquiryPage(Long memberNo, int page, int size) throws Exception {
+		int startRow = (page - 1) * size + 1;
+		int endRow = page * size;
+		int totalCount = inquiryMapper.countInquiryByMemberNo(memberNo);
+		List<Inquiry> list = inquiryMapper.selectInquiryPageByMemberNo(memberNo, startRow, endRow);
+		return new PageResponse<>(list, totalCount, page, size);
+	}
 
-    // ================================================
-    // 특정 회원 장바구니 상품 목록 조회
-    // ================================================
-    @Override
-    public List<AdminCartItemDTO> getMemberCartItems(Long memberNo) throws Exception {
-        return cartItemMapper.selectCartItemsWithProductByMemberNo(memberNo);
-    }
+	// ================================================
+	// 특정 회원 장바구니 상품 목록 조회
+	// ================================================
+	@Override
+	public List<AdminCartItemDTO> getMemberCartItems(Long memberNo) throws Exception {
+		return cartItemMapper.selectCartItemsWithProductByMemberNo(memberNo);
+	}
 }
