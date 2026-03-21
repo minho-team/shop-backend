@@ -163,7 +163,8 @@
         oi.item_name          AS itemName,
         oi.item_size          AS itemSize,
         oi.item_color         AS itemColor,
-        pi.image_url          AS imageUrl
+        pi.image_url          AS imageUrl,
+        oi.order_item_status  AS orderItemStatus
     FROM order_item oi
     INNER JOIN product_option po 
         ON oi.product_option_no = po.product_option_no

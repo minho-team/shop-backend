@@ -15,12 +15,13 @@ public class OrderItemDTO {
     private Long productOptionNo; 
     private Long productNo;       // product_option 테이블에서 조인하여 획득
     
-    private int quantity;         
-    private long unitPrice;   
+    private Integer quantity;         
+    private Long unitPrice;   
     
     private String itemName;      
     private String itemSize;      
     private String itemColor;     
     
     private String imageUrl;      // product_img 테이블에서 조인하여 획득   
+    private String orderItemStatus;
 }

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.shop.mapper.user.RefundMapper">
+
+	<insert id="insertRefund">
+		INSERT INTO refund (
+		refund_no,
+		order_no,
+		member_no,
+		refund_status,
+		refund_reason,
+		total_refund_amount,
+		requested_at
+		)
+		VALUES (
+		seq_refund.NEXTVAL,
+		#{orderNo},
+		#{memberNo},
+		'REQUESTED',
+		#{refundReason},
+		0,
+		SYSTIMESTAMP
+		)
+	</insert>
+
+	<select id="getCurrentRefundNo" resultType="long">
+		SELECT seq_refund.CURRVAL
+		FROM dual
+	</select>
+
+	<insert id="insertRefundItem">
+		INSERT INTO refund_item (
+		refund_item_no,
+		refund_no,
+		order_item_no,
+		refund_quantity,
+		refund_amount,
+		refund_status,
+		created_at
+		)
+		VALUES (
+		seq_refund_item.NEXTVAL,
+		#{refundNo},
+		#{orderItemNo},
+		#{refundQuantity},
+		#{refundAmount},
+		'REQUESTED',
+		SYSTIMESTAMP
+		)
+	</insert>
+
+	<update id="updateRefundTotalAmount">
+		UPDATE refund
+		SET total_refund_amount = #{totalRefundAmount}
+		WHERE refund_no = #{refundNo}
+	</update>
+
+	<update id="increaseRefundedQuantity">
+		UPDATE order_item
+		SET refunded_quantity = refunded_quantity + #{refundQuantity}
+		WHERE order_item_no = #{orderItemNo}
+	</update>
+
+	<update id="updateOrderItemStatus">
+		UPDATE order_item
+		SET order_item_status = #{orderItemStatus}
+		WHERE order_item_no = #{orderItemNo}
+	</update>
+
+	<select id="findOrderItemStatusesByOrderNo" resultType="string">
+		SELECT order_item_status
+		FROM order_item
+		WHERE order_no = #{orderNo}
+		ORDER BY order_item_no ASC
+	</select>
+
+	<update id="updateOrderStatus">
+		UPDATE orders
+		SET order_status = #{orderStatus}
+		WHERE order_no = #{orderNo}
+	</update>
+
+
+</mapper>	
