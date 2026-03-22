@@ -58,6 +58,12 @@ public interface AdminProductMapper {
 	// 상품 옵션 삭제
 	void deleteProductOption(@Param("productNo") Long productNo,
             					@Param("productOptionNo") Long productOptionNo);
+	
+	// 상품 use_yn = 'N' 처리
+	void softDeleteProduct(Long productNo);
+
+	// 해당 상품 이미지 전체 삭제
+	void deleteProductImages(Long productNo);
     
 	
 }

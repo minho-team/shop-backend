@@ -2,6 +2,7 @@ package com.shop.controller.admin;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -111,6 +112,22 @@ public class AdminProductController {
 		}
 	}
 	
+	// 상품 옵션 추가
+	@PostMapping("/{productNo}/options")
+	public ResponseEntity<?> insertProductOption(
+	        @PathVariable Long productNo,
+	        @RequestBody AdminProductOptionRequestDTO dto) {
+	    try {
+	        productService.insertProductOption(productNo, dto);
+	        return ResponseEntity.ok("상품 옵션 추가 완료");
+	    } catch (IllegalArgumentException e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품 옵션 추가 중 오류가 발생했습니다.");
+	    }
+	}
+	
 	// 상품 옵션 수정
 	@PutMapping("/{productNo}/options/{productOptionNo}")
 	public ResponseEntity<?> updateProductOption(
@@ -142,13 +159,21 @@ public class AdminProductController {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품 옵션 삭제 중 오류가 발생했습니다.");
 	    }
 	}
-	/*
-	 * @DeleteMapping("/{productNo}")
-	 * 
-	 * @PreAuthorize("hasRole('ADMIN')") public ResponseEntity<?>
-	 * deleteProduct(@PathVariable Long productNo) { try {
-	 * productService.deleteProduct(productNo); } catch (Exception e) {
-	 * e.printStackTrace(); } return null; }
-	 */
+	
+	// 상품 삭제
+	@DeleteMapping("/{productNo}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<?> deleteProduct(@PathVariable Long productNo) {
+	    try {
+	        productService.deleteProduct(productNo);
+	        return ResponseEntity.ok("상품 삭제 완료");
+	    } catch (IllegalArgumentException e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품 삭제 중 오류가 발생했습니다.");
+	    }
+	}
+	
 
 }
