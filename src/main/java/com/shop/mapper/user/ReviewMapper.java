@@ -9,9 +9,9 @@ import com.shop.dto.user.review.MyReviewResponseDTO;
 public interface ReviewMapper {
 	void insertReview(Review review);
 
-	List<Review> getReviewListByProduct(int productNo);
+	List<Review> getReviewListByProduct(Long productNo);
 
-	Review getOneReviewByOrderItem(int orderItemNo);
+	Review getOneReviewByOrderItem(Long orderItemNo);
 
 	List<MyReviewResponseDTO> selectReviewsByMemberNo(Long memberNo);
 }
