@@ -12,8 +12,7 @@
 		<result property="itemName" column="item_name" />
 		<result property="itemSize" column="item_size" />
 		<result property="itemColor" column="item_color" />
-		<result property="productNo" column="product_no" />
-		<result property="imageUrl" column="image_url" />
+
 	</resultMap>
 
 	<select id="selectByOrderNo" parameterType="long"
