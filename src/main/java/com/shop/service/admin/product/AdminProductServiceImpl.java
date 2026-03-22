@@ -132,7 +132,8 @@ public class AdminProductServiceImpl implements AdminProductService{
 	        log.info("서비스 진입 - product dto: name={}, categoryId={}, price={}, discountRate={}, useYn={}, sameDayDeliveryYn={}",
 	                dto.getName(), dto.getCategoryId(), dto.getPrice(), dto.getDiscountRate(),
 	                dto.getUseYn(), dto.getSameDayDeliveryYn());
-
+	        
+	        // 유효성 검사
 	        if (dto.getThumbImage() == null || dto.getThumbImage().isEmpty()) {
 	            throw new IllegalArgumentException("썸네일 이미지는 필수입니다.");
 	        }
@@ -303,6 +304,48 @@ public class AdminProductServiceImpl implements AdminProductService{
 		
 	}
 	
+	// 상품 옵션 추가
+	@Override
+	@Transactional
+	public void insertProductOption(Long productNo, AdminProductOptionRequestDTO dto) {
+		
+		// 유효성 검사
+	    if (productNo == null) {
+	        throw new IllegalArgumentException("상품번호가 없습니다.");
+	    }
+
+	    if (dto.getColor() == null || dto.getColor().trim().isEmpty()) {
+	        throw new IllegalArgumentException("색상은 필수입니다.");
+	    }
+
+	    if (dto.getOptionSize() == null || dto.getOptionSize().trim().isEmpty()) {
+	        throw new IllegalArgumentException("사이즈는 필수입니다.");
+	    }
+
+	    if (dto.getStock() == null || dto.getStock() < 0) {
+	        throw new IllegalArgumentException("재고는 0 이상이어야 합니다.");
+	    }
+
+	    if (!"Y".equals(dto.getUseYn()) && !"N".equals(dto.getUseYn())) {
+	        throw new IllegalArgumentException("사용여부는 Y 또는 N만 가능합니다.");
+	    }
+	    
+	    // 해당 상품 존재 유무 확인
+	    AdminProductDetailDTO product = adminProductMapper.getProduct(productNo);
+	    if (product == null) {
+	        throw new IllegalArgumentException("존재하지 않는 상품입니다.");
+	    }
+
+	    AdminProductOptionDTO optionDTO = new AdminProductOptionDTO();
+	    optionDTO.setProductNo(productNo);
+	    optionDTO.setColor(dto.getColor());
+	    optionDTO.setOptionSize(dto.getOptionSize());
+	    optionDTO.setStock(dto.getStock());
+	    optionDTO.setUseYn(dto.getUseYn());
+
+	    adminProductMapper.insertProductOption(optionDTO);
+	}
+	
 	// 상품 옵션 삭제
 	@Override
 	@Transactional
@@ -325,6 +368,58 @@ public class AdminProductServiceImpl implements AdminProductService{
 
 	    adminProductMapper.deleteProductOption(productNo, productOptionNo);
 		
+	}
+	 
+	/*
+	 * 상품 삭제 (상품은 소프트 삭제, 이미지는 하드 삭제)
+	 * 삭제 메서드 순서 중요!!
+	 * 이미지 조회 → 파일 삭제 → DB 이미지 삭제 → 상품 soft delete
+	 * DB를 먼저 삭제하고 실제 파일을 삭제하려고하면 삭제하려는 파일을 찾을수 없음
+	 */
+	@Override
+	@Transactional
+	public void deleteProduct(Long productNo) {
+
+	    // 상품번호 검증
+	    if (productNo == null) {
+	        throw new IllegalArgumentException("상품번호가 없습니다.");
+	    }
+
+	    // 상품 존재 여부 확인
+	    AdminProductDetailDTO product = adminProductMapper.getProduct(productNo);
+	    if (product == null) {
+	        throw new IllegalArgumentException("존재하지 않는 상품입니다.");
+	    }
+
+	    // 이미 삭제된 상품인지 확인
+	    if ("N".equals(product.getUseYn())) {
+	        throw new IllegalArgumentException("이미 삭제된 상품입니다.");
+	    }
+
+	    // 해당 상품 이미지 목록 조회
+	    List<AdminProductImageDTO> imageList = adminProductMapper.getProductImages(productNo);
+
+	    // 실제 파일 삭제용 파일명 수집
+	    List<String> fileNames = new ArrayList<>();
+
+	    if (imageList != null && !imageList.isEmpty()) {
+	        for (AdminProductImageDTO image : imageList) {
+	            if (image.getImageUrl() != null && !image.getImageUrl().trim().isEmpty()) {
+	                fileNames.add(image.getImageUrl());
+	            }
+	        }
+	    }
+
+	    // 실제 업로드 파일 삭제
+	    if (!fileNames.isEmpty()) {
+	        customFileUtil.deleteFiles(fileNames);
+	    }
+
+	    // product_img 테이블 이미지 데이터 하드 삭제
+	    adminProductMapper.deleteProductImages(productNo);
+
+	    // product 테이블은 soft delete
+	    adminProductMapper.softDeleteProduct(productNo);
 	}
 	
 	/*
@@ -414,6 +509,8 @@ public class AdminProductServiceImpl implements AdminProductService{
 
 	    adminProductMapper.insertProductImage(productNo, imageUrl, imageType, sortOrder);
 	}
+
+	
 
 	
 
