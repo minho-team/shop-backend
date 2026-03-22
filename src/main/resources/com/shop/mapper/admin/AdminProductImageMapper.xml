@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.admin.AdminProductImageMapper">
+
+    <!-- 타입별 단일 이미지 조회 -->
+    <select id="getSingleImageByType" resultType="com.shop.dto.admin.product.AdminProductImageDTO">
+        SELECT
+            product_img_no,
+            product_no,
+            image_url,
+            image_type,
+            sort_order
+        FROM product_img
+        WHERE product_no = #{productNo}
+          AND image_type = #{imageType}
+    </select>
+
+    <!-- 갤러리 이미지 목록 조회 -->
+    <select id="getGalleryImages" resultType="com.shop.dto.admin.product.AdminProductImageDTO">
+        SELECT
+            product_img_no,
+            product_no,
+            image_url,
+            image_type,
+            sort_order
+        FROM product_img
+        WHERE product_no = #{productNo}
+          AND image_type = 'GALLERY'
+        ORDER BY sort_order ASC, product_img_no ASC
+    </select>
+
+    <!-- 갤러리 이미지 단건 조회 -->
+    <select id="getGalleryImage" resultType="com.shop.dto.admin.product.AdminProductImageDTO">
+        SELECT
+            product_img_no,
+            product_no,
+            image_url,
+            image_type,
+            sort_order
+        FROM product_img
+        WHERE product_no = #{productNo}
+          AND product_img_no = #{productImgNo}
+          AND image_type = 'GALLERY'
+    </select>
+
+    <!-- 이미지 등록 -->
+    <insert id="insertProductImage">
+        INSERT INTO product_img (
+            product_img_no,
+            product_no,
+            image_url,
+            image_type,
+            sort_order
+        ) VALUES (
+            seq_product_img.NEXTVAL,
+            #{productNo},
+            #{imageUrl},
+            #{imageType},
+            #{sortOrder}
+        )
+    </insert>
+
+    <!-- 이미지 경로 수정 -->
+    <update id="updateImageUrl">
+        UPDATE product_img
+        SET image_url = #{imageUrl}
+        WHERE product_img_no = #{productImgNo}
+    </update>
+
+    <!-- 타입별 단일 이미지 삭제 -->
+    <delete id="deleteSingleImageByType">
+        DELETE FROM product_img
+        WHERE product_no = #{productNo}
+          AND image_type = #{imageType}
+    </delete>
+
+    <!-- 갤러리 이미지 삭제 -->
+    <delete id="deleteGalleryImage">
+        DELETE FROM product_img
+        WHERE product_no = #{productNo}
+          AND product_img_no = #{productImgNo}
+          AND image_type = 'GALLERY'
+    </delete>
+
+    <!-- 다음 갤러리 정렬순서 조회 -->
+    <select id="getNextGallerySortOrder" resultType="int">
+        SELECT NVL(MAX(sort_order), 0) + 1
+        FROM product_img
+        WHERE product_no = #{productNo}
+          AND image_type = 'GALLERY'
+    </select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
