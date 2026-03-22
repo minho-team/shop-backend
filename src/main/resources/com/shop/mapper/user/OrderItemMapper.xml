@@ -28,10 +28,18 @@
 		item_color
 		FROM
 		order_item
-		WHERE order_no = #{orderNo}
+		WHERE order_no
+		= #{orderNo}
 	</select>
 
-
+	<!-- orderNo를 받아서 order_item 상태 변경 -->
+	<update id="updateOrderItemStatusByOrderNo">
+		UPDATE order_item
+		SET order_item_status = #{orderItemStatus}
+		WHERE order_no = #{orderNo}
+	</update>
+	
+	<!-- order_item 인서트 -->
 	<insert id="insertOrderItem"
 		parameterType="com.shop.domain.OrderItem">
 		<selectKey keyProperty="orderItemNo" resultType="long"
@@ -48,7 +56,7 @@
 		item_name,
 		item_size,
 		item_color
-		
+
 		) VALUES (
 		#{orderItemNo},
 		#{orderNo},

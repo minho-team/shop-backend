@@ -20,5 +20,6 @@ public class Orders {
 	private String receiverBaseAddress;
 	private String receiverDetailAddress;
 	private String message;
+	private String pgOrderId;
 	
 }

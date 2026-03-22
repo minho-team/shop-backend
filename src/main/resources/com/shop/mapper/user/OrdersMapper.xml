@@ -2,6 +2,25 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.shop.mapper.user.OrdersMapper">
 
+	<!-- 결제관련 매퍼 -->
+	<select id="findByPgOrderId" resultType="com.shop.domain.Orders">
+		SELECT *
+		FROM orders
+		WHERE pg_order_id = #{pgOrderId}
+	</select>
+
+	<update id="updatePgOrderId">
+		UPDATE orders
+		SET pg_order_id = #{pgOrderId}
+		WHERE order_no = #{orderNo}
+	</update>
+
+	<update id="updateOrderStatus">
+		UPDATE orders
+		SET order_status = #{orderStatus}
+		WHERE order_no = #{orderNo}
+	</update>
+	
 	<!-- 주문 생성 -->
 	<insert id="createOrder" parameterType="com.shop.domain.Orders">
 		<selectKey keyProperty="orderNo" resultType="long"
@@ -67,7 +86,8 @@
 	</select>
 
 	<!-- 사용자 - 내 주문 페이징 조회 (마이페이지용) -->
-	<select id="getMyOrderList" resultType="com.shop.dto.user.order.OrderDTO">
+	<select id="getMyOrderList"
+		resultType="com.shop.dto.user.order.OrderDTO">
     <![CDATA[
     SELECT * FROM (
         SELECT
@@ -83,7 +103,7 @@
     )
     WHERE rn >= #{startRow} AND rn <= #{endRow}
     ]]>
-</select>
+	</select>
 
 
 	<!-- 관리자 - 특정 회원 최근 주문 5건 (회원 상세 요약용) -->
@@ -152,26 +172,27 @@
 		FROM orders WHERE member_no = #{memberNo}
 	</select>
 
-	<select id="getOrderItemList" resultType="com.shop.dto.user.order.OrderItemDTO">
-    SELECT
-        oi.order_item_no      AS orderItemNo,
-        oi.order_no           AS orderNo,
-        oi.product_option_no  AS productOptionNo,
-        po.product_no         AS productNo,
-        oi.quantity           AS quantity,
-        oi.unit_price         AS unitPrice,
-        oi.item_name          AS itemName,
-        oi.item_size          AS itemSize,
-        oi.item_color         AS itemColor,
-        pi.image_url          AS imageUrl,
-        oi.order_item_status  AS orderItemStatus
-    FROM order_item oi
-    INNER JOIN product_option po 
-        ON oi.product_option_no = po.product_option_no
-    LEFT JOIN product_img pi 
-        ON po.product_no = pi.product_no 
-        AND pi.image_type = 'THUMB'
-    WHERE oi.order_no = #{orderNo}
-</select>
+	<select id="getOrderItemList"
+		resultType="com.shop.dto.user.order.OrderItemDTO">
+		SELECT
+		oi.order_item_no AS orderItemNo,
+		oi.order_no AS orderNo,
+		oi.product_option_no AS productOptionNo,
+		po.product_no AS productNo,
+		oi.quantity AS quantity,
+		oi.unit_price AS unitPrice,
+		oi.item_name AS itemName,
+		oi.item_size AS itemSize,
+		oi.item_color AS itemColor,
+		pi.image_url AS imageUrl,
+		oi.order_item_status AS orderItemStatus
+		FROM order_item oi
+		INNER JOIN product_option po
+		ON oi.product_option_no = po.product_option_no
+		LEFT JOIN product_img pi
+		ON po.product_no = pi.product_no
+		AND pi.image_type = 'THUMB'
+		WHERE oi.order_no = #{orderNo}
+	</select>
 
 </mapper>

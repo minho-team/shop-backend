@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.shop.mapper.user.PaymentMapper">
+
+
+	<insert id="insertReadyPayment"
+		parameterType="com.shop.domain.Payment">
+		<selectKey keyProperty="paymentNo" resultType="long"
+			order="BEFORE">
+			SELECT seq_payment.NEXTVAL FROM dual
+		</selectKey>
+
+		INSERT INTO payment (
+		payment_no,
+		order_no,
+		member_no,
+		payment_method,
+		payment_status,
+		payment_amount,
+		pg_provider,
+		created_at
+		) VALUES (
+		#{paymentNo},
+		#{orderNo},
+		#{memberNo},
+		#{paymentMethod},
+		#{paymentStatus},
+		#{paymentAmount},
+		#{pgProvider},
+		SYSTIMESTAMP
+		)
+	</insert>
+
+	<update id="completePayment">
+		UPDATE payment
+		SET payment_status = 'COMPLETED',
+		payment_key = #{paymentKey},
+		pg_tid = #{pgTid},
+		approved_at = SYSTIMESTAMP
+		WHERE order_no = #{orderNo}
+		AND payment_status = 'READY'
+	</update>
+
+	<update id="failPayment">
+		UPDATE payment
+		SET payment_status = 'FAILED',
+		fail_reason = #{failReason},
+		failed_at = SYSTIMESTAMP
+		WHERE order_no =
+		#{orderNo}
+		AND payment_status = 'READY'
+	</update>
+</mapper>

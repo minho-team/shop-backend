@@ -23,4 +23,5 @@ public class OrderItem {
     
     private String orderItemStatus;
     private Integer refundedQuantity;
+    private String imageUrl;
 }
