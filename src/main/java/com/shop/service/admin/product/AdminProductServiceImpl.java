@@ -264,6 +264,25 @@ public class AdminProductServiceImpl implements AdminProductService{
 		
 	}
 	
+	// 상품 옵션 목록 조회
+	@Override
+	@Transactional(readOnly = true)
+	public List<AdminProductOptionDTO> getProductOptions(Long productNo) {
+
+	    // 유효성 검사
+	    if (productNo == null) {
+	        throw new IllegalArgumentException("상품번호가 없습니다.");
+	    }
+
+	    // 상품 존재 여부 확인
+	    AdminProductDetailDTO product = adminProductMapper.getProduct(productNo);
+	    if (product == null) {
+	        throw new IllegalArgumentException("존재하지 않는 상품입니다.");
+	    }
+
+	    return adminProductMapper.getProductOptions(productNo);
+	}
+	
 	// 상품 옵션 수정
 	@Override
 	@Transactional
@@ -509,6 +528,8 @@ public class AdminProductServiceImpl implements AdminProductService{
 
 	    adminProductMapper.insertProductImage(productNo, imageUrl, imageType, sortOrder);
 	}
+
+	
 
 	
 

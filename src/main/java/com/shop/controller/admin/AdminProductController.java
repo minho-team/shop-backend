@@ -56,6 +56,18 @@ public class AdminProductController {
 		}
 	}
 	
+	// 상품 옵션 조회
+	@GetMapping("/{productNo}/options")
+	public ResponseEntity<?> getProductOptions(@PathVariable Long productNo) {
+	    try {
+	        return ResponseEntity.ok(productService.getProductOptions(productNo));
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                .body("상품 옵션 조회 중 오류가 발생했습니다.");
+	    }
+	}
+	
 	// 상품 등록
 	@PostMapping(consumes = "multipart/form-data")
 	public ResponseEntity<?> insertProduct(@ModelAttribute AdminProductInsertDTO dto) {
