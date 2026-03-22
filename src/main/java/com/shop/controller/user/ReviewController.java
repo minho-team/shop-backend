@@ -62,12 +62,12 @@ public class ReviewController {
 	}
 
 	@GetMapping("/product/{productNo}")
-	public ResponseEntity<?> getProductReviews(@PathVariable int productNo) {
+	public ResponseEntity<?> getProductReviews(@PathVariable Long productNo) {
 		return ResponseEntity.ok(reviewService.getReviewListByProduct(productNo));
 	}
 
 	@GetMapping("/check/{orderItemNo}")
-	public ResponseEntity<Boolean> checkReviewed(@PathVariable int orderItemNo) {
+	public ResponseEntity<Boolean> checkReviewed(@PathVariable Long orderItemNo) {
 		boolean isReviewed = reviewService.checkAlreadyReviewed(orderItemNo);
 		return ResponseEntity.ok(isReviewed);
 	}

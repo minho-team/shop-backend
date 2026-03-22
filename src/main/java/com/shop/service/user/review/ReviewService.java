@@ -11,9 +11,9 @@ public interface ReviewService {
     
     void registerReview(Review review, MultipartFile file) throws Exception;
 
-    List<Review> getReviewListByProduct(int productNo);
+    List<Review> getReviewListByProduct(Long productNo);
     
-    boolean checkAlreadyReviewed(int orderItemNo);
+    boolean checkAlreadyReviewed(Long orderItemNo);
     
     List<MyReviewResponseDTO> getMyReviews(Long memberNo);
 }

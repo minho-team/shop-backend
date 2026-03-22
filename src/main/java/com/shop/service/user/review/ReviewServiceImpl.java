@@ -43,12 +43,12 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	@Override
-	public List<Review> getReviewListByProduct(int productNo) {
+	public List<Review> getReviewListByProduct(Long productNo) {
 		return reviewMapper.getReviewListByProduct(productNo);
 	}
 
 	@Override
-	public boolean checkAlreadyReviewed(int orderItemNo) {
+	public boolean checkAlreadyReviewed(Long orderItemNo) {
 		// order_item_no로 기존 리뷰를 조회하여 존재 여부 반환
 		Review existingReview = reviewMapper.getOneReviewByOrderItem(orderItemNo);
 		return existingReview != null;
