@@ -18,5 +18,10 @@ public interface MemberService {
 	public void insertAdmin(Member member) throws Exception;
 	
 	Member getOrCreateKakaoMember(Map<String, Object> kakaoUserInfo)throws Exception;
-
+	
+	void updateMemberGrade(Long memberNo) throws Exception;
+	
+	void increasePurchaseCount(Long memberNo) throws Exception;
+	
+	void decreasePurchaseCount(Long memberNo) throws Exception;
 }
