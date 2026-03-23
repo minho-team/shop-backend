@@ -32,10 +32,11 @@ public interface OrdersMapper {
 	//결제 관련--------------------
 	Orders findByPgOrderId(String pgOrderId);
 
+	//orders 테이블의 pgOrderId 업데이트
 	void updatePgOrderId(@Param("orderNo") Long orderNo, @Param("pgOrderId") String pgOrderId);
 
 	void updateOrderStatus(@Param("orderNo") Long orderNo, @Param("orderStatus") String orderStatus);
-	//결제 관련--------------------
+	//--------------------
 	
 	// 관리자 - 특정 회원 최근 주문 5건 (요약용)
 	List<Orders> selectRecentOrdersByMemberNo(Long memberNo);

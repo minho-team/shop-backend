@@ -51,7 +51,7 @@
 		#{ordererName},
 		#{ordererPhoneNumber},
 		#{ordererEmail},
-		'PAYMENT_COMPLETED',
+		#{orderStatus},
 		#{totalPrice},
 		SYSTIMESTAMP,
 		SYSTIMESTAMP,
