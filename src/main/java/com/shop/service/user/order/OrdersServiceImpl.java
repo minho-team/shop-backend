@@ -17,6 +17,7 @@ import com.shop.dto.user.order.OrderItemDTO;
 import com.shop.dto.user.order.OrderResponseDTO;
 import com.shop.mapper.user.OrderItemMapper;
 import com.shop.mapper.user.OrdersMapper;
+import com.shop.service.user.member.MemberService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +29,10 @@ public class OrdersServiceImpl implements OrdersService {
 
 	private final OrdersMapper mapper;
 	private final OrderItemMapper orderItemMapper;
+	private final MemberService memberService;
 
-	// 주문서 작성 페이지에서 결제하기 버튼을 누르면 작동되는 함수
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public OrderCreateResponseDTO createOrder(OrderCreateRequestDTO request, Long memberNo) throws Exception {
 		if (request.getItems() == null || request.getItems().isEmpty()) {
 			throw new IllegalArgumentException("주문 상품이 없습니다.");
@@ -72,7 +73,9 @@ public class OrdersServiceImpl implements OrdersService {
 
 			orderItemMapper.insertOrderItem(orderItem);
 		}
-
+		log.info("(OrdersServiceImpl) 주문 완료 -> 회원 번호 {}의 구매 횟수 증가 로직 실행", memberNo);
+	    memberService.updateMemberGrade(memberNo);
+	    
 		return new OrderCreateResponseDTO(orders.getOrderNo(), new Date(), orders.getTotalPrice());
 	}
 
@@ -121,4 +124,15 @@ public class OrdersServiceImpl implements OrdersService {
 	public List<Orders> getAllOrders(Long memberNo) {
 		return mapper.getAllOrders(memberNo);
 	}
+	@Transactional(rollbackFor = Exception.class)
+	public void cancelOrder(Long orderNo) throws Exception {
+	    Orders order = mapper.getOneOrder(orderNo);
+	    
+	    mapper.updateOrderStatus(orderNo, "CANCELED");
+	    
+	    log.info("(OrdersServiceImpl) 주문 취소 -> 회원 {}번 구매 횟수 차감 요청", order.getMemberNo());
+	    memberService.decreasePurchaseCount(order.getMemberNo());
+	}
+	
+
 }
