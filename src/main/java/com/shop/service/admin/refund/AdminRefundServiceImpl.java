@@ -153,14 +153,9 @@ public class AdminRefundServiceImpl implements AdminRefundService {
             adminRefundMapper.updateRefundHeaderStatus(refundNo, "REJECTED");
             adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "DELIVERED");
         } else if ("COMPLETED".equals(refundStatus)) {
-            int notCompletedCount = adminRefundMapper.countNotCompletedRefundItems(refundNo);
-
-            if (notCompletedCount == 0) {
-                adminRefundMapper.updateRefundHeaderStatus(refundNo, "COMPLETED");
-                adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "REFUNDED");
-            } else {
-                adminRefundMapper.updateRefundHeaderStatus(refundNo, "APPROVED");
-            }
+            adminRefundMapper.updateRefundItemsStatus(refundNo, "COMPLETED");
+            adminRefundMapper.updateRefundHeaderStatus(refundNo, "COMPLETED");
+            adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "REFUNDED");
         }
 
         String finalHeaderStatus;

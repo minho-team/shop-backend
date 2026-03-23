@@ -26,6 +26,7 @@ public class RefundController {
 	public ResponseEntity<String> createRefund(@RequestBody RefundCreateRequestDTO requestDTO,
 			Authentication authentication) {
 		String memberId = authentication.getName();
+		log.info("createRefund 진입");
 		try {
 			refundService.createRefund(memberId, requestDTO);
 			return ResponseEntity.ok("환불 신청 완료");
