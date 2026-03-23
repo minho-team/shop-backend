@@ -38,4 +38,6 @@ public interface ProductMapper {
     List<HomeProductCardDto> selectHomeBestProducts() throws Exception;
     List<HomeProductCardDto> selectHomeSaleProducts() throws Exception;
     List<HomeProductCardDto> selectHomeRecommendProducts() throws Exception;
+    List<com.shop.dto.user.product.PopularKeywordDto> selectPopularKeywords() throws Exception;
+    void incrementViewCount(@org.apache.ibatis.annotations.Param("productNo") Long productNo) throws Exception;
 }
