@@ -108,4 +108,23 @@
 		ORDER BY r.created_at DESC
 	</select>
 
+	<select id="selectHomeRecentReviews" resultType="com.shop.dto.user.product.HomeReviewDto">
+		SELECT *
+		FROM (
+			SELECT
+				r.review_no AS reviewNo,
+				m.nick_name AS memberNickName,
+				p.name AS productName,
+				r.rating AS rating,
+				r.content AS content,
+				r.created_at AS createdAt
+			FROM review r
+			INNER JOIN member m ON r.member_no = m.member_no
+			INNER JOIN product p ON r.product_no = p.product_no
+			WHERE r.delete_yn = 'N'
+			ORDER BY r.created_at DESC
+		)
+		WHERE ROWNUM &lt;= 6
+	</select>
+
 </mapper>

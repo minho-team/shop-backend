@@ -10,4 +10,6 @@ public class HomeMainResponse {
     private List<HomeProductCardDto> bestProducts;
     private List<HomeProductCardDto> saleProducts;
     private List<HomeProductCardDto> recommendProducts;
+    private List<HomeReviewDto> recentReviews;
+    private List<PopularKeywordDto> popularKeywords;
 }

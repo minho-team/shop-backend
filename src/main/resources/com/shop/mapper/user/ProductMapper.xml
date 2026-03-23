@@ -10,7 +10,7 @@
             p.product_no AS productNo,
             p.name AS name,
             p.price AS price,
-            0 AS discountRate,
+            p.discount_rate AS discountRate,
             p.category_id AS categoryId,
             p.description AS description,
             p.use_yn AS useYn,
@@ -27,7 +27,7 @@
             p.product_no AS productNo,
             p.name AS name,
             p.price AS price,
-            0 AS discountRate,
+            p.discount_rate AS discountRate,
             p.category_id AS categoryId,
             p.description AS description,
             p.use_yn AS useYn,
@@ -45,7 +45,7 @@
             p.name AS name,
             p.price AS price,
             p.price AS salePrice,
-            0 AS discountRate,
+            p.discount_rate AS discountRate,
             pi.image_url AS imageUrl
         FROM product p
         LEFT JOIN product_img pi
@@ -60,10 +60,11 @@
             p.product_no AS productNo,
             p.name AS name,
             p.price AS price,
-            0 AS discountRate,
+            p.discount_rate AS discountRate,
             pi.image_url AS imageUrl,
             p.category_id AS categoryId,
-            p.same_day_delivery_yn AS sameDayDeliveryYn
+            p.same_day_delivery_yn AS sameDayDeliveryYn,
+            p.created_at AS createdAt
         FROM product p
         LEFT JOIN product_img pi
                ON pi.product_no = p.product_no
@@ -84,14 +85,18 @@
             AND p.name LIKE '%' || #{keyword} || '%'
         </if>
 
+        <if test="sort != null and sort == 'new'">
+            AND p.created_at >= SYSTIMESTAMP - INTERVAL '7' DAY
+        </if>
+
         <choose>
-            <when test="sort == 'new'">
+            <when test="sort != null and sort == 'new'">
                 ORDER BY p.created_at DESC, p.product_no DESC
             </when>
-            <when test="sort == 'sale'">
-                ORDER BY p.created_at DESC, p.product_no DESC
+            <when test="sort != null and sort == 'sale'">
+                ORDER BY p.discount_rate DESC, p.product_no DESC
             </when>
-            <when test="sort == 'best'">
+            <when test="sort != null and sort == 'best'">
                 ORDER BY p.view_count DESC, p.product_no DESC
             </when>
             <otherwise>
@@ -105,14 +110,16 @@
             p.product_no AS productNo,
             p.name AS name,
             p.price AS price,
-            0 AS discountRate,
+            p.discount_rate AS discountRate,
             pi.image_url AS imageUrl,
-            p.same_day_delivery_yn AS sameDayDeliveryYn
+            p.same_day_delivery_yn AS sameDayDeliveryYn,
+            p.created_at AS createdAt
         FROM product p
         LEFT JOIN product_img pi
                ON pi.product_no = p.product_no
               AND pi.image_type = 'THUMB'
         WHERE p.use_yn = 'Y'
+          AND p.created_at >= SYSTIMESTAMP - INTERVAL '7' DAY
         ORDER BY p.created_at DESC, p.product_no DESC
         FETCH FIRST 8 ROWS ONLY
     </select>
@@ -122,9 +129,10 @@
             p.product_no AS productNo,
             p.name AS name,
             p.price AS price,
-            0 AS discountRate,
+            p.discount_rate AS discountRate,
             pi.image_url AS imageUrl,
-            p.same_day_delivery_yn AS sameDayDeliveryYn
+            p.same_day_delivery_yn AS sameDayDeliveryYn,
+            p.created_at AS createdAt
         FROM product p
         LEFT JOIN product_img pi
                ON pi.product_no = p.product_no
@@ -134,14 +142,37 @@
         FETCH FIRST 8 ROWS ONLY
     </select>
 
+    <select id="selectHomeSaleProducts" resultType="com.shop.dto.user.product.HomeProductCardDto">
+        SELECT *
+        FROM (
+            SELECT
+                p.product_no AS productNo,
+                p.name AS name,
+                p.price AS price,
+                p.discount_rate AS discountRate,
+                pi.image_url AS imageUrl,
+                p.same_day_delivery_yn AS sameDayDeliveryYn,
+                p.created_at AS createdAt
+            FROM product p
+            LEFT JOIN product_img pi
+                   ON pi.product_no = p.product_no
+                  AND pi.image_type = 'THUMB'
+            WHERE p.use_yn = 'Y'
+              AND p.discount_rate > 0
+            ORDER BY p.discount_rate DESC, p.product_no DESC
+        )
+        WHERE ROWNUM &lt;= 8
+    </select>
+
     <select id="selectHomeRecommendProducts" resultType="com.shop.dto.user.product.HomeProductCardDto">
         SELECT
             p.product_no AS productNo,
             p.name AS name,
             p.price AS price,
-            0 AS discountRate,
+            p.discount_rate AS discountRate,
             pi.image_url AS imageUrl,
-            p.same_day_delivery_yn AS sameDayDeliveryYn
+            p.same_day_delivery_yn AS sameDayDeliveryYn,
+            p.created_at AS createdAt
         FROM product p
         LEFT JOIN product_img pi
                ON pi.product_no = p.product_no
@@ -150,5 +181,25 @@
         ORDER BY p.product_no DESC
         FETCH FIRST 8 ROWS ONLY
     </select>
+
+    <!-- 인기 검색어: view_count 기준 상위 10개 상품명 -->
+    <select id="selectPopularKeywords" resultType="com.shop.dto.user.product.PopularKeywordDto">
+        SELECT *
+        FROM (
+            SELECT
+                p.name AS name,
+                p.view_count AS viewCount
+            FROM product p
+            WHERE p.use_yn = 'Y'
+            ORDER BY p.view_count DESC, p.product_no DESC
+        )
+        WHERE ROWNUM &lt;= 10
+    </select>
+
+    <update id="incrementViewCount">
+        UPDATE product
+        SET view_count = view_count + 1
+        WHERE product_no = #{productNo}
+    </update>
 
 </mapper>

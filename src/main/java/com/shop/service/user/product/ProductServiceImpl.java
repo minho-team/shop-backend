@@ -12,6 +12,8 @@ import com.shop.domain.Product;
 import com.shop.domain.ProductOption;
 import com.shop.dto.user.product.HomeMainResponse;
 import com.shop.dto.user.product.HomeProductCardDto;
+import com.shop.dto.user.product.HomeReviewDto;
+import com.shop.dto.user.product.PopularKeywordDto;
 import com.shop.dto.user.product.ProductCreateRequest;
 import com.shop.dto.user.product.ProductDetailResponse;
 import com.shop.dto.user.product.ProductListResponse;
@@ -19,6 +21,7 @@ import com.shop.dto.user.product.ProductListResponseDto;
 import com.shop.dto.user.product.ProductUpdateRequest;
 import com.shop.mapper.user.ProductMapper;
 import com.shop.mapper.user.ProductOptionMapper;
+import com.shop.mapper.user.ReviewMapper;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -33,6 +36,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ProductOptionMapper productOptionMapper;
+
+    @Autowired
+    private ReviewMapper reviewMapper;
 
     @Override
     public void insertProduct(ProductCreateRequest dto) throws Exception {
@@ -53,8 +59,10 @@ public class ProductServiceImpl implements ProductService {
     //상품 상세페이지에서 상품의 정보(product)와 상품 옵션(product_option)을 가져옴 
     @Override
     public ProductDetailResponse getOneProduct(Long productNo) throws Exception {
+        // 조회수 증가
+        productMapper.incrementViewCount(productNo);
+
         Product product = productMapper.getOneProducts(productNo);
-        applySeasonalDiscount(product);
         List<ProductOption> options = productOptionMapper.getOptionsByProductNo(productNo);
 
         ProductDetailResponse response = new ProductDetailResponse();
@@ -69,8 +77,6 @@ public class ProductServiceImpl implements ProductService {
         List<ProductListResponse> list = productMapper.getAllProductToMainPage();
 
         for (ProductListResponse dto : list) {
-            applySeasonalDiscount(dto);
-
             if (dto.getPrice() != null) {
                 dto.setSalePrice(calculateSalePrice(dto.getPrice(), dto.getDiscountRate()));
             }
@@ -99,8 +105,6 @@ public class ProductServiceImpl implements ProductService {
                 productMapper.selectSearchProductList(categoryId, keyword, sort, false);
 
         for (ProductListResponseDto dto : list) {
-            applySeasonalDiscount(dto);
-
             if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
                 dto.setImageUrl("/upload/" + dto.getImageUrl());
             }
@@ -127,17 +131,11 @@ public class ProductServiceImpl implements ProductService {
         List<HomeProductCardDto> newProducts = productMapper.selectHomeNewProducts();
         List<HomeProductCardDto> bestProducts = productMapper.selectHomeBestProducts();
         List<HomeProductCardDto> recommendProducts = productMapper.selectHomeRecommendProducts();
+        List<HomeProductCardDto> saleProducts = productMapper.selectHomeSaleProducts();
+        // 모든 할인율은 DB의 discount_rate 컬럼 값을 직접 사용
 
-        newProducts.forEach(this::applySeasonalDiscount);
-        bestProducts.forEach(this::applySeasonalDiscount);
-        recommendProducts.forEach(this::applySeasonalDiscount);
-
-        List<HomeProductCardDto> saleProducts = productMapper.selectSearchProductList(null, null, "new", false).stream()
-                .peek(this::applySeasonalDiscount)
-                .filter(dto -> dto.getDiscountRate() != null && dto.getDiscountRate() > 0)
-                .limit(8)
-                .map(this::toHomeProductCardDto)
-                .collect(Collectors.toList());
+        List<HomeReviewDto> recentReviews = reviewMapper.selectHomeRecentReviews();
+        List<PopularKeywordDto> popularKeywords = productMapper.selectPopularKeywords();
 
         normalizeImagePath(newProducts);
         normalizeImagePath(bestProducts);
@@ -148,6 +146,8 @@ public class ProductServiceImpl implements ProductService {
         response.setBestProducts(bestProducts);
         response.setSaleProducts(saleProducts);
         response.setRecommendProducts(recommendProducts);
+        response.setRecentReviews(recentReviews);
+        response.setPopularKeywords(popularKeywords);
 
         return response;
     }
