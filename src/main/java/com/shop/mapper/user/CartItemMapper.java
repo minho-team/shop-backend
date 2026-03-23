@@ -2,6 +2,8 @@ package com.shop.mapper.user;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.shop.domain.CartItem;
 import com.shop.dto.admin.member.AdminCartItemDTO;
 import com.shop.dto.user.cart.CartItemResponseDTO;
@@ -19,6 +21,12 @@ public interface CartItemMapper {
 
 	// 장바구니 아이템 수량 수정
 	void updateCartItem(CartItem cartItem) throws Exception;
+
+	// 회원의 장바구니에서 특정 cartItem만 삭제
+	void deleteCartItemByMemberNoAndCartItemNo(
+			@Param("memberNo") Long memberNo, 
+			@Param("cartItemNo") Long cartItemNo
+	) throws Exception;
 
 	// 전체 장바구니 아이템 조회
 	List<CartItem> readAllCartItem() throws Exception;
