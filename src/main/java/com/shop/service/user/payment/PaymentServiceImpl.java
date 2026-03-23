@@ -100,7 +100,7 @@ public class PaymentServiceImpl implements PaymentService {
 			orderItem.setOrderNo(order.getOrderNo());
 			orderItem.setProductOptionNo(dto.getProductOptionNo());
 			orderItem.setQuantity(dto.getQuantity());
-			orderItem.setUnitPrice(dto.getUnitPrice().intValue());
+			orderItem.setUnitPrice(dto.getUnitPrice());
 			orderItem.setItemName(dto.getItemName());
 			orderItem.setItemSize(dto.getItemSize());
 			orderItem.setItemColor(dto.getItemColor());

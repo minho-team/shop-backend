@@ -15,7 +15,7 @@ public class OrderItem {
     private Long productOptionNo; 
     
     private Integer quantity;         
-    private Integer unitPrice;      
+    private Long unitPrice;      
     
     private String itemName;      
     private String itemSize;     
