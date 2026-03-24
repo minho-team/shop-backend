@@ -181,6 +181,39 @@
         ORDER BY p.product_no DESC
         FETCH FIRST 8 ROWS ONLY
     </select>
+    
+    <!-- 시드 상품 데이터 삽입 -->
+    <insert id="insertSeedProduct" parameterType="com.shop.domain.Product">
+    <selectKey keyProperty="productNo" resultType="long" order="BEFORE">
+        SELECT seq_product.NEXTVAL FROM dual
+    </selectKey>
+
+    INSERT INTO product (
+        product_no,
+        name,
+        price,
+        discount_rate,
+        category_id,
+        description,
+        use_yn,
+        created_at,
+        updated_at,
+        view_count,
+        same_day_delivery_yn
+    ) VALUES (
+        #{productNo},
+        #{name},
+        #{price},
+        #{discountRate},
+        #{categoryId},
+        #{description},
+        #{useYn},
+        SYSTIMESTAMP,
+        NULL,
+        0,
+        #{sameDayDeliveryYn}
+    )
+</insert>
 
     <!-- 인기 검색어: view_count 기준 상위 10개 상품명 -->
     <select id="selectPopularKeywords" resultType="com.shop.dto.user.product.PopularKeywordDto">

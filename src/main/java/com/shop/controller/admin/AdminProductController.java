@@ -49,6 +49,7 @@ public class AdminProductController {
 	public ResponseEntity<?> getOneProduct(@PathVariable Long productNo) {
 		try {
 			AdminProductReadDTO productDetail = productService.getProduct(productNo);
+			log.info(productDetail.getCategoryName());
 			return ResponseEntity.ok(productDetail);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -117,10 +118,12 @@ public class AdminProductController {
 			productService.updateProductsBasic(productNo, dto);
 			return ResponseEntity.ok("상품 기본정보 수정 완료");
 		} catch (IllegalArgumentException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		} catch (IllegalStateException e) {
+		    return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품 기본정보 수정 중 오류가 발생했습니다.");
+		    e.printStackTrace();
+		    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품 기본정보 수정 중 오류가 발생했습니다.");
 		}
 	}
 	

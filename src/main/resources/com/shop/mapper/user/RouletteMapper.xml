@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.user.RouletteMapper">
+
+    <!-- 오늘 이미 룰렛 돌렸는지 확인 -->
+    <select id="countTodaySpin" resultType="int">
+        SELECT COUNT(*)
+        FROM roulette_log
+        WHERE member_no = #{memberNo}
+          AND TRUNC(spun_at) = TRUNC(SYSDATE)
+    </select>
+
+    <!-- 룰렛 결과 로그 저장 -->
+    <insert id="insertRouletteLog">
+        INSERT INTO roulette_log (log_no, member_no, prize_name, coupon_no, spun_at)
+        VALUES (seq_roulette_log.NEXTVAL, #{memberNo}, #{prizeName}, #{couponNo}, SYSTIMESTAMP)
+    </insert>
+
+    <!-- 쿠폰 발급 -->
+    <insert id="insertMemberCoupon">
+        INSERT INTO member_coupon (
+            member_coupon_no, member_no, coupon_no,
+            used_yn, issued_at, start_at, end_at
+        ) VALUES (
+            seq_member_coupon.NEXTVAL, #{memberNo}, #{couponNo},
+            'N', SYSTIMESTAMP, #{startAt}, #{endAt}
+        )
+    </insert>
+
+</mapper>

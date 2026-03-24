@@ -15,6 +15,7 @@ public class AdminProductReadDTO {
     private Integer discountRate;
     private Long salePrice;
     private Long categoryId;
+    private String categoryName;
     private String description;
     private String useYn;
     private LocalDateTime createdAt;
