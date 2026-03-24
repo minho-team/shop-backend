@@ -118,21 +118,27 @@
 		resultType="com.shop.dto.admin.product.AdminProductDetailDTO">
 
 		SELECT
-			p.product_no,
-			p.name,
-			p.price,
-			p.discount_rate,
-			TRUNC((p.price - (p.price * p.discount_rate / 100)) / 100) * 100 AS
-			sale_price,
-			p.category_id,
-			p.description,
-			p.use_yn,
-			p.same_day_delivery_yn,
-			p.view_count,
-			p.created_at,
-			p.updated_at
-		FROM product p
-		WHERE p.product_no = #{productNo}
+	        p.product_no,
+	        p.name,
+	        p.price,
+	        p.discount_rate,
+	        TRUNC((p.price - (p.price * p.discount_rate / 100)) / 100) * 100 AS sale_price,
+	        p.category_id,
+	        c1.name || ' > ' || c2.name || ' > ' || c3.name AS category_name,
+	        p.description,
+	        p.use_yn,
+	        p.same_day_delivery_yn,
+	        p.view_count,
+	        p.created_at,
+	        p.updated_at
+	    FROM product p
+		    LEFT JOIN category c3
+		        ON p.category_id = c3.category_id
+		    LEFT JOIN category c2
+		        ON c3.parent_id = c2.category_id
+		    LEFT JOIN category c1
+		        ON c2.parent_id = c1.category_id
+	    WHERE p.product_no = #{productNo}
 
 	</select>
 
@@ -255,6 +261,32 @@
 	        updated_at = SYSTIMESTAMP
 	    WHERE product_no = #{productNo}
 	</update>
+	
+	<!-- ========================= 현재 상품 판매여부 조회 ========================== -->
+	<select id="getProductUseYn" resultType="string">
+	    SELECT use_yn
+	    FROM product
+	    WHERE product_no = #{productNo}
+	</select>
+
+	<!-- ========================= 해당 상품의 활성 주문 건수 조회 ========================== -->
+	<select id="countActiveOrderItemsByProductNo" resultType="int">
+	    SELECT COUNT(*)
+	    FROM order_item oi
+	    JOIN product_option po
+	      ON oi.product_option_no = po.product_option_no
+	    WHERE po.product_no = #{productNo}
+	      AND oi.order_item_status IN (
+	          'PENDING_PAYMENT',
+	          'PAYMENT_COMPLETED',
+	          'PREPARING',
+	          'SHIPPING',
+	          'DELIVERED',
+	          'CANCEL_REQUESTED',
+	          'REFUND_REQUESTED'
+	      )
+	</select>
+	
 	
 	<!-- ============== 상품 옵션 조회 (Null 여부 확인용) ============== -->
 	<select id="getProductOption" resultType="com.shop.dto.admin.product.AdminProductOptionDTO">
