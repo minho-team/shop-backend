@@ -1,6 +1,7 @@
 package com.shop.dto.user.product;
 
 import lombok.Data;
+import java.time.LocalDateTime;
 
 @Data
 public class HomeProductCardDto {
@@ -10,4 +11,5 @@ public class HomeProductCardDto {
     private Integer discountRate;
     private String imageUrl;
     private String sameDayDeliveryYn;
+    private LocalDateTime createdAt;
 }

@@ -31,6 +31,17 @@
 		cart_item_no = #{cartItemNo}
 	</update>
 
+	<!-- 회원의 장바구니에서 특정 cartItem만 삭제 -->
+	<delete id="deleteCartItemByMemberNoAndCartItemNo">
+		DELETE FROM cart_item
+		WHERE cart_item_no = #{cartItemNo}
+		AND cart_no IN (
+		SELECT cart_no
+		FROM cart
+		WHERE member_no = #{memberNo}
+		)
+	</delete>
+
 	<!-- 전체 장바구니 아이템 조회 -->
 	<select id="readAllCartItem"
 		resultType="com.shop.domain.CartItem">
@@ -56,16 +67,19 @@
 		po.option_size AS sizeName,
 		p.price AS price,
 		CASE
-		WHEN img.image_url IS NOT NULL THEN '/upload/' || img.image_url
+		WHEN img.image_url IS
+		NOT NULL THEN '/upload/' || img.image_url
 		ELSE NULL
 		END AS imageUrl
-		FROM cart_item ci
+		FROM
+		cart_item ci
 		JOIN cart c
 		ON ci.cart_no = c.cart_no
 		JOIN product_option po
 		ON ci.product_option_no = po.product_option_no
 		JOIN product p
-		ON po.product_no = p.product_no
+		ON
+		po.product_no = p.product_no
 		LEFT JOIN (
 		SELECT product_no, image_url
 		FROM (
@@ -73,15 +87,18 @@
 		pi.product_no,
 		pi.image_url,
 		ROW_NUMBER() OVER (
-		PARTITION BY pi.product_no
+		PARTITION BY
+		pi.product_no
 		ORDER BY
-		CASE WHEN pi.image_type = 'THUMB' THEN 0 ELSE 1 END,
+		CASE WHEN pi.image_type = 'THUMB' THEN 0 ELSE 1
+		END,
 		NVL(pi.sort_order, 9999)
 		) AS rn
 		FROM product_img pi
 		)
 		WHERE rn = 1
-		) img
+		)
+		img
 		ON p.product_no = img.product_no
 		WHERE c.member_no = #{memberNo}
 		ORDER BY ci.cart_item_no DESC

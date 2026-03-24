@@ -35,10 +35,11 @@
 	<!-- orderNo를 받아서 order_item 상태 변경 -->
 	<update id="updateOrderItemStatusByOrderNo">
 		UPDATE order_item
-		SET order_item_status = #{orderItemStatus}
+		SET order_item_status =
+		#{orderItemStatus}
 		WHERE order_no = #{orderNo}
 	</update>
-	
+
 	<!-- order_item 인서트 -->
 	<insert id="insertOrderItem"
 		parameterType="com.shop.domain.OrderItem">
@@ -76,4 +77,43 @@
 		WHERE order_no = #{orderNo}
 	</delete>
 
+	<select id="selectPaymentResultItemsByOrderNo"
+		parameterType="long"
+		resultType="com.shop.dto.user.payment.PaymentPrepareItemDTO">
+		SELECT
+		oi.product_option_no AS productOptionNo,
+		oi.quantity AS quantity,
+		oi.unit_price AS unitPrice,
+		oi.item_name AS itemName,
+		oi.item_size AS itemSize,
+		oi.item_color AS itemColor,
+		CASE
+		WHEN img.image_url IS NOT NULL THEN '/upload/' || img.image_url
+		ELSE NULL
+		END AS imageUrl
+		FROM order_item oi
+		JOIN product_option po
+		ON oi.product_option_no = po.product_option_no
+		JOIN product p
+		ON po.product_no = p.product_no
+		LEFT JOIN (
+		SELECT product_no, image_url
+		FROM (
+		SELECT
+		pi.product_no,
+		pi.image_url,
+		ROW_NUMBER() OVER (
+		PARTITION BY pi.product_no
+		ORDER BY
+		CASE WHEN pi.image_type = 'THUMB' THEN 0 ELSE 1 END,
+		NVL(pi.sort_order, 9999)
+		) AS rn
+		FROM product_img pi
+		)
+		WHERE rn = 1
+		) img
+		ON p.product_no = img.product_no
+		WHERE oi.order_no = #{orderNo}
+		ORDER BY oi.order_item_no ASC
+	</select>
 </mapper>

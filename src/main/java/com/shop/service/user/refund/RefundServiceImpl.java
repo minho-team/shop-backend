@@ -29,6 +29,7 @@ public class RefundServiceImpl implements RefundService {
 
 		Long memberNo = member.getMemberNo();
 
+		//refund테이블에 REQUESTED 상태로 새로운 환불 insert
 		refundMapper.insertRefund(requestDTO.getOrderNo(), memberNo, requestDTO.getRefundReason());
 
 		Long refundNo = refundMapper.getCurrentRefundNo();
@@ -42,11 +43,13 @@ public class RefundServiceImpl implements RefundService {
 
 		//환불작성서에 있는 아이템을 하나씩 돌려가면서 그에 대한 조작하기 
 		for (RefundCreateItemRequestDTO item : items) {
+			//refund_item을 REQUESTED로
 			refundMapper.insertRefundItem(refundNo, item.getOrderItemNo(), item.getRefundQuantity(),
 					item.getRefundAmount());
 
 			refundMapper.increaseRefundedQuantity(item.getOrderItemNo(), item.getRefundQuantity());
 
+			//해당 order_item_no에 대해서 상태를 REFUND_REQUESTED로 변경
 			refundMapper.updateOrderItemStatus(item.getOrderItemNo(), "REFUND_REQUESTED");
 			//환불의 총액 계산
 			totalRefundAmount += item.getRefundAmount();
@@ -67,6 +70,11 @@ public class RefundServiceImpl implements RefundService {
 			throw new RuntimeException("주문상품 상태가 없습니다.");
 		}
 
+		//orders 테이블의 상태값 헤더 동기화 정책
+		//  ex) orderNo = 7의 아이템들의 모든 상태가 결제대기일 경우 결제대기 반환(allMatch)
+		//  모든 상태가 '취소된'일 경우 CANCELED 반환
+		//	하나라도 배송중이거나 준비중일 경우, '배송중'or'준비중' 반환 (anyMatch)
+		// 	그 외엔 '결제 완료' 반환
 		if (statuses.stream().allMatch(status -> "PENDING_PAYMENT".equals(status))) {
 			return "PENDING_PAYMENT";
 		}

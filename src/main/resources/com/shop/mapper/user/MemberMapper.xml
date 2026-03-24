@@ -65,13 +65,16 @@
 			SELECT seq_member.NEXTVAL FROM dual
 		</selectKey>
 		INSERT INTO member (
-		member_no, member_id, password, name, nick_name, email, phone_number,
-		zip_code, basic_address, detail_address, gender, birthday,
+		member_no, member_id, password, name, nick_name,
+		email, phone_number,
+		zip_code, basic_address, detail_address, gender,
+		birthday,
 		bank_name, bank_code, account_holder_name
 		) VALUES (
 		#{memberNo}, #{memberId}, #{password}, #{name}, #{nickName}, #{email},
 		#{phoneNumber},
-		#{zipCode}, #{basicAddress}, #{detailAddress}, #{gender}, #{birthday},
+		#{zipCode}, #{basicAddress}, #{detailAddress},
+		#{gender}, #{birthday},
 		#{bankName}, #{bankCode}, #{accountHolderName}
 		)
 	</insert>
@@ -101,15 +104,18 @@
 		member_no, member_id, password, name, nick_name,
 		email, phone_number, provider
 		) VALUES (
-		#{memberNo}, #{memberId}, #{password}, #{name}, #{nickName},
-		#{email}, #{phoneNumber}, #{provider}
+		#{memberNo}, #{memberId},
+		#{password}, #{name}, #{nickName},
+		#{email}, #{phoneNumber},
+		#{provider}
 		)
 	</insert>
 
 	<!-- memberNo를 기반으로 권한 인서트 -->
 	<insert id="insertRoleByMemberNo">
 		INSERT INTO member_role (
-		member_role_no, member_no, role_name
+		member_role_no, member_no,
+		role_name
 		) VALUES (
 		seq_member_role.NEXTVAL, #{memberNo}, #{roleName}
 		)
@@ -120,6 +126,25 @@
 		INSERT INTO member_role VALUES (#{memberRoleNo},
 		#{memberNo}, #{roleName})
 	</insert>
+
+	<!-- 회원 등급: purchase_count를 활용 -->
+	<update id="incrementPurchaseCount">
+		UPDATE member
+		SET purchase_count = NVL(purchase_count, 0) + 1
+		WHERE member_no = #{memberNo}
+	</update>
+
+	<update id="decrementPurchaseCount">
+		UPDATE member
+		SET purchase_count =
+		GREATEST(NVL(purchase_count, 0) - 1, 0)
+		WHERE member_no = #{memberNo}
+	</update>
+
+	<select id="getPurchaseCount" resultType="int">
+		SELECT
+		NVL(purchase_count, 0) FROM member WHERE member_no = #{memberNo}
+	</select>
 
 
 </mapper>
