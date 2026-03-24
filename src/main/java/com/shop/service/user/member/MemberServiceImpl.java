@@ -124,9 +124,15 @@ public class MemberServiceImpl implements MemberService {
 	// 구매횟수 관련 로직
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional(rollbackFor = Exception.class) 
 	public void updateMemberGrade(Long memberNo) throws Exception {
-		this.increasePurchaseCount(memberNo); 
+	    if (memberNo == null) return;
+	    int currentCount = memberMapper.getPurchaseCount(memberNo);
+	    
+	    String grade = determineGrade(currentCount);
+	    
+	    log.info("(MemberServiceImpl) 회원 {}번의 현재 구매 횟수는 {}회이며, 판정된 등급은 {}입니다.", 
+	              memberNo, currentCount, grade);
 	}
 
 	@Override

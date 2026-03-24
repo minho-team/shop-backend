@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // [추가]임포트 추가
 
 import com.shop.dto.admin.order.AdminOrderDto;
 import com.shop.dto.admin.order.AdminOrderItemDTO;
@@ -14,12 +15,19 @@ import com.shop.dto.admin.order.OrderStatusUpdateRequestDTO;
 import com.shop.dto.admin.order.PageResponseDto;
 import com.shop.dto.admin.order.RefundStatusUpdateRequestDTO;
 import com.shop.mapper.admin.AdminOrderMapper;
+import com.shop.service.user.member.MemberService; // [추가]임포트 추가
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j // [추가]log.info 를 위해 추가했음
 public class AdminOrderServiceImpl implements AdminOrderService {
 
 	@Autowired
 	private AdminOrderMapper adminOrderMapper;
+	
+	@Autowired
+    private MemberService memberService; // [추가] 회원 서비스 주입
 
 	@Override
 	public AdminOrderListResponse getOrderList(AdminOrderListRequest request) throws Exception{
@@ -78,9 +86,28 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 		adminOrderMapper.updateOrderStatus(orderNo, requestDTO.getOrderStatus());
 	}
 
-	@Override
+	@Override // [추가] updateRefundStatus 전체코드 수정했음
+	@Transactional(rollbackFor = Exception.class) // [추가] 데이터 정합성 보장
 	public void updateRefundStatus(Long orderNo, RefundStatusUpdateRequestDTO requestDTO) throws Exception {
-		adminOrderMapper.updateRefundStatus(orderNo, requestDTO.getRefundStatus());
-	}
+	    // 1. 기존 환불 상태 업데이트 로직
+	    adminOrderMapper.updateRefundStatus(orderNo, requestDTO.getRefundStatus());
 
+	    // 2. [추가] 환불 완료(REFUNDED) 시 구매 횟수 차감 로직
+	    if ("REFUNDED".equals(requestDTO.getRefundStatus())) {
+	        // 주문 정보 조회를 통해 memberNo 획득
+	        AdminOrderReadDTO order = adminOrderMapper.getOrder(orderNo);
+
+	        if (order != null && order.getMemberNo() != null) {
+	            Long memberNo = order.getMemberNo();
+
+	            // 구매 횟수 1 차감 (purchase_count - 1)
+	            memberService.decreasePurchaseCount(memberNo);
+
+	            // 바뀐 횟수를 기준으로 회원 등급 재계산
+	            memberService.updateMemberGrade(memberNo);
+
+	            log.info("환불 완료 처리: 회원 {}번 구매 횟수 차감 및 등급 재계산 완료", memberNo);
+	        }
+	    }
+	}
 }
