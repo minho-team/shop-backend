@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.admin.AdminCartItemMapper">
+
+    <!-- 특정 회원 장바구니 담긴 상품 종류 수 조회 (회원 상세 요약용) -->
+    <select id="countCartItemByMemberNo" parameterType="long" resultType="int">
+        SELECT COUNT(ci.cart_item_no)
+        FROM cart c
+        JOIN cart_item ci ON c.cart_no = ci.cart_no
+        WHERE c.member_no = #{memberNo}
+    </select>
+
+    <!-- 특정 회원 장바구니 상품 목록 상세 조회
+         상품명, 옵션(사이즈/색상), 수량, 가격 포함 -->
+    <select id="selectCartItemsWithProductByMemberNo"
+        parameterType="long"
+        resultType="com.shop.dto.admin.member.AdminCartItemDTO">
+        SELECT
+            ci.cart_item_no AS cartItemNo,
+            p.product_no    AS productNo,
+            p.name          AS productName,
+            po.option_size  AS optionSize,
+            po.color        AS color,
+            ci.quantity     AS quantity,
+            p.price         AS price,
+            p.discount_rate AS discountRate
+        FROM cart c
+        JOIN cart_item ci     ON c.cart_no = ci.cart_no
+        JOIN product_option po ON ci.product_option_no = po.product_option_no
+        JOIN product p         ON po.product_no = p.product_no
+        WHERE c.member_no = #{memberNo}
+        ORDER BY ci.cart_item_no DESC
+    </select>
+
+</mapper>
