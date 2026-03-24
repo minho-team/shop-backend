@@ -108,6 +108,7 @@ public class AdminProductServiceImpl implements AdminProductService{
         responseDTO.setDiscountRate(product.getDiscountRate());
         responseDTO.setSalePrice(product.getSalePrice());
         responseDTO.setCategoryId(product.getCategoryId());
+        responseDTO.setCategoryName(product.getCategoryName());
         responseDTO.setDescription(product.getDescription());
         responseDTO.setUseYn(product.getUseYn());
         responseDTO.setSameDayDeliveryYn(product.getSameDayDeliveryYn());
@@ -228,9 +229,9 @@ public class AdminProductServiceImpl implements AdminProductService{
 	@Override
 	@Transactional
 	public void updateProductsBasic(Long productNo, AdminProductBasicUpdateDTO dto) {
-		
-		// 유효성 검사
-		if (productNo == null) {
+
+	    // 유효성 검사
+	    if (productNo == null) {
 	        throw new IllegalArgumentException("상품번호가 없습니다.");
 	    }
 
@@ -254,14 +255,32 @@ public class AdminProductServiceImpl implements AdminProductService{
 	        throw new IllegalArgumentException("당일배송여부는 Y 또는 N만 가능합니다.");
 	    }
 
+	    // 상품 존재 여부 확인
 	    AdminProductDetailDTO product = adminProductMapper.getProduct(productNo);
-	    
+
 	    if (product == null) {
 	        throw new IllegalArgumentException("존재하지 않는 상품입니다.");
 	    }
 
+	    // 현재 판매여부 조회
+	    String currentUseYn = adminProductMapper.getProductUseYn(productNo);
+
+	    if (currentUseYn == null) {
+	        throw new IllegalArgumentException("상품 판매상태를 확인할 수 없습니다.");
+	    }
+
+	    // 판매여부가 실제로 변경되는 경우에만 활성 주문 검사
+	    boolean isUseYnChanged = !currentUseYn.equals(dto.getUseYn());
+
+	    if (isUseYnChanged) {
+	        int activeOrderCount = adminProductMapper.countActiveOrderItemsByProductNo(productNo);
+
+	        if (activeOrderCount > 0) {
+	            throw new IllegalStateException("활성 주문이 있는 상품은 판매상태를 변경할 수 없습니다.");
+	        }
+	    }
+
 	    adminProductMapper.updateProductBasic(productNo, dto);
-		
 	}
 	
 	// 상품 옵션 목록 조회

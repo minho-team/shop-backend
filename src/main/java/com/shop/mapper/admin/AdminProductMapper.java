@@ -29,8 +29,6 @@ public interface AdminProductMapper {
     // 상품 이미지 목록 조회
     List<AdminProductImageDTO> getProductImages(Long productNo);
 
-    // 상품 옵션 목록 조회
-    List<AdminProductOptionDTO> getProductOptions(Long productNo);
     
     // 상품 등록
     void insertProduct(AdminProductInsertDTO dto);
@@ -40,24 +38,11 @@ public interface AdminProductMapper {
                             @Param("imageUrl") String imageUrl,
                             @Param("imageType") String imageType,
                             @Param("sortOrder") int sortOrder);
-    // 상품 옵션 등록
-    void insertProductOption(AdminProductOptionDTO optionDTO);
     
     // 상품 기본정보 수정
 	void updateProductBasic(@Param("productNo")Long productNo, 
 							@Param("dto")AdminProductBasicUpdateDTO dto);
 	
-	// 상품 옵션 조회 (Null 여부 확인용)
-	AdminProductOptionDTO getProductOption(@Param("productNo") Long productNo,
-            								  @Param("productOptionNo") Long productOptionNo);
-	// 상품 옵션 수정
-	void updateProductOption(@Param("productNo") Long productNo,
-				            @Param("productOptionNo") Long productOptionNo,
-				            @Param("dto") AdminProductOptionRequestDTO dto);
-	
-	// 상품 옵션 삭제
-	void deleteProductOption(@Param("productNo") Long productNo,
-            					@Param("productOptionNo") Long productOptionNo);
 	
 	// 상품 use_yn = 'N' 처리
 	void softDeleteProduct(Long productNo);
@@ -65,5 +50,30 @@ public interface AdminProductMapper {
 	// 해당 상품 이미지 전체 삭제
 	void deleteProductImages(Long productNo);
     
+	// 현재 상품 판매여부 조회
+	String getProductUseYn(@Param("productNo") Long productNo);
+
+	// 해당 상품의 활성 주문 건수 조회
+	int countActiveOrderItemsByProductNo(@Param("productNo") Long productNo);
 	
+	
+	// ======================= 상품 옵션 영역 =======================
+	// 상품 옵션 조회 (Null 여부 확인용)
+	AdminProductOptionDTO getProductOption(@Param("productNo") Long productNo,
+			@Param("productOptionNo") Long productOptionNo);
+	
+	// 상품 옵션 목록 조회
+	List<AdminProductOptionDTO> getProductOptions(Long productNo);
+	
+	// 상품 옵션 등록
+	void insertProductOption(AdminProductOptionDTO optionDTO);
+	
+	// 상품 옵션 수정
+	void updateProductOption(@Param("productNo") Long productNo,
+			@Param("productOptionNo") Long productOptionNo,
+			@Param("dto") AdminProductOptionRequestDTO dto);
+	
+	// 상품 옵션 삭제
+	void deleteProductOption(@Param("productNo") Long productNo,
+			@Param("productOptionNo") Long productOptionNo);
 }

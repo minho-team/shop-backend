@@ -13,6 +13,7 @@ public class AdminProductDetailDTO {
     private Integer discountRate;
     private Long salePrice;
     private Long categoryId;
+    private String categoryName;
     private String description;
     private String useYn;
     private String sameDayDeliveryYn;
