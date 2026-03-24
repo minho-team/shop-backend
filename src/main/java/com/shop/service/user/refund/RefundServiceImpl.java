@@ -12,26 +12,32 @@ import com.shop.mapper.user.MemberMapper;
 import com.shop.mapper.user.RefundMapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RefundServiceImpl implements RefundService {
 	private final RefundMapper refundMapper;
 	private final MemberMapper memberMapper;
 
 	@Override
 	@Transactional
-	public void createRefund(String memberId, RefundCreateRequestDTO requestDTO) throws Exception{
+	public void createRefund(String memberId, RefundCreateRequestDTO requestDTO) throws Exception {
 		Member member = memberMapper.readOneMember(memberId);
 		if (member == null) {
 			throw new RuntimeException("회원이 없습니다.");
 		}
 
 		Long memberNo = member.getMemberNo();
+		log.info("serviceImpl에서 memberNo" + memberNo);
+		// 사용자의 은행명, 계좌번호 업데이트
+		memberMapper.updateBankInfo(memberNo, requestDTO.getBankName(), requestDTO.getBankCode());
 
-		//refund테이블에 REQUESTED 상태로 새로운 환불 insert
+		// refund테이블에 REQUESTED 상태로 새로운 환불 insert
 		refundMapper.insertRefund(requestDTO.getOrderNo(), memberNo, requestDTO.getRefundReason());
 
+		//
 		Long refundNo = refundMapper.getCurrentRefundNo();
 
 		List<RefundCreateItemRequestDTO> items = requestDTO.getItems();
@@ -41,27 +47,27 @@ public class RefundServiceImpl implements RefundService {
 
 		long totalRefundAmount = 0L;
 
-		//환불작성서에 있는 아이템을 하나씩 돌려가면서 그에 대한 조작하기 
+		// 환불작성서에 있는 아이템을 하나씩 돌려가면서 그에 대한 조작하기
 		for (RefundCreateItemRequestDTO item : items) {
-			//refund_item을 REQUESTED로
+			// refund_item을 REQUESTED로
 			refundMapper.insertRefundItem(refundNo, item.getOrderItemNo(), item.getRefundQuantity(),
 					item.getRefundAmount());
 
 			refundMapper.increaseRefundedQuantity(item.getOrderItemNo(), item.getRefundQuantity());
 
-			//해당 order_item_no에 대해서 상태를 REFUND_REQUESTED로 변경
+			// 해당 order_item_no에 대해서 상태를 REFUND_REQUESTED로 변경
 			refundMapper.updateOrderItemStatus(item.getOrderItemNo(), "REFUND_REQUESTED");
-			//환불의 총액 계산
+			// 환불의 총액 계산
 			totalRefundAmount += item.getRefundAmount();
 		}
 
-		//환불 테이블에 총액 갱신
+		// 환불 테이블에 총액 갱신
 		refundMapper.updateRefundTotalAmount(refundNo, totalRefundAmount);
 
 		Long orderNo = requestDTO.getOrderNo();
 		List<String> orderItemStatuses = refundMapper.findOrderItemStatusesByOrderNo(orderNo);
 		String orderStatus = calculateOrderStatus(orderItemStatuses);
-		//환불 상태 처리 후에 orders의 테이블에도 상태를 또 계산해야함
+		// 환불 상태 처리 후에 orders의 테이블에도 상태를 또 계산해야함
 		refundMapper.updateOrderStatus(orderNo, orderStatus);
 	}
 
@@ -70,11 +76,11 @@ public class RefundServiceImpl implements RefundService {
 			throw new RuntimeException("주문상품 상태가 없습니다.");
 		}
 
-		//orders 테이블의 상태값 헤더 동기화 정책
-		//  ex) orderNo = 7의 아이템들의 모든 상태가 결제대기일 경우 결제대기 반환(allMatch)
-		//  모든 상태가 '취소된'일 경우 CANCELED 반환
-		//	하나라도 배송중이거나 준비중일 경우, '배송중'or'준비중' 반환 (anyMatch)
-		// 	그 외엔 '결제 완료' 반환
+		// orders 테이블의 상태값 헤더 동기화 정책
+		// ex) orderNo = 7의 아이템들의 모든 상태가 결제대기일 경우 결제대기 반환(allMatch)
+		// 모든 상태가 '취소된'일 경우 CANCELED 반환
+		// 하나라도 배송중이거나 준비중일 경우, '배송중'or'준비중' 반환 (anyMatch)
+		// 그 외엔 '결제 완료' 반환
 		if (statuses.stream().allMatch(status -> "PENDING_PAYMENT".equals(status))) {
 			return "PENDING_PAYMENT";
 		}

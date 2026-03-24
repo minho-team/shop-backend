@@ -26,13 +26,13 @@ public class RefundController {
 	public ResponseEntity<String> createRefund(@RequestBody RefundCreateRequestDTO requestDTO,
 			Authentication authentication) {
 		String memberId = authentication.getName();
-		log.info("createRefund 진입");
+		log.info("createRefund 진입,memberId:"+memberId);
 		try {
 			refundService.createRefund(memberId, requestDTO);
 			return ResponseEntity.ok("환불 신청 완료");
 
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("환불 생성 실패: " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("환불 신청 실패: " + e.getMessage());
 
 		}
 	}
