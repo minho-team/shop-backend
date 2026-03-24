@@ -32,19 +32,24 @@ import com.shop.mapper.user.MemberMapper;
 import com.shop.mapper.user.OrderItemMapper;
 import com.shop.mapper.user.OrdersMapper;
 import com.shop.mapper.user.PaymentMapper;
+import com.shop.service.user.member.MemberService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentServiceImpl implements PaymentService {
 
 	private final MemberMapper memberMapper;
+	private final MemberService memberService;
 	private final OrdersMapper ordersMapper;
 	private final OrderItemMapper orderItemMapper;
 	private final PaymentMapper paymentMapper;
 	private final CartItemMapper cartItemMapper;
 	private final RestTemplate restTemplate;
+	
 
 	@Value("${toss.secret-key}")
 	private String tossSecretKey;
@@ -129,7 +134,9 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	@Transactional
 	public PaymentConfirmResponseDTO confirmPayment(String memberId, PaymentConfirmRequestDTO request) {
+		
 		Member member = null;
+		
 		try {
 			member = memberMapper.readOneMember(memberId);
 		} catch (Exception e) {
@@ -178,10 +185,28 @@ public class PaymentServiceImpl implements PaymentService {
 		String paymentKey = String.valueOf(result.get("paymentKey"));
 
 		paymentMapper.completePayment(order.getOrderNo(), paymentKey, paymentKey);
-
+		
 		ordersMapper.updateOrderStatus(order.getOrderNo(), "PAYMENT_COMPLETED");
 		orderItemMapper.updateOrderItemStatusByOrderNo(order.getOrderNo(), "PAYMENT_COMPLETED");
+		
+		try {
+            Member currentMember = memberMapper.readOneMember(memberId);
+            
+            if (currentMember != null && currentMember.getMemberNo() != null) {
+                // (1) 구매 횟수 증가
+                memberMapper.incrementPurchaseCount(currentMember.getMemberNo());
+                log.info("결제 성공: 회원 {}번 구매 횟수 +1 증가", currentMember.getMemberNo());
 
+                // (2) 등급 업데이트
+                memberService.updateMemberGrade(currentMember.getMemberNo());
+                log.info("결제 성공: 회원 {}번 등급 최신화 완료", currentMember.getMemberNo());
+            } else {
+                log.error("회원 정보를 찾을 수 없어 카운트를 올리지 못했습니다. (memberNo: null)");
+            }
+        } catch (Exception e) {
+            log.error("구매 카운트/등급 업데이트 중 오류 발생(결제는 완료됨): ", e);
+        }
+		
 		// 장바구니에서 주문한 상품만 결제 완료 후 장바구니에서 삭제
 		List<Long> orderedCartItemNos = request.getOrderedCartItemNos();
 		if (orderedCartItemNos != null && !orderedCartItemNos.isEmpty()) {

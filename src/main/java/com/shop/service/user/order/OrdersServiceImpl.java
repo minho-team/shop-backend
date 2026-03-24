@@ -111,8 +111,24 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public void createOrder(Orders orders) {
-		mapper.createOrder(orders);
+	@Transactional(rollbackFor = Exception.class) // [1] 트랜잭션 추가 (에러 발생 시 모두 취소)
+	public void createOrder(Orders orders) throws Exception { // [2] throws Exception 추가
+	    
+	    // 1. 먼저 주문을 DB에 저장합니다.
+	    mapper.createOrder(orders);
+	    
+	    // 2. 저장된 orders 객체에서 memberNo를 꺼내옵니다.
+	    Long memberNo = orders.getMemberNo(); 
+
+	    if (memberNo != null) {
+	        // 3. 구매 횟수 증가 및 등급 업데이트를 호출합니다.
+	        memberService.increasePurchaseCount(memberNo);
+	        memberService.updateMemberGrade(memberNo);
+	        
+	        log.info("(OrdersServiceImpl) 주문 저장 완료 -> 회원 {}번 데이터 갱신", memberNo);
+	    } else {
+	        log.error("주문 정보에 memberNo가 없어 카운트를 올리지 못했습니다.");
+	    }
 	}
 
 	@Override
@@ -124,15 +140,5 @@ public class OrdersServiceImpl implements OrdersService {
 	public List<Orders> getAllOrders(Long memberNo) {
 		return mapper.getAllOrders(memberNo);
 	}
-	@Transactional(rollbackFor = Exception.class)
-	public void cancelOrder(Long orderNo) throws Exception {
-	    Orders order = mapper.getOneOrder(orderNo);
-	    
-	    mapper.updateOrderStatus(orderNo, "CANCELED");
-	    
-	    log.info("(OrdersServiceImpl) 주문 취소 -> 회원 {}번 구매 횟수 차감 요청", order.getMemberNo());
-	    memberService.decreasePurchaseCount(order.getMemberNo());
-	}
-	
 
 }
