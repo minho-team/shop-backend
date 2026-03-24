@@ -1,6 +1,7 @@
 package com.shop.service.user.product;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import com.shop.dto.user.product.HomeProductCardDto;
 import com.shop.dto.user.product.HomeReviewDto;
 import com.shop.dto.user.product.PopularKeywordDto;
 import com.shop.dto.user.product.ProductCreateRequest;
+import com.shop.dto.user.product.ProductDetailProductDto;
 import com.shop.dto.user.product.ProductDetailResponse;
 import com.shop.dto.user.product.ProductListResponse;
 import com.shop.dto.user.product.ProductListResponseDto;
@@ -26,202 +28,235 @@ import com.shop.mapper.user.ReviewMapper;
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private static final List<String> SPRING_SALE_KEYWORDS = Arrays.asList(
-            "가디건", "니트", "스웨트셔츠", "셔츠", "긴팔", "긴바지"
-    );
-    private static final int SPRING_SALE_RATE = 10;
+	private static final List<String> SPRING_SALE_KEYWORDS = Arrays.asList("가디건", "니트", "스웨트셔츠", "셔츠", "긴팔", "긴바지");
+	private static final int SPRING_SALE_RATE = 10;
 
-    @Autowired
-    private ProductMapper productMapper;
+	@Autowired
+	private ProductMapper productMapper;
 
-    @Autowired
-    private ProductOptionMapper productOptionMapper;
+	@Autowired
+	private ProductOptionMapper productOptionMapper;
 
-    @Autowired
-    private ReviewMapper reviewMapper;
+	@Autowired
+	private ReviewMapper reviewMapper;
 
-    @Override
-    public void insertProduct(ProductCreateRequest dto) throws Exception {
-        productMapper.insertProduct(dto);
-    }
+	@Override
+	public void insertProduct(ProductCreateRequest dto) throws Exception {
+		productMapper.insertProduct(dto);
+	}
 
-    @Override
-    public void updateProducts(Long productNo, ProductUpdateRequest dto) throws Exception {
-        productMapper.updateProducts(productNo, dto);
-    }
+	@Override
+	public void updateProducts(Long productNo, ProductUpdateRequest dto) throws Exception {
+		productMapper.updateProducts(productNo, dto);
+	}
 
-    @Override
-    public void deleteProduct(Long productNo) throws Exception {
-        productMapper.deleteProduct(productNo);
-    }
+	@Override
+	public void deleteProduct(Long productNo) throws Exception {
+		productMapper.deleteProduct(productNo);
+	}
 
-    
-    //상품 상세페이지에서 상품의 정보(product)와 상품 옵션(product_option)을 가져옴 
-    @Override
-    public ProductDetailResponse getOneProduct(Long productNo) throws Exception {
-        // 조회수 증가
-        productMapper.incrementViewCount(productNo);
+	// 상품 상세페이지에서 상품의 정보(product)와 상품 옵션(product_option)을 가져옴
+	@Override
+	public ProductDetailResponse getOneProduct(Long productNo) throws Exception {
+		// 조회수 증가
+		productMapper.incrementViewCount(productNo);
 
-        Product product = productMapper.getOneProducts(productNo);
-        List<ProductOption> options = productOptionMapper.getOptionsByProductNo(productNo);
+		Product product = productMapper.getOneProducts(productNo);
+		List<ProductOption> options = productOptionMapper.getOptionsByProductNo(productNo);
 
-        ProductDetailResponse response = new ProductDetailResponse();
-        response.setProduct(product);
-        response.setOptions(options);
+		ProductDetailProductDto productDto = null;
 
-        return response;
-    }
+		if (product != null) {
+			productDto = new ProductDetailProductDto();
+			productDto.setProductNo(product.getProductNo());
+			productDto.setName(product.getName());
+			productDto.setPrice(product.getPrice());
+			productDto.setDiscountRate(product.getDiscountRate());
+			productDto.setSalePrice(calculateSalePrice(product.getPrice(), product.getDiscountRate()));
+			productDto.setCategoryId(product.getCategoryId());
+			productDto.setDescription(product.getDescription());
+			productDto.setUseYn(product.getUseYn());
+			productDto.setViewCount(product.getViewCount());
+			productDto.setSameDayDeliveryYn(product.getSameDayDeliveryYn());
+		}
 
-    @Override
-    public List<ProductListResponse> getAllProductToMainPage() throws Exception {
-        List<ProductListResponse> list = productMapper.getAllProductToMainPage();
+		ProductDetailResponse response = new ProductDetailResponse();
+		response.setProduct(productDto);
+		response.setOptions(options);
 
-        for (ProductListResponse dto : list) {
-            if (dto.getPrice() != null) {
-                dto.setSalePrice(calculateSalePrice(dto.getPrice(), dto.getDiscountRate()));
-            }
+		return response;
+	}
 
-            if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
-                dto.setImageUrl("/upload/" + dto.getImageUrl());
-            }
-        }
+	@Override
+	public List<ProductListResponse> getAllProductToMainPage() throws Exception {
+		List<ProductListResponse> list = productMapper.getAllProductToMainPage();
 
-        return list;
-    }
+		for (ProductListResponse dto : list) {
+			if (dto.getPrice() != null) {
+				dto.setSalePrice(calculateSalePrice(dto.getPrice(), dto.getDiscountRate()));
+			}
 
-    @Override
-    public List<Product> getAllProducts() throws Exception {
-        return productMapper.getAllProducts();
-    }
+			if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+				dto.setImageUrl("/upload/" + dto.getImageUrl());
+			}
+		}
 
-    @Override
-    public List<ProductListResponseDto> selectSearchProductList(
-            Integer categoryId,
-            String keyword,
-            String sort,
-            Boolean discountOnly
-    ) throws Exception {
-        List<ProductListResponseDto> list =
-                productMapper.selectSearchProductList(categoryId, keyword, sort, false);
+		return list;
+	}
 
-        for (ProductListResponseDto dto : list) {
-            if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
-                dto.setImageUrl("/upload/" + dto.getImageUrl());
-            }
-        }
+	@Override
+	public List<Product> getAllProducts() throws Exception {
+		return productMapper.getAllProducts();
+	}
 
-        if (Boolean.TRUE.equals(discountOnly)) {
-            list = list.stream()
-                    .filter(dto -> dto.getDiscountRate() != null && dto.getDiscountRate() > 0)
-                    .collect(Collectors.toList());
-        }
+	@Override
+	public List<ProductListResponseDto> selectSearchProductList(Integer categoryId, String keyword, String sort,
+			Boolean discountOnly) throws Exception {
+		List<ProductListResponseDto> list = productMapper.selectSearchProductList(categoryId, keyword, sort, false);
 
-        if ("sale".equals(sort)) {
-            list.sort(Comparator.comparing(ProductListResponseDto::getDiscountRate,
-                    Comparator.nullsLast(Comparator.reverseOrder())));
-        }
+		for (ProductListResponseDto dto : list) {
+			if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+				dto.setImageUrl("/upload/" + dto.getImageUrl());
+			}
+		}
 
-        return list;
-    }
+		if (Boolean.TRUE.equals(discountOnly)) {
+			list = list.stream().filter(dto -> dto.getDiscountRate() != null && dto.getDiscountRate() > 0)
+					.collect(Collectors.toList());
+		}
 
-    @Override
-    public HomeMainResponse getHomeMainData() throws Exception {
-        HomeMainResponse response = new HomeMainResponse();
+		if ("sale".equals(sort)) {
+			list.sort(Comparator.comparing(ProductListResponseDto::getDiscountRate,
+					Comparator.nullsLast(Comparator.reverseOrder())));
+		}
 
-        List<HomeProductCardDto> newProducts = productMapper.selectHomeNewProducts();
-        List<HomeProductCardDto> bestProducts = productMapper.selectHomeBestProducts();
-        List<HomeProductCardDto> recommendProducts = productMapper.selectHomeRecommendProducts();
-        List<HomeProductCardDto> saleProducts = productMapper.selectHomeSaleProducts();
-        // 모든 할인율은 DB의 discount_rate 컬럼 값을 직접 사용
+		return list;
+	}
 
-        List<HomeReviewDto> recentReviews = reviewMapper.selectHomeRecentReviews();
-        List<PopularKeywordDto> popularKeywords = productMapper.selectPopularKeywords();
+	@Override
+	public HomeMainResponse getHomeMainData() throws Exception {
+		HomeMainResponse response = new HomeMainResponse();
 
-        normalizeImagePath(newProducts);
-        normalizeImagePath(bestProducts);
-        normalizeImagePath(saleProducts);
-        normalizeImagePath(recommendProducts);
+		List<HomeProductCardDto> newProducts = productMapper.selectHomeNewProducts();
+		List<HomeProductCardDto> bestProducts = productMapper.selectHomeBestProducts();
+		List<HomeProductCardDto> recommendProducts = productMapper.selectHomeRecommendProducts();
+		List<HomeProductCardDto> saleProducts = productMapper.selectHomeSaleProducts();
+		// 모든 할인율은 DB의 discount_rate 컬럼 값을 직접 사용
 
-        response.setNewProducts(newProducts);
-        response.setBestProducts(bestProducts);
-        response.setSaleProducts(saleProducts);
-        response.setRecommendProducts(recommendProducts);
-        response.setRecentReviews(recentReviews);
-        response.setPopularKeywords(popularKeywords);
+		List<HomeReviewDto> recentReviews = reviewMapper.selectHomeRecentReviews();
+		List<PopularKeywordDto> popularKeywords = productMapper.selectPopularKeywords();
 
-        return response;
-    }
+		normalizeImagePath(newProducts);
+		normalizeImagePath(bestProducts);
+		normalizeImagePath(saleProducts);
+		normalizeImagePath(recommendProducts);
 
-    private void normalizeImagePath(List<HomeProductCardDto> list) {
-        for (HomeProductCardDto dto : list) {
-            if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
-                dto.setImageUrl("/upload/" + dto.getImageUrl());
-            }
-        }
-    }
+		response.setNewProducts(newProducts);
+		response.setBestProducts(bestProducts);
+		response.setSaleProducts(saleProducts);
+		response.setRecommendProducts(recommendProducts);
+		response.setRecentReviews(recentReviews);
+		response.setPopularKeywords(popularKeywords);
 
-    private void applySeasonalDiscount(Product product) {
-        if (product == null) {
-            return;
-        }
-        product.setDiscountRate(resolveSeasonalDiscountRate(product.getName()));
-    }
+		return response;
+	}
 
-    private void applySeasonalDiscount(ProductListResponse product) {
-        if (product == null) {
-            return;
-        }
-        int discountRate = resolveSeasonalDiscountRate(product.getName());
-        product.setDiscountRate(discountRate);
+	private void normalizeImagePath(List<HomeProductCardDto> list) {
+		for (HomeProductCardDto dto : list) {
+			if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+				dto.setImageUrl("/upload/" + dto.getImageUrl());
+			}
+		}
+	}
 
-        if (product.getPrice() != null) {
-            product.setSalePrice(calculateSalePrice(product.getPrice(), discountRate));
-        }
-    }
+	private void applySeasonalDiscount(Product product) {
+		if (product == null) {
+			return;
+		}
+		product.setDiscountRate(resolveSeasonalDiscountRate(product.getName()));
+	}
 
-    private void applySeasonalDiscount(ProductListResponseDto product) {
-        if (product == null) {
-            return;
-        }
-        product.setDiscountRate(resolveSeasonalDiscountRate(product.getName()));
-    }
+	private void applySeasonalDiscount(ProductListResponse product) {
+		if (product == null) {
+			return;
+		}
+		int discountRate = resolveSeasonalDiscountRate(product.getName());
+		product.setDiscountRate(discountRate);
 
-    private void applySeasonalDiscount(HomeProductCardDto product) {
-        if (product == null) {
-            return;
-        }
-        product.setDiscountRate(resolveSeasonalDiscountRate(product.getName()));
-    }
+		if (product.getPrice() != null) {
+			product.setSalePrice(calculateSalePrice(product.getPrice(), discountRate));
+		}
+	}
 
-    private HomeProductCardDto toHomeProductCardDto(ProductListResponseDto product) {
-        HomeProductCardDto dto = new HomeProductCardDto();
-        dto.setProductNo(product.getProductNo());
-        dto.setName(product.getName());
-        dto.setPrice(product.getPrice());
-        dto.setDiscountRate(product.getDiscountRate());
-        dto.setImageUrl(product.getImageUrl());
-        dto.setSameDayDeliveryYn(product.getSameDayDeliveryYn());
-        return dto;
-    }
+	private void applySeasonalDiscount(ProductListResponseDto product) {
+		if (product == null) {
+			return;
+		}
+		product.setDiscountRate(resolveSeasonalDiscountRate(product.getName()));
+	}
 
-    private int resolveSeasonalDiscountRate(String productName) {
-        if (productName == null || productName.isBlank()) {
-            return 0;
-        }
+	private void applySeasonalDiscount(HomeProductCardDto product) {
+		if (product == null) {
+			return;
+		}
+		product.setDiscountRate(resolveSeasonalDiscountRate(product.getName()));
+	}
 
-        return SPRING_SALE_KEYWORDS.stream()
-                .anyMatch(productName::contains)
-                ? SPRING_SALE_RATE
-                : 0;
-    }
+	private HomeProductCardDto toHomeProductCardDto(ProductListResponseDto product) {
+		HomeProductCardDto dto = new HomeProductCardDto();
+		dto.setProductNo(product.getProductNo());
+		dto.setName(product.getName());
+		dto.setPrice(product.getPrice());
+		dto.setDiscountRate(product.getDiscountRate());
+		dto.setImageUrl(product.getImageUrl());
+		dto.setSameDayDeliveryYn(product.getSameDayDeliveryYn());
+		return dto;
+	}
 
-    private Long calculateSalePrice(Long price, Integer discountRate) {
-        if (price == null) {
-            return null;
-        }
-        if (discountRate == null || discountRate <= 0) {
-            return price;
-        }
-        return price * (100 - discountRate) / 100;
-    }
+	private int resolveSeasonalDiscountRate(String productName) {
+		if (productName == null || productName.isBlank()) {
+			return 0;
+		}
+
+		return SPRING_SALE_KEYWORDS.stream().anyMatch(productName::contains) ? SPRING_SALE_RATE : 0;
+	}
+
+	private Long calculateSalePrice(Long price, Integer discountRate) {
+		if (price == null) {
+			return null;
+		}
+		if (discountRate == null || discountRate <= 0) {
+			return price;
+		}
+		long discountedPrice = price * (100 - discountRate) / 100;
+		return (discountedPrice / 100) * 100;
+	}
+
+	@Override
+	public List<ProductListResponse> getRelatedProducts(Long productNo) throws Exception {
+
+		// 1) 현재 상품 정보를 먼저 조회
+		Product currentProduct = productMapper.getOneProducts(productNo);
+
+		// 2) 현재 상품이 없거나 categoryId가 없으면 관련상품을 찾을 수 없으므로 빈 리스트 반환
+		if (currentProduct == null || currentProduct.getCategoryId() == null) {
+			return Collections.emptyList();
+		}
+
+		// 3) 현재 상품의 categoryId를 기준으로 같은 카테고리의 상품들을 조회(현재 상품 자신은 제외)
+		List<ProductListResponse> list = productMapper.selectRelatedProducts(currentProduct.getCategoryId(), productNo);
+
+		for (ProductListResponse dto : list) {
+
+			if (dto.getPrice() != null) {
+				dto.setSalePrice(calculateSalePrice(dto.getPrice(), dto.getDiscountRate()));
+			}
+
+			if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+				dto.setImageUrl("/upload/" + dto.getImageUrl());
+			}
+		}
+
+		return list;
+	}
 }

@@ -21,56 +21,66 @@ import com.shop.service.user.product.ProductService;
 @RequestMapping("/api/product")
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+	@Autowired
+	private ProductService productService;
 
-    @GetMapping("/{productNo}")
-    public ResponseEntity<?> getOneProduct(@PathVariable Long productNo) {
-        try {
-            ProductDetailResponse response = productService.getOneProduct(productNo);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품 정보를 받아오지 못했습니다.");
-        }
-    }
+	@GetMapping("/{productNo}")
+	public ResponseEntity<?> getOneProduct(@PathVariable Long productNo) {
+		try {
+			ProductDetailResponse response = productService.getOneProduct(productNo);
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품 정보를 받아오지 못했습니다.");
+		}
+	}
 
-    @GetMapping
-    public ResponseEntity<?> getAllProductToMainPage() {
-        try {
-            List<ProductListResponse> list = productService.getAllProductToMainPage();
-            return ResponseEntity.ok(list);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
-        }
-    }
+	@GetMapping
+	public ResponseEntity<?> getAllProductToMainPage() {
+		try {
+			List<ProductListResponse> list = productService.getAllProductToMainPage();
+			return ResponseEntity.ok(list);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
+		}
+	}
 
-    @GetMapping("/home")
-    public ResponseEntity<?> getHomeMainData() {
-        try {
-            HomeMainResponse response = productService.getHomeMainData();
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("메인 데이터 조회 실패");
-        }
-    }
+	@GetMapping("/home")
+	public ResponseEntity<?> getHomeMainData() {
+		try {
+			HomeMainResponse response = productService.getHomeMainData();
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("메인 데이터 조회 실패");
+		}
+	}
 
-    @GetMapping("/withcategory")
-    public ResponseEntity<?> getProductListWithCategory(
-            @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String sort,
-            @RequestParam(required = false) Boolean discountOnly
-    ) {
-        try {
-            List<ProductListResponseDto> list =
-                    productService.selectSearchProductList(categoryId, keyword, sort, discountOnly);
-            return ResponseEntity.ok(list);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
-        }
-    }
+	@GetMapping("/withcategory")
+	public ResponseEntity<?> getProductListWithCategory(@RequestParam(required = false) Integer categoryId,
+			@RequestParam(required = false) String keyword, @RequestParam(required = false) String sort,
+			@RequestParam(required = false) Boolean discountOnly) {
+		try {
+			List<ProductListResponseDto> list = productService.selectSearchProductList(categoryId, keyword, sort,
+					discountOnly);
+			return ResponseEntity.ok(list);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
+		}
+	}
+
+	// 현재 보고 있는 상품(productNo) 기준으로 같은 카테고리의 관련상품 목록을 조회하는 API
+	@GetMapping("/{productNo}/related")
+	public ResponseEntity<?> getRelatedProducts(@PathVariable Long productNo) {
+		try {
+			// 서비스에서 관련상품 목록 조회
+			List<ProductListResponse> list = productService.getRelatedProducts(productNo);
+			return ResponseEntity.ok(list);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("관련상품 조회 실패");
+		}
+	}
 }

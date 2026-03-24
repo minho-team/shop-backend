@@ -9,6 +9,6 @@ import lombok.Data;
 
 @Data
 public class ProductDetailResponse {
-	private Product product;
+	private ProductDetailProductDto product;
 	private List<ProductOption> options;
 }
