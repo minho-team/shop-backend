@@ -29,16 +29,28 @@ public class AdminOrdersController {
 	@Autowired
 	private AdminOrderService adminOrderService;
 
-	// 전체 주문 목록 조회
-	@GetMapping
+	 // 전체 주문 목록 조회 + 검색/필터
+    @GetMapping
     public ResponseEntity<?> getOrderList(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String searchType,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String datePreset,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String orderStatus
     ) {
         try {
             AdminOrderListRequest request = new AdminOrderListRequest();
             request.setPage(page);
             request.setSize(size);
+            request.setSearchType(searchType);
+            request.setKeyword(keyword);
+            request.setDatePreset(datePreset);
+            request.setStartDate(startDate);
+            request.setEndDate(endDate);
+            request.setOrderStatus(orderStatus);
 
             AdminOrderListResponse response = adminOrderService.getOrderList(request);
             return ResponseEntity.ok(response);

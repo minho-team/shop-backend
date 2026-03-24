@@ -32,5 +32,5 @@ public interface AdminOrderMapper {
     List<AdminOrderDto> getOrderList(AdminOrderListRequest request) throws Exception;
 
     // 전체 주문 건수 조회 (페이징 계산용)
-    int getOrderCount() throws Exception;
+    int getOrderCount(AdminOrderListRequest request) throws Exception;
 }

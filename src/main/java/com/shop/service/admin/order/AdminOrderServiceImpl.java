@@ -29,45 +29,44 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 	@Autowired
     private MemberService memberService; // [추가] 회원 서비스 주입
 
-	@Override
-	public AdminOrderListResponse getOrderList(AdminOrderListRequest request) throws Exception{
+	 @Override
+	    public AdminOrderListResponse getOrderList(AdminOrderListRequest request) throws Exception {
 
-		int totalCount = adminOrderMapper.getOrderCount();
-		List<AdminOrderDto> orderList = adminOrderMapper.getOrderList(request);
+	        int totalCount = adminOrderMapper.getOrderCount(request);
+	        List<AdminOrderDto> orderList = adminOrderMapper.getOrderList(request);
 
-		int totalPage = (int) Math.ceil((double) totalCount / request.getSize());
+	        int totalPage = (int) Math.ceil((double) totalCount / request.getSize());
 
-		// 블록 크기 5
-		int blockSize = 5;
+	        int blockSize = 5;
+	        int startPage = ((request.getPage() - 1) / blockSize) * blockSize + 1;
+	        int endPage = startPage + blockSize - 1;
 
-		// 예:
-		// 1~5 -> startPage=1
-		// 6~10 -> startPage=6
-		// 11~15 -> startPage=11
-		int startPage = ((request.getPage() - 1) / blockSize) * blockSize + 1;
-		int endPage = startPage + blockSize - 1;
+	        if (endPage > totalPage) {
+	            endPage = totalPage;
+	        }
 
-		// 전체 페이지 수보다 endPage가 크면 잘라냄
-		if (endPage > totalPage) {
-			endPage = totalPage;
-		}
+	        if (totalPage == 0) {
+	            startPage = 1;
+	            endPage = 1;
+	        }
 
-		PageResponseDto pageInfo = new PageResponseDto();
-		pageInfo.setCurrentPage(request.getPage());
-		pageInfo.setSize(request.getSize());
-		pageInfo.setTotalCount(totalCount);
-		pageInfo.setTotalPage(totalPage);
-		pageInfo.setStartPage(startPage);
-		pageInfo.setEndPage(endPage);
-		pageInfo.setHasPrev(startPage > 1);
-		pageInfo.setHasNext(endPage < totalPage);
+	        PageResponseDto pageInfo = new PageResponseDto();
+	        pageInfo.setCurrentPage(request.getPage());
+	        pageInfo.setSize(request.getSize());
+	        pageInfo.setTotalCount(totalCount);
+	        pageInfo.setTotalPage(totalPage);
+	        pageInfo.setStartPage(startPage);
+	        pageInfo.setEndPage(endPage);
+	        pageInfo.setHasPrev(startPage > 1);
+	        pageInfo.setHasNext(endPage < totalPage);
 
-		AdminOrderListResponse response = new AdminOrderListResponse();
-		response.setContent(orderList);
-		response.setPageInfo(pageInfo);
+	        AdminOrderListResponse response = new AdminOrderListResponse();
+	        response.setContent(orderList);
+	        response.setPageInfo(pageInfo);
 
-		return response;
-	}
+	        return response;
+	    }
+
 
 	@Override
 	public AdminOrderReadDTO getOrder(Long orderNo) throws Exception {

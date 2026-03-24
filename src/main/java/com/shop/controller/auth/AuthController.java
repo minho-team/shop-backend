@@ -229,6 +229,7 @@ public class AuthController {
             result.put("memberId",   memberId);
             result.put("memberName", member.getName());
             result.put("memberNo",   member.getMemberNo());
+            result.put("purchaseCount", member.getPurchaseCount()); 
             result.put("roles", authentication.getAuthorities().stream()
                     .map(a -> a.getAuthority())
                     .toList());
