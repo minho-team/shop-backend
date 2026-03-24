@@ -50,6 +50,7 @@ public class AdminRefundController {
 		}
 	}
 
+	// 환불아이템에 대한 상태 업데이트
 	@PutMapping("/{refundNo}/status")
 	public ResponseEntity<?> updateRefundStatus(@PathVariable Long refundNo,
 			@RequestBody AdminRefundStatusUpdateRequestDTO request) {
