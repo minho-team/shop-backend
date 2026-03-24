@@ -24,7 +24,9 @@
             oi.item_size AS itemSize,
             ri.refund_quantity AS refundQuantity,
             ri.refund_amount AS refundAmount,
-            ri.refund_status AS refundItemStatus
+            ri.refund_status AS refundItemStatus,
+            m.bank_code as bankCode,
+            m.bank_name as bankName
         FROM refund r
         JOIN member m
           ON r.member_no = m.member_no

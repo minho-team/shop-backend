@@ -13,5 +13,7 @@ public class AdminRefundDetailResponseDTO {
     private String name;
     private Long totalRefundAmount;
     private String refundReason;
+    private String bankCode;
+    private String bankName;
     private List<AdminRefundDetailItemDTO> items;
 }

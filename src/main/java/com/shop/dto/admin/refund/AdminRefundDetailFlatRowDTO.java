@@ -21,5 +21,10 @@ public class AdminRefundDetailFlatRowDTO {
     private Integer refundQuantity;
     private Long refundAmount;
     private String refundItemStatus;
+    
+    private String bankCode;
+    private String bankName;
+    
+    
 
 }

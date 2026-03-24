@@ -107,6 +107,8 @@ public class AdminRefundServiceImpl implements AdminRefundService {
         dto.setName(rows.get(0).getName());
         dto.setTotalRefundAmount(rows.get(0).getTotalRefundAmount());
         dto.setRefundReason(rows.get(0).getRefundReason());
+        dto.setBankCode(rows.get(0).getBankCode());
+        dto.setBankName(rows.get(0).getBankName());
         dto.setItems(new ArrayList<>());
 
         for (AdminRefundDetailFlatRowDTO row : rows) {
@@ -119,6 +121,7 @@ public class AdminRefundServiceImpl implements AdminRefundService {
             itemDto.setRefundQuantity(row.getRefundQuantity());
             itemDto.setRefundAmount(row.getRefundAmount());
             itemDto.setRefundItemStatus(row.getRefundItemStatus());
+            
             dto.getItems().add(itemDto);
         }
 
