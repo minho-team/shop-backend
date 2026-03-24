@@ -3,10 +3,9 @@ package com.shop.mapper.user;
 import java.util.List;
 import com.shop.domain.Comment;
 import com.shop.dto.user.inquiry.CommentCreateRequest;
-
 import org.apache.ibatis.annotations.Mapper;
 
-// 관리자 답변(댓글) DB 접근을 담당하는 MyBatis Mapper
+// 1:1 문의 답변(댓글) DB 접근 Mapper
 @Mapper
 public interface CommentMapper {
 
@@ -24,4 +23,4 @@ public interface CommentMapper {
 
     // 특정 문의글의 남은 답변 수 조회 (삭제되지 않은 것만)
     int countCommentsByInquiryNo(Long inquiryNo) throws Exception;
-}
+}	

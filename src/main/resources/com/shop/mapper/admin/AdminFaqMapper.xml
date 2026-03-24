@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.admin.AdminFaqMapper">
+
+    <!-- FAQ 등록 (관리자 전용) -->
+    <insert id="createFaq">
+        <selectKey keyProperty="faqNo" resultType="Long" order="BEFORE">
+            SELECT seq_faq.nextval FROM dual
+        </selectKey>
+        INSERT INTO faq (
+            faq_no, category, question, answer, sort_order, delete_yn, created_at
+        ) VALUES (
+            #{faqNo}, #{category}, #{question}, #{answer}, #{sortOrder}, 'N', SYSTIMESTAMP
+        )
+    </insert>
+
+    <!-- FAQ 삭제 (관리자 전용, soft delete) -->
+    <update id="deleteFaq">
+        UPDATE faq SET delete_yn = 'Y' WHERE faq_no = #{faqNo}
+    </update>
+
+</mapper>
