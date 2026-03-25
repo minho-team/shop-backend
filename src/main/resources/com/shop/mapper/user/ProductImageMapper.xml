@@ -36,12 +36,14 @@
 		sort_order AS sortOrder
 		FROM product_img
 		WHERE product_no = #{productNo}
-		AND image_type IN ('MAIN', 'THUMB')
+		AND image_type IN ('THUMB', 'MAIN', 'GALLERY', 'SIZE')
 		ORDER BY
 		CASE image_type
-		WHEN 'MAIN' THEN 1
-		WHEN 'THUMB' THEN 2
-		ELSE 3
+		WHEN 'THUMB' THEN 1
+		WHEN 'MAIN' THEN 2
+		WHEN 'GALLERY' THEN 3
+		WHEN 'SIZE' THEN 4
+		ELSE 5
 		END,
 		sort_order ASC
 	</select>
