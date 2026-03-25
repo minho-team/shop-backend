@@ -17,10 +17,12 @@ import com.shop.dto.admin.order.RefundStatusUpdateRequestDTO;
 import com.shop.mapper.admin.AdminOrderMapper;
 import com.shop.service.user.member.MemberService; // [추가]임포트 추가
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j // [추가]log.info 를 위해 추가했음
+@RequiredArgsConstructor
 public class AdminOrderServiceImpl implements AdminOrderService {
 
 	@Autowired
@@ -81,8 +83,27 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 	}
 
 	@Override
+	@Transactional(rollbackFor = Exception.class) // [추가] 배송 완료 시 멤버 정보 업데이트를 위한 트랜잭션
 	public void updateOrderStatus(Long orderNo, OrderStatusUpdateRequestDTO requestDTO) throws Exception {
+		// 1. 주문 상태 업데이트
 		adminOrderMapper.updateOrderStatus(orderNo, requestDTO.getOrderStatus());
+		
+		// 2. [추가] 배송 완료(DELIVERED) 시 구매 횟수 증가 로직
+		if ("DELIVERED".equals(requestDTO.getOrderStatus())) {
+			AdminOrderReadDTO order = adminOrderMapper.getOrder(orderNo);
+			
+			if (order != null && order.getMemberNo() != null) {
+				Long memberNo = order.getMemberNo();
+				
+				// 구매 횟수 1 증가 (purchase_count + 1)
+				memberService.increasePurchaseCount(memberNo);
+				
+				// 바뀐 횟수를 기준으로 회원 등급 재계산
+				memberService.updateMemberGrade(memberNo);
+				
+				log.info("배송 완료 처리: 회원 {}번 구매 횟수 증가 및 등급 재계산 완료", memberNo);
+			}
+		}
 	}
 
 	@Override // [추가] updateRefundStatus 전체코드 수정했음
