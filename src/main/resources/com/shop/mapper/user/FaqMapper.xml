@@ -13,7 +13,8 @@
                created_at AS createdAt
         FROM faq
         WHERE delete_yn = 'N'
-        ORDER BY category, sort_order ASC
+        <!-- sort_order 먼저 정렬: 0이면 전체 목록 최상단에 표시 -->
+        ORDER BY sort_order ASC, category, faq_no ASC
     </select>
 
     <!-- 카테고리별 FAQ 조회 -->
@@ -28,7 +29,8 @@
         FROM faq
         WHERE delete_yn = 'N'
           AND category = #{category}
-        ORDER BY sort_order ASC
+        <!-- sort_order=0이면 카테고리 내 최상단에 표시 -->
+        ORDER BY sort_order ASC, faq_no ASC
     </select>
 
     <!-- FAQ 키워드 검색 -->
@@ -44,7 +46,8 @@
         WHERE delete_yn = 'N'
           AND (question LIKE '%' || #{keyword} || '%'
                OR answer  LIKE '%' || #{keyword} || '%')
-        ORDER BY category, sort_order ASC
+        <!-- sort_order=0이면 전체 최상단, 그 외 category → faq_no 순 -->
+        ORDER BY sort_order ASC, category, faq_no ASC
     </select>
 
     <!-- FAQ 페이징 조회 (카테고리 + 키워드 필터) -->
@@ -69,7 +72,8 @@
                     AND (question LIKE '%' || #{keyword} || '%'
                          OR answer  LIKE '%' || #{keyword} || '%')
                 </if>
-                ORDER BY category, sort_order ASC
+                <!-- sort_order=0이면 전체 1번에 표시, 같은 sort_order 내에서는 category → faq_no 순 -->
+                ORDER BY sort_order ASC, category, faq_no ASC
             ) a
             WHERE ROWNUM &lt;= #{endRow}
         )
