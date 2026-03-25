@@ -1,7 +1,7 @@
 package com.shop.service.user.comment;
 
 import com.shop.dto.user.inquiry.CommentCreateRequest;
-import com.shop.mapper.user.CommentMapper;
+import com.shop.mapper.admin.AdminCommentMapper;
 import com.shop.mapper.user.InquiryMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class CommentServiceImpl implements CommentService {
 
     // Mapper 주입
-    private final CommentMapper commentMapper;
+    private final AdminCommentMapper commentMapper;
     private final InquiryMapper inquiryMapper;
 
     // 답변 작성 처리 (답변 저장 후 게시글 상태를 '답변완료'로 자동 변경)
