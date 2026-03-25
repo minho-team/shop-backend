@@ -33,6 +33,9 @@ public interface MemberMapper {
     // 회원 번호 기반 역할 추가
     void insertRoleByMemberNo(@Param("memberNo") Long memberNo, @Param("roleName") String roleName) throws Exception;
     
+    // 회원 등급 업데이트 (Update Member Grade)
+    void updateGrade(@Param("memberNo") Long memberNo, @Param("grade") String grade);
+    
     // 구매 횟수 1 증가 - @Param 추가로 XML과 확실한 연결
     void incrementPurchaseCount(@Param("memberNo") Long memberNo);
 

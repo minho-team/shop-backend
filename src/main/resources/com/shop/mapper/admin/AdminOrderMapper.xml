@@ -54,7 +54,12 @@
 	<!-- ========================= 2. 주문 상세 조회 ========================== -->
 	<select id="getOrder"
 		resultType="com.shop.dto.admin.order.AdminOrderReadDTO">
-		SELECT *
+		SELECT
+		order_no AS orderNo,
+		member_no AS memberNo, orderer_name AS ordererName,
+		order_status AS orderStatus,
+		total_price AS totalPrice,
+		refund_status AS refundStatus
 		FROM orders
 		WHERE order_no = #{orderNo}
 	</select>
@@ -67,12 +72,16 @@
 		WHERE order_no = #{orderNo}
 	</select>
 
+	<update id="updateOrderItemStatus">
+		UPDATE order_item
+		SET order_item_status = #{status}
+		WHERE order_no = #{orderNo}
+	</update>
+
 	<!-- ========================= 4. 주문 상태 변경 ========================== -->
 	<update id="updateOrderStatus">
 		UPDATE orders
-		SET order_status =
-		#{requestDTO.orderStatus}
-		WHERE order_no = #{orderNo}
+		SET order_status = #{orderStatus} WHERE order_no = #{orderNo}
 	</update>
 
 	<!-- ========================= 5. 환불 상태 변경 ========================== -->
@@ -80,7 +89,8 @@
 		UPDATE orders
 		SET refund_status =
 		#{refundStatus}
-		WHERE order_no = #{orderNo}
+		WHERE
+		order_no = #{orderNo}
 	</update>
 
 	<!-- ========================= 6. 주문 리스트 페이지로 받아오기 ========================== -->
@@ -93,20 +103,22 @@
 		o.order_status AS orderStatus,
 		o.total_price AS totalPrice,
 		TO_CHAR(o.created_at, 'YYYY-MM-DD HH24:MI:SS') AS createdAt
-		FROM orders o
+		FROM orders
+		o
 		<include refid="orderSearchCondition" />
 		ORDER BY o.order_no DESC
-		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS
+		ONLY
 	</select>
-	
+
 	<!-- ========================= 7. 주문 리스트 개수 쿼리 ========================== -->
 	<select id="getOrderCount"
-            parameterType="com.shop.dto.admin.order.AdminOrderListRequest"
-            resultType="int">
-        SELECT COUNT(*)
-        FROM orders o
-        <include refid="orderSearchCondition"/>
-    </select>
+		parameterType="com.shop.dto.admin.order.AdminOrderListRequest"
+		resultType="int">
+		SELECT COUNT(*)
+		FROM orders o
+		<include refid="orderSearchCondition" />
+	</select>
 </mapper>
 
 

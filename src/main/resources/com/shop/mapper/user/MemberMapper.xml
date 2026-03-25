@@ -146,6 +146,12 @@
 		NVL(purchase_count, 0) FROM member WHERE member_no = #{memberNo}
 	</select>
 	
+	<update id="updateGrade">
+		UPDATE member 
+		SET status = #{grade}
+		WHERE member_no = #{memberNo}
+	</update>
+	
 	<update id="updateBankInfo">
 		update member set bank_name = #{bankName}, bank_code=#{bankCode}
 		where member_no = #{memberNo}

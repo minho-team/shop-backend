@@ -144,16 +144,22 @@ public class MemberServiceImpl implements MemberService {
 	// ================================================
 
 
-	@Override
-	@Transactional(rollbackFor = Exception.class) // 추가
-	public void updateMemberGrade(Long memberNo) throws Exception { // if문추가
-		if (memberNo == null)
-			return;
-		int currentCount = memberMapper.getPurchaseCount(memberNo);
+	@Transactional
+	public void updateMemberGrade(Long memberNo) {
+	    // 1. 현재 구매 횟수 조회
+	    int count = memberMapper.getPurchaseCount(memberNo);
+	    String newGrade = "BRONZE"; // 기본 등급
 
-		String grade = determineGrade(currentCount);
+	    // 2. 등급 기준 설정 (발표 시 설명하기 좋게 간단히!)
+	    if (count >= 10) {
+	        newGrade = "GOLD";
+	    } else if (count >= 5) {
+	        newGrade = "SILVER";
+	    }
 
-		log.info("(MemberServiceImpl) 회원 {}번의 현재 구매 횟수는 {}회이며, 판정된 등급은 {}입니다.", memberNo, currentCount, grade);
+	    // 3. 등급 업데이트
+	    memberMapper.updateGrade(memberNo, newGrade);
+	    log.info("회원 {}번 등급 최신화: 현재 구매 횟수 {}회 -> 변경 등급 {}", memberNo, count, newGrade);
 	}
 
 	@Override

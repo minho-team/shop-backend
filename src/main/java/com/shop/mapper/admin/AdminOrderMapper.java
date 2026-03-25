@@ -22,6 +22,11 @@ public interface AdminOrderMapper {
     void updateOrderStatus(
             @Param("orderNo") Long orderNo,
             @Param("orderStatus") String orderStatus) throws Exception;
+    
+    // 주문 상품 상태 변경 (배송 완료 시 리뷰 권한 활성화용)
+    void updateOrderItemStatus(
+            @Param("orderNo") Long orderNo, 
+            @Param("status") String status) throws Exception;
 
     // 환불 상태 변경
     void updateRefundStatus(
