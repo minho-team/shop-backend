@@ -24,6 +24,10 @@ public class AdminFaqController {
     @PostMapping
     public ResponseEntity<?> createFaq(@RequestBody FaqCreateRequest request) {
         try {
+            // sortOrder 미입력(null) 또는 0 이하면 0으로 설정 → ORDER BY sort_order ASC 기준 맨 앞
+            if (request.getSortOrder() == null || request.getSortOrder() <= 0) {
+                request.setSortOrder(0);
+            }
             adminFaqMapper.createFaq(request);
             return ResponseEntity.ok("FAQ가 등록되었습니다.");
         } catch (Exception e) {

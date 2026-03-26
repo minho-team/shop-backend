@@ -173,4 +173,20 @@ public class AdminMemberController {
 		adminMemberService.createCoupon(coupon);
 		return ResponseEntity.ok("쿠폰이 생성되었습니다.");
 	}
+
+	// 쿠폰 마스터 삭제
+	// DELETE /api/admin/member/coupons/master/{couponNo}
+	@DeleteMapping("/coupons/master/{couponNo}")
+	public ResponseEntity<String> deleteCouponMaster(@PathVariable Long couponNo) throws Exception {
+		adminMemberService.deleteCouponMaster(couponNo);
+		return ResponseEntity.ok("쿠폰이 삭제되었습니다.");
+	}
+
+	// 회원 보유 쿠폰 삭제
+	// DELETE /api/admin/member/coupons/{memberCouponNo}
+	@DeleteMapping("/coupons/{memberCouponNo}")
+	public ResponseEntity<String> deleteMemberCoupon(@PathVariable Long memberCouponNo) throws Exception {
+		adminMemberService.deleteMemberCoupon(memberCouponNo);
+		return ResponseEntity.ok("쿠폰이 삭제되었습니다.");
+	}
 }

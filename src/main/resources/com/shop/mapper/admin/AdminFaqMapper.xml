@@ -19,4 +19,21 @@
         UPDATE faq SET delete_yn = 'Y' WHERE faq_no = #{faqNo}
     </update>
 
+    <!-- sortOrder >= fromOrder 인 활성 FAQ 를 +1 이동 -->
+    <update id="incrementSortOrderFrom">
+        UPDATE faq SET sort_order = sort_order + 1
+        WHERE sort_order >= #{fromOrder} AND delete_yn = 'N'
+    </update>
+
+    <!-- 전체 활성 FAQ sort_order 재번호 (현재 순서 기준 1, 2, 3...) -->
+    <update id="reorderFaqSortOrder">
+        MERGE INTO faq f
+        USING (
+            SELECT faq_no, ROW_NUMBER() OVER (ORDER BY sort_order, faq_no) AS new_order
+            FROM faq
+            WHERE delete_yn = 'N'
+        ) t ON (f.faq_no = t.faq_no)
+        WHEN MATCHED THEN UPDATE SET f.sort_order = t.new_order
+    </update>
+
 </mapper>
