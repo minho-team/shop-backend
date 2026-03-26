@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -97,4 +98,32 @@ public class ReviewController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("에러 발생: " + e.getMessage());
 		}
 	}
+
+	@DeleteMapping("/{reviewNo}")
+	public ResponseEntity<?> deleteReview(@PathVariable Long reviewNo, Authentication authentication) {
+
+		if (authentication == null) {
+			log.error("삭제 시도: 인증 정보가 없습니다.");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+		}
+
+		try {
+			String memberId = authentication.getName();
+			Member member = memberService.readOneMember(memberId);
+
+			if (member == null) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("회원 정보를 찾을 수 없습니다.");
+			}
+
+			reviewService.deleteReview(reviewNo, member.getMemberNo());
+
+			log.info("리뷰 삭제 완료 - 번호: {}, 유저: {}", reviewNo, memberId);
+			return ResponseEntity.ok("리뷰가 성공적으로 삭제되었습니다.");
+
+		} catch (Exception e) {
+			log.error("리뷰 삭제 중 서버 오류 발생", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("삭제 실패: " + e.getMessage());
+		}
+	}
+
 }

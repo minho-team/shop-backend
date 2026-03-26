@@ -6,19 +6,25 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shop.domain.Review;
 import com.shop.dto.user.review.MyReviewResponseDTO;
+import com.shop.dto.user.review.ReviewDTO;
 import com.shop.mapper.user.ReviewMapper;
+import com.shop.util.CustomFileUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 
 	private final ReviewMapper reviewMapper;
+	private final CustomFileUtil fileUtil;
 
 	@Value("${upload.path}") // application.properties의 C:/upload 경로 사용
 	private String uploadPath;
@@ -53,9 +59,35 @@ public class ReviewServiceImpl implements ReviewService {
 		Review existingReview = reviewMapper.getOneReviewByOrderItem(orderItemNo);
 		return existingReview != null;
 	}
-	
+
 	@Override
 	public List<MyReviewResponseDTO> getMyReviews(Long memberNo) {
-	    return reviewMapper.selectReviewsByMemberNo(memberNo);
+		return reviewMapper.selectReviewsByMemberNo(memberNo);
+	}
+
+	@Override
+	@Transactional
+	public void updateReview(ReviewDTO dto, MultipartFile uploadFile) {
+
+		if (uploadFile != null && !uploadFile.isEmpty()) {
+			String fileName = fileUtil.saveFile(uploadFile);
+			dto.setImageUrl(fileName);
+		}
+		int result = reviewMapper.updateReview(dto);
+
+		if (result == 0) {
+			throw new RuntimeException("리뷰 수정 대상(ReviewNo)을 찾을 수 없습니다.");
+		}
+	}
+
+	@Override
+	@Transactional
+	public void removeReview(Long reviewNo, Long memberNo) {
+		reviewMapper.deleteReview(reviewNo, memberNo);
+	}
+
+	@Override
+	public void deleteReview(Long reviewNo, Long memberNo) {
+	    reviewMapper.deleteReview(reviewNo, memberNo); 
 	}
 }
