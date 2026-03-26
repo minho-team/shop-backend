@@ -29,6 +29,7 @@ public class AdminProductServiceImpl implements AdminProductService{
 	
 	private final AdminProductMapper adminProductMapper;
 	private final CustomFileUtil customFileUtil;
+	private static final String DISCONTINUED_IMAGE_NAME = "product-discontinued.jpg";
 	
 	// 관리자 상품 목록 조회
 	@Override
@@ -276,7 +277,7 @@ public class AdminProductServiceImpl implements AdminProductService{
 	        int activeOrderCount = adminProductMapper.countActiveOrderItemsByProductNo(productNo);
 
 	        if (activeOrderCount > 0) {
-	            throw new IllegalStateException("활성 주문이 있는 상품은 판매상태를 변경할 수 없습니다.");
+	            throw new IllegalStateException("환불/취소가 완료되지 않은 주문이 있는 상품은 판매상태를 변경할 수 없습니다.");
 	        }
 	    }
 
@@ -409,55 +410,80 @@ public class AdminProductServiceImpl implements AdminProductService{
 	}
 	 
 	/*
-	 * 상품 삭제 (상품은 소프트 삭제, 이미지는 하드 삭제)
-	 * 삭제 메서드 순서 중요!!
-	 * 이미지 조회 → 파일 삭제 → DB 이미지 삭제 → 상품 soft delete
-	 * DB를 먼저 삭제하고 실제 파일을 삭제하려고하면 삭제하려는 파일을 찾을수 없음
+	 * 상품 판매중지 처리 (soft delete)
+	 * - 상품은 소프트 삭제 처리
+	 * - 기존 이미지는 하드 삭제
+	 * - 삭제 후 판매중지 기본 이미지로 대체
+	 *
+	 * 처리 순서 중요
+	 * 1. 이미지 조회
+	 * 2. 실제 파일 삭제
+	 * 3. DB 이미지 삭제
+	 * 4. 상품 소프트 삭제
+	 * 5. 판매중지 기본 이미지 등록
+	 *
+	 * 주의: DB 이미지를 먼저 삭제하면 실제 파일 삭제 시 파일명을 찾을 수 없음
 	 */
 	@Override
 	@Transactional
-	public void deleteProduct(Long productNo) {
+	public void softDeleteProduct(Long productNo) {
 
-	    // 상품번호 검증
+	    // 1. 상품번호 검증
 	    if (productNo == null) {
 	        throw new IllegalArgumentException("상품번호가 없습니다.");
 	    }
 
-	    // 상품 존재 여부 확인
+	    // 2. 상품 존재 여부 확인
 	    AdminProductDetailDTO product = adminProductMapper.getProduct(productNo);
 	    if (product == null) {
 	        throw new IllegalArgumentException("존재하지 않는 상품입니다.");
 	    }
 
-	    // 이미 삭제된 상품인지 확인
+	    // 3. 이미 판매중지 상태인지 확인
 	    if ("N".equals(product.getUseYn())) {
-	        throw new IllegalArgumentException("이미 삭제된 상품입니다.");
+	        throw new IllegalArgumentException("이미 판매중지된 상품입니다.");
 	    }
 
-	    // 해당 상품 이미지 목록 조회
+	    // 4. 취소(CANCELED)를 제외한 주문 이력이 있는지 확인
+	    int activeOrderCount = adminProductMapper.countActiveOrderItemsByProductNo(productNo);
+	    if (activeOrderCount > 0) {
+	        throw new IllegalArgumentException("환불/주문취소가 완료되지 않은 주문이 있는 상품은 판매중지할 수 없습니다.");
+	    }
+
+	    // 5. 해당 상품 이미지 목록 조회
 	    List<AdminProductImageDTO> imageList = adminProductMapper.getProductImages(productNo);
 
-	    // 실제 파일 삭제용 파일명 수집
+	    // 실제 파일 삭제용 파일명 목록
 	    List<String> fileNames = new ArrayList<>();
 
 	    if (imageList != null && !imageList.isEmpty()) {
 	        for (AdminProductImageDTO image : imageList) {
+	        		String imageUrl = image.getImageUrl();
 	            if (image.getImageUrl() != null && !image.getImageUrl().trim().isEmpty()) {
+	                
+	            		// 공용 기본 이미지는 실제 파일 삭제 대상에서 제외
+	                if (DISCONTINUED_IMAGE_NAME.equals(imageUrl)) {
+	                    continue;
+	                }
+	            	
 	                fileNames.add(image.getImageUrl());
 	            }
 	        }
 	    }
 
-	    // 실제 업로드 파일 삭제
+	    // 6. 실제 업로드 파일 삭제
 	    if (!fileNames.isEmpty()) {
 	        customFileUtil.deleteFiles(fileNames);
 	    }
 
-	    // product_img 테이블 이미지 데이터 하드 삭제
+	    // 7. product_img 테이블 이미지 데이터 하드 삭제
 	    adminProductMapper.deleteProductImages(productNo);
 
-	    // product 테이블은 soft delete
+	    // 8. product 테이블 soft delete
 	    adminProductMapper.softDeleteProduct(productNo);
+
+	    // 9. 판매중지 기본 이미지 등록
+	    adminProductMapper.insertProductImage(productNo, DISCONTINUED_IMAGE_NAME, "THUMB", 1);
 	}
 	
 	/*

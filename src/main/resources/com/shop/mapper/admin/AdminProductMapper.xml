@@ -258,7 +258,8 @@
 	        discount_rate = #{dto.discountRate},
 	        use_yn = #{dto.useYn},
 	        same_day_delivery_yn = #{dto.sameDayDeliveryYn},
-	        updated_at = SYSTIMESTAMP
+	        updated_at = SYSTIMESTAMP,
+	        description = #{dto.description}
 	    WHERE product_no = #{productNo}
 	</update>
 	
@@ -272,19 +273,11 @@
 	<!-- ========================= 해당 상품의 활성 주문 건수 조회 ========================== -->
 	<select id="countActiveOrderItemsByProductNo" resultType="int">
 	    SELECT COUNT(*)
-	    FROM order_item oi
-	    JOIN product_option po
-	      ON oi.product_option_no = po.product_option_no
-	    WHERE po.product_no = #{productNo}
-	      AND oi.order_item_status IN (
-	          'PENDING_PAYMENT',
-	          'PAYMENT_COMPLETED',
-	          'PREPARING',
-	          'SHIPPING',
-	          'DELIVERED',
-	          'CANCEL_REQUESTED',
-	          'REFUND_REQUESTED'
-	      )
+    		FROM order_item oi
+        JOIN product_option po
+          ON oi.product_option_no = po.product_option_no
+   		WHERE po.product_no = #{productNo}
+      	  AND oi.order_item_status NOT IN ('CANCELED', 'REFUNDED')
 	</select>
 	
 	

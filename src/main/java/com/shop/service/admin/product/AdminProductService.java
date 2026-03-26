@@ -32,8 +32,8 @@ public interface AdminProductService {
 	// 상품 옵션 삭제
 	void deleteProductOption(Long productNo, Long productOptionNo);
 	
-	// 상품 삭제 (상품은 소프트 삭제, 이미지는 하드 삭제)
-	void deleteProduct(Long productNo);
+	// 상품 판매중지 처리 (soft delete)
+	void softDeleteProduct(Long productNo);
 
 
 }

@@ -175,18 +175,19 @@ public class AdminProductController {
 	    }
 	}
 	
-	// 상품 삭제
+	// 상품 판매중지 처리 (soft delete)
 	@DeleteMapping("/{productNo}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> deleteProduct(@PathVariable Long productNo) {
 	    try {
-	        productService.deleteProduct(productNo);
-	        return ResponseEntity.ok("상품 삭제 완료");
+	    	productService.softDeleteProduct(productNo);
+	        return ResponseEntity.ok("상품 판매중지 처리 완료");
 	    } catch (IllegalArgumentException e) {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 	    } catch (Exception e) {
 	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("상품 삭제 중 오류가 발생했습니다.");
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("상품 판매중지 처리 중 오류가 발생했습니다.");
 	    }
 	}
 	
