@@ -61,4 +61,10 @@ public interface AdminMemberMapper {
 
 	// 쿠폰 마스터 생성
 	void insertCoupon(Coupon coupon) throws Exception;
+
+	// 쿠폰 마스터 삭제 (soft delete)
+	void deleteCouponMaster(Long couponNo) throws Exception;
+
+	// 회원 보유 쿠폰 삭제
+	void deleteMemberCoupon(Long memberCouponNo) throws Exception;
 }

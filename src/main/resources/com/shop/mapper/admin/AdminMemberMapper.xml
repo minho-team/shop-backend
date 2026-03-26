@@ -179,4 +179,14 @@
 		VALUES (seq_coupon.NEXTVAL, #{couponName}, #{discountType}, #{discountValue}, 'N', SYSTIMESTAMP)
 	</insert>
 
+	<!-- 쿠폰 마스터 삭제 (soft delete) -->
+	<update id="deleteCouponMaster">
+		UPDATE coupon SET delete_yn = 'Y' WHERE coupon_no = #{couponNo}
+	</update>
+
+	<!-- 회원 보유 쿠폰 삭제 -->
+	<delete id="deleteMemberCoupon">
+		DELETE FROM member_coupon WHERE member_coupon_no = #{memberCouponNo}
+	</delete>
+
 </mapper>

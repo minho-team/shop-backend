@@ -193,4 +193,16 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     public void createCoupon(Coupon coupon) throws Exception {
         adminMemberMapper.insertCoupon(coupon);
     }
+
+    // 쿠폰 마스터 삭제 (soft delete)
+    @Override
+    public void deleteCouponMaster(Long couponNo) throws Exception {
+        adminMemberMapper.deleteCouponMaster(couponNo);
+    }
+
+    // 회원 보유 쿠폰 삭제
+    @Override
+    public void deleteMemberCoupon(Long memberCouponNo) throws Exception {
+        adminMemberMapper.deleteMemberCoupon(memberCouponNo);
+    }
 }

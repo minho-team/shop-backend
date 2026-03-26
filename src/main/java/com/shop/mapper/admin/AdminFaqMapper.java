@@ -13,4 +13,10 @@ public interface AdminFaqMapper {
 
     // FAQ 삭제 (관리자 전용, soft delete)
     void deleteFaq(Long faqNo) throws Exception;
+
+    // sortOrder >= fromOrder 인 항목 +1 이동
+    void incrementSortOrderFrom(Integer fromOrder) throws Exception;
+
+    // 전체 활성 FAQ sortOrder 재번호 (1, 2, 3...)
+    void reorderFaqSortOrder() throws Exception;
 }

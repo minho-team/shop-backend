@@ -60,4 +60,10 @@ public interface AdminMemberService {
     
  // 쿠폰 마스터 생성
     void createCoupon(Coupon coupon) throws Exception;
+
+    // 쿠폰 마스터 삭제
+    void deleteCouponMaster(Long couponNo) throws Exception;
+
+    // 회원 보유 쿠폰 삭제
+    void deleteMemberCoupon(Long memberCouponNo) throws Exception;
 }
