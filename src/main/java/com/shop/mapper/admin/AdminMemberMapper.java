@@ -67,4 +67,13 @@ public interface AdminMemberMapper {
 
 	// 회원 보유 쿠폰 삭제
 	void deleteMemberCoupon(Long memberCouponNo) throws Exception;
+
+	// 결제 시 쿠폰 유효성 검증 + 정보 조회 (미사용, 유효기간 내, 본인 쿠폰)
+	Map<String, Object> selectMemberCouponForUse(@Param("memberCouponNo") Long memberCouponNo, @Param("memberNo") Long memberNo);
+
+	// 쿠폰 사용 처리 (used_yn = 'Y', used_at = SYSTIMESTAMP)
+	void updateMemberCouponUsed(@Param("memberCouponNo") Long memberCouponNo);
+
+	// 쿠폰 사용 내역 조회 (관리자용 - 사용된 쿠폰 + 연결 주문)
+	List<Map<String, Object>> selectCouponUsageHistory(Long memberNo) throws Exception;
 }

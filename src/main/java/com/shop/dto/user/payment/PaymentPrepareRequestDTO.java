@@ -18,5 +18,6 @@ public class PaymentPrepareRequestDTO {
     private String message;
 
     private Long totalPrice;
+    private Long memberCouponNo;
     private List<PaymentPrepareItemDTO> items;
 }

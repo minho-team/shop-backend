@@ -21,5 +21,5 @@ public class Orders {
 	private String receiverDetailAddress;
 	private String message;
 	private String pgOrderId;
-	
+
 }

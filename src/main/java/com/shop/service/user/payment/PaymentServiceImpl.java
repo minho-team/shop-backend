@@ -27,6 +27,7 @@ import com.shop.dto.user.payment.PaymentConfirmResponseDTO;
 import com.shop.dto.user.payment.PaymentPrepareItemDTO;
 import com.shop.dto.user.payment.PaymentPrepareRequestDTO;
 import com.shop.dto.user.payment.PaymentPrepareResponseDTO;
+import com.shop.mapper.admin.AdminMemberMapper;
 import com.shop.mapper.user.CartItemMapper;
 import com.shop.mapper.user.MemberMapper;
 import com.shop.mapper.user.OrderItemMapper;
@@ -48,6 +49,7 @@ public class PaymentServiceImpl implements PaymentService {
 	private final OrderItemMapper orderItemMapper;
 	private final PaymentMapper paymentMapper;
 	private final CartItemMapper cartItemMapper;
+	private final AdminMemberMapper adminMemberMapper;
 	private final RestTemplate restTemplate;
 	
 
@@ -77,7 +79,27 @@ public class PaymentServiceImpl implements PaymentService {
 			recalculatedTotal += (long) item.getQuantity() * item.getUnitPrice();
 		}
 
-		if (!Objects.equals(recalculatedTotal, request.getTotalPrice())) {
+		// 쿠폰 할인 계산
+		long discountAmount = 0L;
+		Long memberCouponNo = request.getMemberCouponNo();
+		if (memberCouponNo != null) {
+			Map<String, Object> coupon = adminMemberMapper.selectMemberCouponForUse(memberCouponNo, member.getMemberNo());
+			if (coupon == null) {
+				throw new IllegalArgumentException("사용할 수 없는 쿠폰입니다.");
+			}
+			String discountType = String.valueOf(coupon.get("discountType"));
+			long discountValue = Long.parseLong(String.valueOf(coupon.get("discountValue")));
+			if ("FIXED".equals(discountType)) {
+				discountAmount = discountValue;
+			} else if ("RATE".equals(discountType)) {
+				discountAmount = recalculatedTotal * discountValue / 100;
+			}
+			discountAmount = Math.min(discountAmount, recalculatedTotal);
+		}
+
+		long finalPrice = recalculatedTotal - discountAmount;
+
+		if (!Objects.equals(finalPrice, request.getTotalPrice())) {
 			throw new IllegalArgumentException("주문 금액이 올바르지 않습니다.");
 		}
 
@@ -87,7 +109,7 @@ public class PaymentServiceImpl implements PaymentService {
 		order.setOrdererPhoneNumber(request.getOrdererPhoneNumber());
 		order.setOrdererEmail(request.getOrdererEmail());
 		order.setOrderStatus("PENDING_PAYMENT");
-		order.setTotalPrice(recalculatedTotal);
+		order.setTotalPrice(finalPrice);
 		order.setReceiverName(request.getReceiverName());
 		order.setReceiverPhoneNumber(request.getReceiverPhoneNumber());
 		order.setReceiverZipCode(request.getReceiverZipCode());
@@ -127,7 +149,7 @@ public class PaymentServiceImpl implements PaymentService {
 				: request.getItems().get(0).getItemName() + " 외 " + (request.getItems().size() - 1) + "건";
 
 		return PaymentPrepareResponseDTO.builder().orderNo(order.getOrderNo()).orderId(pgOrderId).orderName(orderName)
-				.amount(recalculatedTotal).customerName(request.getOrdererName())
+				.amount(finalPrice).customerName(request.getOrdererName())
 				.customerEmail(request.getOrdererEmail()).customerMobilePhone(request.getOrdererPhoneNumber()).build();
 	}
 
@@ -188,6 +210,11 @@ public class PaymentServiceImpl implements PaymentService {
 		
 		ordersMapper.updateOrderStatus(order.getOrderNo(), "PAYMENT_COMPLETED");
 		orderItemMapper.updateOrderItemStatusByOrderNo(order.getOrderNo(), "PAYMENT_COMPLETED");
+
+		// 쿠폰 사용 처리 (결제 확정 시 member_coupon.used_yn = 'Y')
+		if (request.getMemberCouponNo() != null) {
+			adminMemberMapper.updateMemberCouponUsed(request.getMemberCouponNo());
+		}
 		
 		// 장바구니에서 주문한 상품만 결제 완료 후 장바구니에서 삭제
 		List<Long> orderedCartItemNos = request.getOrderedCartItemNos();
