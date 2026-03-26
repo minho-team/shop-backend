@@ -66,4 +66,7 @@ public interface AdminMemberService {
 
     // 회원 보유 쿠폰 삭제
     void deleteMemberCoupon(Long memberCouponNo) throws Exception;
+
+    // 쿠폰 사용 내역 조회 (관리자용)
+    List<Map<String, Object>> getCouponUsageHistory(Long memberNo) throws Exception;
 }

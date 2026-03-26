@@ -10,4 +10,5 @@ public class PaymentConfirmRequestDTO {
 	private String orderId;
 	private Long amount;
 	private List<Long> orderedCartItemNos;
+	private Long memberCouponNo;
 }

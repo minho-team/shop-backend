@@ -189,4 +189,11 @@ public class AdminMemberController {
 		adminMemberService.deleteMemberCoupon(memberCouponNo);
 		return ResponseEntity.ok("쿠폰이 삭제되었습니다.");
 	}
+
+	// 쿠폰 사용 내역 조회
+	// GET /api/admin/member/{memberNo}/coupons/history
+	@GetMapping("/{memberNo}/coupons/history")
+	public ResponseEntity<List<Map<String, Object>>> getCouponUsageHistory(@PathVariable Long memberNo) throws Exception {
+		return ResponseEntity.ok(adminMemberService.getCouponUsageHistory(memberNo));
+	}
 }

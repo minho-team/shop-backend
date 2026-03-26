@@ -205,4 +205,11 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     public void deleteMemberCoupon(Long memberCouponNo) throws Exception {
         adminMemberMapper.deleteMemberCoupon(memberCouponNo);
     }
+
+    // 쿠폰 사용 내역 조회 (관리자용)
+    @Override
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getCouponUsageHistory(Long memberNo) throws Exception {
+        return adminMemberMapper.selectCouponUsageHistory(memberNo);
+    }
 }

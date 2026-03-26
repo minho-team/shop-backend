@@ -189,4 +189,41 @@
 		DELETE FROM member_coupon WHERE member_coupon_no = #{memberCouponNo}
 	</delete>
 
+	<!-- 결제 시 쿠폰 유효성 검증 + 정보 조회 -->
+	<select id="selectMemberCouponForUse" resultType="map">
+		SELECT mc.member_coupon_no AS "memberCouponNo",
+		       c.discount_type    AS "discountType",
+		       c.discount_value   AS "discountValue",
+		       c.coupon_name      AS "couponName"
+		FROM member_coupon mc
+		JOIN coupon c ON mc.coupon_no = c.coupon_no
+		WHERE mc.member_coupon_no = #{memberCouponNo}
+		  AND mc.member_no        = #{memberNo}
+		  AND mc.used_yn          = 'N'
+		  AND mc.end_at           &gt;= SYSTIMESTAMP
+		  AND mc.start_at         &lt;= SYSTIMESTAMP
+		  AND c.delete_yn         = 'N'
+	</select>
+
+	<!-- 쿠폰 사용 처리 -->
+	<update id="updateMemberCouponUsed">
+		UPDATE member_coupon
+		SET used_yn = 'Y', used_at = SYSTIMESTAMP
+		WHERE member_coupon_no = #{memberCouponNo}
+	</update>
+
+	<!-- 쿠폰 사용 내역 조회 (관리자용) -->
+	<select id="selectCouponUsageHistory" resultType="map">
+		SELECT mc.member_coupon_no                          AS "memberCouponNo",
+		       c.coupon_name                                AS "couponName",
+		       c.discount_type                              AS "discountType",
+		       c.discount_value                             AS "discountValue",
+		       TO_CHAR(mc.used_at, 'YYYY-MM-DD HH24:MI:SS') AS "usedAt"
+		FROM member_coupon mc
+		JOIN coupon c ON mc.coupon_no = c.coupon_no
+		WHERE mc.member_no = #{memberNo}
+		  AND mc.used_yn   = 'Y'
+		ORDER BY mc.used_at DESC
+	</select>
+
 </mapper>
