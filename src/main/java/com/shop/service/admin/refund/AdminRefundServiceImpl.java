@@ -28,6 +28,7 @@ public class AdminRefundServiceImpl implements AdminRefundService {
 
     private final AdminRefundMapper adminRefundMapper;
 
+    //환불 리스트 받아오기, 검색어, 페이징 포함
     @Override
     public AdminRefundPageResponseDTO getRefundList(AdminRefundListRequestDTO request) {
         int totalCount = adminRefundMapper.getRefundCount(request);
@@ -154,7 +155,7 @@ public class AdminRefundServiceImpl implements AdminRefundService {
         } else if ("REJECTED".equals(refundStatus)) {
             adminRefundMapper.updateRefundItemsStatus(refundNo, "REJECTED");
             adminRefundMapper.updateRefundHeaderStatus(refundNo, "REJECTED");
-            adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "DELIVERED");
+            adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "REJECTED");
         } else if ("COMPLETED".equals(refundStatus)) {
             adminRefundMapper.updateRefundItemsStatus(refundNo, "COMPLETED");
             adminRefundMapper.updateRefundHeaderStatus(refundNo, "COMPLETED");
