@@ -10,4 +10,5 @@ public class AdminProductBasicUpdateDTO {
     private Integer discountRate;
     private String useYn;
     private String sameDayDeliveryYn;
+    private String description;
 }
