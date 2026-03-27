@@ -28,6 +28,7 @@
 		<result property="bankCode" column="bank_code" />
 		<result property="accountHolderName"
 			column="account_holder_name" />
+		<result property="grade" column="grade" />
 		<result property="status" column="status" />
 		<result property="provider" column="provider" />
 		<collection property="memberRoleList" resultMap="roleMap" />
@@ -49,7 +50,8 @@
 
 	<!-- memberId로 회원 한 명 조회 -->
 	<select id="readOneMember" resultMap="memberMap">
-		SELECT * FROM member WHERE member_id = #{memberId}
+		SELECT * FROM member WHERE
+		member_id = #{memberId}
 	</select>
 
 	<!-- 로그인 시 리프레시 토큰 업데이트 -->
@@ -130,14 +132,14 @@
 	<!-- 회원 등급: purchase_count를 활용 -->
 	<update id="incrementPurchaseCount">
 		UPDATE member
-		SET purchase_count = NVL(purchase_count, 0) + 1
+		SET purchase_count = purchase_count + 1
 		WHERE member_no = #{memberNo}
 	</update>
 
 	<update id="decrementPurchaseCount">
 		UPDATE member
-		SET purchase_count =
-		GREATEST(NVL(purchase_count, 0) - 1, 0)
+		SET purchase_count = CASE WHEN purchase_count > 0 THEN purchase_count - 1
+		ELSE 0 END
 		WHERE member_no = #{memberNo}
 	</update>
 
@@ -145,15 +147,16 @@
 		SELECT
 		NVL(purchase_count, 0) FROM member WHERE member_no = #{memberNo}
 	</select>
-	
+
 	<update id="updateGrade">
-		UPDATE member 
-		SET status = #{grade}
+		UPDATE member
+		SET grade = #{grade}
 		WHERE member_no = #{memberNo}
 	</update>
-	
+
 	<update id="updateBankInfo">
-		update member set bank_name = #{bankName}, bank_code=#{bankCode}
+		update member set bank_name = #{bankName},
+		bank_code=#{bankCode}
 		where member_no = #{memberNo}
 	</update>
 

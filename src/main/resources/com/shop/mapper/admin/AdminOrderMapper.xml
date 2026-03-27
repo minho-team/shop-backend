@@ -56,12 +56,15 @@
 		resultType="com.shop.dto.admin.order.AdminOrderReadDTO">
 		SELECT
 		order_no AS orderNo,
-		member_no AS memberNo, orderer_name AS ordererName,
+		member_no AS memberNo,
+		orderer_name AS ordererName,
 		order_status AS orderStatus,
-		total_price AS totalPrice,
+		total_price AS
+		totalPrice,
 		refund_status AS refundStatus
 		FROM orders
-		WHERE order_no = #{orderNo}
+		WHERE order_no =
+		#{orderNo}
 	</select>
 
 	<!-- ========================= 3. 주문 상품 목록 조회 ========================== -->
@@ -75,13 +78,29 @@
 	<update id="updateOrderItemStatus">
 		UPDATE order_item
 		SET order_item_status = #{status}
-		WHERE order_no = #{orderNo}
+		WHERE order_item_no = #{orderItemNo}
 	</update>
+
+	<select id="getMemberNoByOrderItemNo" resultType="long">
+		SELECT
+		o.member_no
+		FROM order_item oi
+		JOIN orders o ON oi.order_no = o.order_no
+		WHERE oi.order_item_no = #{orderItemNo}
+	</select>
+
+	<select id="getMemberNoByOrderItemNo" resultType="long">
+		SELECT o.member_no
+		FROM order_item oi
+		JOIN orders o ON oi.order_no = o.order_no
+		WHERE oi.order_item_no = #{orderItemNo}
+	</select>
 
 	<!-- ========================= 4. 주문 상태 변경 ========================== -->
 	<update id="updateOrderStatus">
 		UPDATE orders
-		SET order_status = #{orderStatus} WHERE order_no = #{orderNo}
+		SET order_status = #{orderStatus} WHERE
+		order_no = #{orderNo}
 	</update>
 
 	<!-- ========================= 5. 환불 상태 변경 ========================== -->

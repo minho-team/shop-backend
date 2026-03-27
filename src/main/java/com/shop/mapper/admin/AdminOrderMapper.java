@@ -25,7 +25,7 @@ public interface AdminOrderMapper {
     
     // 주문 상품 상태 변경 (배송 완료 시 리뷰 권한 활성화용)
     void updateOrderItemStatus(
-            @Param("orderNo") Long orderNo, 
+    		@Param("orderItemNo") Long orderItemNo,
             @Param("status") String status) throws Exception;
 
     // 환불 상태 변경
@@ -38,4 +38,9 @@ public interface AdminOrderMapper {
 
     // 전체 주문 건수 조회 (페이징 계산용)
     int getOrderCount(AdminOrderListRequest request) throws Exception;
+    
+    
+    // 주문 상품 번호(Order Item No)를 기반으로 해당 주문을 수행한 회원 번호(Member No)를 조회합니다.
+    // 배송 완료 처리 시 회원의 구매 횟수를 증가시키기 위한 식별자 확보 용도입니다.
+    Long getMemberNoByOrderItemNo(@Param("orderItemNo") Long orderItemNo);
 }
