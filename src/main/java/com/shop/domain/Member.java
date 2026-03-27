@@ -34,6 +34,7 @@ public class Member {
 	private String accountHolderName;
 	private String status;
 	private String provider;
+	private String grade;
 
 	// user_role 테이블 매핑용
 	private List<MemberRole> memberRoleList;
