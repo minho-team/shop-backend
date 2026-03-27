@@ -144,53 +144,45 @@ public class MemberServiceImpl implements MemberService {
 	// ================================================
 
 
-	@Transactional
-	public void updateMemberGrade(Long memberNo) {
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void updateMemberGrade(Long memberNo) throws Exception {
+	    if (memberNo == null) return;
+
 	    // 1. 현재 구매 횟수 조회
 	    int count = memberMapper.getPurchaseCount(memberNo);
-	    String newGrade = "BRONZE"; // 기본 등급
+	    
+	    // 2. 등급 판정 (DB 제약 조건과 동일하게 대문자 사용)
+	    String newGrade = determineGrade(count);
 
-	    // 2. 등급 기준 설정 (발표 시 설명하기 좋게 간단히!)
-	    if (count >= 10) {
-	        newGrade = "GOLD";
-	    } else if (count >= 5) {
-	        newGrade = "SILVER";
-	    }
-
-	    // 3. 등급 업데이트
+	    // 3. DB의 'grade' 컬럼 업데이트
 	    memberMapper.updateGrade(memberNo, newGrade);
-	    log.info("회원 {}번 등급 최신화: 현재 구매 횟수 {}회 -> 변경 등급 {}", memberNo, count, newGrade);
+	    
+	    log.info("(MemberService) 회원 {}번 등급 최신화 완료: {}회 -> {}", memberNo, count, newGrade);
 	}
 
+	// 구매횟수 증가 후 등급도 바로 갱신
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void increasePurchaseCount(Long memberNo) throws Exception {
-		if (memberNo == null)
-			return;
-		memberMapper.incrementPurchaseCount(memberNo);
-		log.info("(MemberServiceImpl) 회원 {}번 구매 횟수 1 증가 완료", memberNo);
+	    memberMapper.incrementPurchaseCount(memberNo);
+	    this.updateMemberGrade(memberNo);
 	}
 
-	// 구매 횟수 감소 (환불/취소 시 호출)
+	// 구매횟수 차감 후 등급도 바로 갱신
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void decreasePurchaseCount(Long memberNo) throws Exception {
-		if (memberNo == null)
-			return;
-		memberMapper.decrementPurchaseCount(memberNo);
-		log.info("(MemberServiceImpl) 회원 {}번 구매 횟수 1 차감 완료", memberNo);
+	    memberMapper.decrementPurchaseCount(memberNo);
+	    this.updateMemberGrade(memberNo);
 	}
 
-	// 구매 횟수 기반 등급 계산
+	// 등급 기준 (DB 제약 조건 준수)
 	public String determineGrade(int count) {
-		if (count >= 30)
-			return "VVIP";
-		if (count >= 20)
-			return "VIP";
-		if (count >= 10)
-			return "GOLD";
-		if (count >= 5)
-			return "SILVER";
-		return "BASIC";
+	    if (count >= 30) return "VVIP";
+	    if (count >= 20) return "VIP";
+	    if (count >= 10) return "GOLD";
+	    if (count >= 5)  return "SILVER";
+	    return "BASIC";
 	}
 }

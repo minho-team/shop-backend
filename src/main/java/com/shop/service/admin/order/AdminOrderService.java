@@ -15,4 +15,6 @@ public interface AdminOrderService {
     void updateOrderStatus(Long orderNo, OrderStatusUpdateRequestDTO requestDTO) throws Exception;
 
     void updateRefundStatus(Long orderNo, RefundStatusUpdateRequestDTO requestDTO) throws Exception;
+    
+    void updateOrderItemStatus(Long orderItemNo, String status) throws Exception;
 }
