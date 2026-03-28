@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.shop.mapper.admin.AdminDashboardMapper">
+
+    <!-- ========================= -->
+    <!-- 1. 상단 요약 카드 -->
+    <!-- ========================= -->
+
+    <!-- 금월 총매출 -->
+    <select id="getMonthGrossSales" resultType="long">
+        SELECT NVL(SUM(payment_amount), 0)
+        FROM payment
+        WHERE payment_status = 'COMPLETED'
+          AND approved_at &gt;= TRUNC(SYSDATE, 'MM')
+          AND approved_at &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+    </select>
+
+    <!-- 금월 총환불금액 -->
+    <select id="getMonthRefundAmount" resultType="long">
+        SELECT NVL(SUM(total_refund_amount), 0)
+        FROM refund
+        WHERE refund_status = 'COMPLETED'
+          AND completed_at &gt;= TRUNC(SYSDATE, 'MM')
+          AND completed_at &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+    </select>
+
+    <!-- 금월 주문 수 -->
+    <select id="getMonthOrderCount" resultType="int">
+        SELECT COUNT(*)
+        FROM orders
+        WHERE created_at &gt;= TRUNC(SYSDATE, 'MM')
+          AND created_at &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+    </select>
+
+    <!-- 전체 회원 수 -->
+    <select id="getTotalMemberCount" resultType="int">
+        SELECT COUNT(*)
+        FROM member
+    </select>
+
+    <!-- 판매중 상품 수 -->
+    <select id="getSellingProductCount" resultType="int">
+        SELECT COUNT(*)
+        FROM product
+        WHERE use_yn = 'Y'
+    </select>
+
+
+    <!-- ========================= -->
+    <!-- 2. 오늘 현황 카드 -->
+    <!-- ========================= -->
+
+    <!-- 오늘 주문 수 -->
+    <select id="getTodayOrderCount" resultType="int">
+        SELECT COUNT(*)
+        FROM orders
+        WHERE created_at &gt;= TRUNC(SYSDATE)
+          AND created_at &lt; TRUNC(SYSDATE) + 1
+    </select>
+
+    <!-- 오늘 매출 -->
+    <select id="getTodaySales" resultType="long">
+        SELECT NVL(SUM(total_price), 0)
+        FROM orders
+        WHERE created_at &gt;= TRUNC(SYSDATE)
+          AND created_at &lt; TRUNC(SYSDATE) + 1
+          AND order_status != 'CANCELED'
+    </select>
+
+    <!-- 오늘 신규 회원 수 -->
+    <select id="getNewMemberCount" resultType="int">
+        SELECT COUNT(*)
+        FROM member
+        WHERE created_at &gt;= TRUNC(SYSDATE)
+          AND created_at &lt; TRUNC(SYSDATE) + 1
+    </select>
+
+    <!-- 재고 부족 상품 수 -->
+    <select id="getLowStockCount" resultType="int">
+        SELECT COUNT(DISTINCT product_no)
+        FROM product_option
+        WHERE stock &lt;= 5
+          AND use_yn = 'Y'
+    </select>
+
+    <!-- 환불 요청 건수 -->
+    <select id="getRefundRequestCount" resultType="int">
+        SELECT COUNT(*)
+        FROM refund
+        WHERE refund_status = 'REQUESTED'
+    </select>
+
+
+    <!-- ========================= -->
+    <!-- 3. 차트 / 목록 데이터 -->
+    <!-- ========================= -->
+
+    <!-- 최근 7일 매출 차트 -->
+    <select id="getSalesChartList" resultType="com.shop.dto.admin.dashboard.AdminDashboardSalesChartDTO">
+        SELECT
+            TO_CHAR(order_date, 'MM-DD') AS label,
+            NVL(sales, 0) AS sales
+        FROM (
+            SELECT TRUNC(SYSDATE) - LEVEL + 1 AS order_date
+            FROM dual
+            CONNECT BY LEVEL &lt;= 7
+        ) d
+        LEFT JOIN (
+            SELECT
+                TRUNC(o.created_at) AS created_date,
+                NVL(SUM(o.total_price), 0) AS sales
+            FROM orders o
+            WHERE o.created_at &gt;= TRUNC(SYSDATE) - 6
+              AND o.created_at &lt; TRUNC(SYSDATE) + 1
+              AND o.order_status != 'CANCELED'
+            GROUP BY TRUNC(o.created_at)
+        ) s
+          ON d.order_date = s.created_date
+        ORDER BY d.order_date
+    </select>
+
+    <!-- 많이 팔린 상품 TOP 5 -->
+    <select id="getTopProductList" resultType="com.shop.dto.admin.dashboard.AdminDashboardTopProductDTO">
+        SELECT *
+        FROM (
+            SELECT
+                ROW_NUMBER() OVER (
+                    ORDER BY SUM(oi.quantity) DESC, p.product_no DESC
+                ) AS product_rank,
+                p.product_no,
+                p.name,
+                SUM(oi.quantity) AS total_sales_count
+            FROM order_item oi
+            JOIN orders o
+              ON oi.order_no = o.order_no
+            JOIN product_option po
+              ON oi.product_option_no = po.product_option_no
+            JOIN product p
+              ON po.product_no = p.product_no
+            WHERE o.order_status != 'CANCELED'
+            GROUP BY p.product_no, p.name
+        )
+        WHERE product_rank &lt;= 5
+    </select>
+
+    <!-- 최근 주문 5건 -->
+    <select id="getRecentOrderList" resultType="com.shop.dto.admin.dashboard.AdminDashboardRecentOrderDTO">
+        SELECT *
+        FROM (
+            SELECT
+                o.order_no,
+                o.orderer_name,
+                o.total_price,
+                o.order_status,
+                o.created_at
+            FROM orders o
+            ORDER BY o.created_at DESC
+        )
+        WHERE ROWNUM &lt;= 5
+    </select>
+
+    <select id="getLowStockProductList"
+        resultType="com.shop.dto.admin.dashboard.AdminDashboardLowStockDTO">
+	    <![CDATA[
+	    SELECT
+	        p.product_no AS productNo,
+	        p.name AS name,
+	        po.product_option_no AS productOptionNo,
+	        po.color AS color,
+	        po.option_Size AS optionSize,
+	        po.stock AS stock
+	    FROM product_option po
+	    JOIN product p
+	      ON po.product_no = p.product_no
+	    WHERE po.stock <= 5
+	      AND po.use_yn = 'Y'
+	    ORDER BY po.stock ASC, p.product_no DESC
+	    ]]>
+	</select>
+
+</mapper>
