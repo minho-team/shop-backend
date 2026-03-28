@@ -17,11 +17,14 @@ public class AdminDashboardResponseDTO {
     // =========================
     // 1. 상단 요약 카드
     // =========================
-    private Long monthSales;              // 금월 매출
+    private Long monthSales;              // 금월 최종매출 (총매출-총환불금액 = 최종매출)
+    private Long monthGrossSales; 		 // 금월 총매출
+    private Long monthRefundAmount;      // 금월 총환불금액
+    
     private Integer monthOrderCount;      // 금월 주문 수
     private Integer totalMemberCount;     // 전체 회원 수
     private Integer sellingProductCount;  // 판매중 상품 수
-
+    
     // =========================
     // 2. 오늘 현황 카드
     // =========================
