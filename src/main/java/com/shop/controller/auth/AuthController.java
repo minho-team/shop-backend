@@ -70,12 +70,12 @@ public class AuthController {
 			memberService.updateRefreshToken(member.getMemberId(), refreshToken);
 
 			// 액세스 토큰 쿠키 (httpOnly, 15분)
-			ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken).httpOnly(true).secure(false)
+			ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken).httpOnly(true).secure(true)
 					.path("/").maxAge(60 * 15).build();
 
 			// 리프레시 토큰 쿠키 (httpOnly, 7일)
 			ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken).httpOnly(true)
-					.secure(false).path("/").maxAge(60 * 60 * 24 * 7).build();
+					.secure(true).path("/").maxAge(60 * 60 * 24 * 7).build();
 
 			response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 			response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
@@ -143,7 +143,7 @@ public class AuthController {
 		String newAccessToken = jwtUtil.createToken(authentication);
 
 		// 새 액세스 토큰 쿠키 (15분)
-		ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken).httpOnly(true).secure(false)
+		ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken).httpOnly(true).secure(true)
 				.path("/").maxAge(60 * 15).build();
 
 		response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
@@ -266,10 +266,10 @@ public class AuthController {
 			String refreshToken = jwtUtil.createRefreshToken(authentication);
 			memberService.updateRefreshToken(member.getMemberId(), refreshToken);
 
-			ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken).httpOnly(true).secure(false)
+			ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken).httpOnly(true).secure(true)
 					.path("/").maxAge(60 * 15).build();
 			ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken).httpOnly(true)
-					.secure(false).path("/").maxAge(60 * 60 * 24 * 7).build();
+					.secure(true).path("/").maxAge(60 * 60 * 24 * 7).build();
 
 			response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 			response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
