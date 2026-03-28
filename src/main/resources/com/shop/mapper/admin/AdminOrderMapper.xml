@@ -89,12 +89,6 @@
 		WHERE oi.order_item_no = #{orderItemNo}
 	</select>
 
-	<select id="getMemberNoByOrderItemNo" resultType="long">
-		SELECT o.member_no
-		FROM order_item oi
-		JOIN orders o ON oi.order_no = o.order_no
-		WHERE oi.order_item_no = #{orderItemNo}
-	</select>
 
 	<!-- ========================= 4. 주문 상태 변경 ========================== -->
 	<update id="updateOrderStatus">
