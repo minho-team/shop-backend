@@ -24,4 +24,10 @@ public class AdminProductSearchDTO {
     //API 페이징 정보
     private int page = 1;
     private int size = 10;
+    
+    // 정렬 컬럼
+    private String sortBy = "createdAt";
+
+    // 정렬 방향
+    private String sortDirection = "desc";
 }
