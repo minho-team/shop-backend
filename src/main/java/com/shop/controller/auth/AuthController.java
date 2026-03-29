@@ -49,7 +49,6 @@ public class AuthController {
 	public ResponseEntity<?> login(@RequestBody LoginDto dto, HttpServletResponse response) {
 
 		try {
-			// ★ 핵심 수정: memberId가 null이거나 빈 값이면 즉시 거부
 			if (dto.getMemberId() == null || dto.getMemberId().isBlank()) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("아이디를 입력해주세요.");
 			}
@@ -57,25 +56,30 @@ public class AuthController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호를 입력해주세요.");
 			}
 
-			// Spring Security 인증 처리 (MyUserDetailsService → BCrypt 비밀번호 검증)
 			Authentication authentication = authenticationManager
 					.authenticate(new UsernamePasswordAuthenticationToken(dto.getMemberId(), dto.getPassword()));
 
-			// JWT 액세스 토큰 (15분) / 리프레시 토큰 (7일) 발급
 			String accessToken = jwtUtil.createToken(authentication);
 			String refreshToken = jwtUtil.createRefreshToken(authentication);
 
-			// 인증된 memberId로 회원 정보 조회 후 리프레시 토큰 DB 저장
 			Member member = memberService.readOneMember(authentication.getName());
 			memberService.updateRefreshToken(member.getMemberId(), refreshToken);
 
-			// 액세스 토큰 쿠키 (httpOnly, 15분)
-			ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken).httpOnly(true).secure(true)
-					.path("/").maxAge(60 * 15).build();
+			ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+					.httpOnly(true)
+					.secure(true)
+					.sameSite("None")
+					.path("/")
+					.maxAge(60 * 15)
+					.build();
 
-			// 리프레시 토큰 쿠키 (httpOnly, 7일)
-			ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken).httpOnly(true)
-					.secure(true).path("/").maxAge(60 * 60 * 24 * 7).build();
+			ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+					.httpOnly(true)
+					.secure(true)
+					.sameSite("None")
+					.path("/")
+					.maxAge(60 * 60 * 24 * 7)
+					.build();
 
 			response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 			response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
@@ -96,7 +100,6 @@ public class AuthController {
 	@PostMapping("/refresh")
 	public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
 
-		// 쿠키에서 refreshToken 추출
 		Cookie[] cookies = request.getCookies();
 		if (cookies == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 없습니다.");
@@ -114,12 +117,10 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 없습니다.");
 		}
 
-		// JWT 유효성 검증
 		if (!jwtUtil.validateToken(refreshToken)) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 만료되었습니다.");
 		}
 
-		// 토큰에서 memberId 추출 후 회원 조회
 		String memberId = jwtUtil.getMemberId(refreshToken);
 		Member member;
 		try {
@@ -129,12 +130,10 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("사용자를 찾을 수 없습니다.");
 		}
 
-		// DB에 저장된 refreshToken과 비교 (탈취 방지)
 		if (!refreshToken.equals(member.getRefreshToken())) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 일치하지 않습니다.");
 		}
 
-		// 새 액세스 토큰 생성
 		Authentication authentication = new UsernamePasswordAuthenticationToken(memberId, null,
 				member.getMemberRoleList().stream()
 						.map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName()))
@@ -142,9 +141,13 @@ public class AuthController {
 
 		String newAccessToken = jwtUtil.createToken(authentication);
 
-		// 새 액세스 토큰 쿠키 (15분)
-		ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken).httpOnly(true).secure(true)
-				.path("/").maxAge(60 * 15).build();
+		ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
+				.httpOnly(true)
+				.secure(true)
+				.sameSite("None")
+				.path("/")
+				.maxAge(60 * 15)
+				.build();
 
 		response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 		log.info("액세스 토큰 재발급 완료 - memberId: {}", memberId);
@@ -173,7 +176,6 @@ public class AuthController {
 	@PostMapping("/logout")
 	public ResponseEntity<?> logout(HttpServletResponse response, Authentication authentication) {
 
-		// 로그인 상태이면 DB의 refreshToken 초기화
 		if (authentication != null) {
 			String memberId = authentication.getName();
 			try {
@@ -184,9 +186,20 @@ public class AuthController {
 			}
 		}
 
-		// 쿠키 만료(삭제)
-		ResponseCookie accessCookie = ResponseCookie.from("accessToken", "").httpOnly(true).path("/").maxAge(0).build();
-		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "").httpOnly(true).path("/").maxAge(0)
+		ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
+				.httpOnly(true)
+				.secure(true)
+				.sameSite("None")
+				.path("/")
+				.maxAge(0)
+				.build();
+
+		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
+				.httpOnly(true)
+				.secure(true)
+				.sameSite("None")
+				.path("/")
+				.maxAge(0)
 				.build();
 
 		response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
@@ -208,22 +221,17 @@ public class AuthController {
 
 		try {
 			String memberId = authentication.getName();
-
-			// 주문 페이지가 열릴 때마다 현재 로그인한 회원의 최신 DB 정보 조회
 			Member member = memberService.readOneMember(memberId);
 
 			Map<String, Object> result = new java.util.HashMap<>();
 			result.put("memberNo", member.getMemberNo());
 			result.put("memberId", member.getMemberId());
-
-			// 주문서 자동입력용
 			result.put("memberName", member.getName());
 			result.put("email", member.getEmail());
 			result.put("phoneNumber", member.getPhoneNumber());
 			result.put("zipCode", member.getZipCode());
 			result.put("basicAddress", member.getBasicAddress());
 			result.put("detailAddress", member.getDetailAddress());
-
 			result.put("purchaseCount", member.getPurchaseCount());
 			result.put("grade", member.getGrade());
 			result.put("roles", authentication.getAuthorities().stream().map(a -> a.getAuthority()).toList());
@@ -249,14 +257,11 @@ public class AuthController {
 				return ResponseEntity.badRequest().body("인가코드가 없습니다.");
 			}
 
-			// 카카오 인가코드 → 액세스 토큰 → 사용자 정보 조회
 			String kakaoAccessToken = kakaoService.getAccessToken(code);
 			Map<String, Object> kakaoUserInfo = kakaoService.getKakaoUserInfo(kakaoAccessToken);
 
-			// 카카오 회원 조회 or 신규 생성
 			Member member = memberService.getOrCreateKakaoMember(kakaoUserInfo);
 
-			// JWT 발급
 			Authentication authentication = new UsernamePasswordAuthenticationToken(member.getMemberId(), null,
 					member.getMemberRoleList().stream()
 							.map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName()))
@@ -266,10 +271,21 @@ public class AuthController {
 			String refreshToken = jwtUtil.createRefreshToken(authentication);
 			memberService.updateRefreshToken(member.getMemberId(), refreshToken);
 
-			ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken).httpOnly(true).secure(true)
-					.path("/").maxAge(60 * 15).build();
-			ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken).httpOnly(true)
-					.secure(true).path("/").maxAge(60 * 60 * 24 * 7).build();
+			ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+					.httpOnly(true)
+					.secure(true)
+					.sameSite("None")
+					.path("/")
+					.maxAge(60 * 15)
+					.build();
+
+			ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+					.httpOnly(true)
+					.secure(true)
+					.sameSite("None")
+					.path("/")
+					.maxAge(60 * 60 * 24 * 7)
+					.build();
 
 			response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 			response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());

@@ -78,9 +78,10 @@ public class SecurityConfig {
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(List.of("http://localhost:5173"));
+		config.setAllowedOrigins(List.of("http://localhost:5173",
+				"https://shop-frontend-topaz.vercel.app"));
 		config.setAllowedMethods(List.of("PUT", "PATCH", "POST", "DELETE", "GET"));
-		config.setAllowedHeaders(List.of("Authorization", "Content-type", "Cookie"));
+		config.setAllowedHeaders(List.of("*"));
 		config.setAllowCredentials(true);
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", config);
