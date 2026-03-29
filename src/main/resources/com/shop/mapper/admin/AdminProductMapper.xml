@@ -48,7 +48,7 @@
 		) thumb
 		ON p.product_no =
 		thumb.product_no
-
+		
 		<where>
 			<if test="keyword != null and keyword != ''">
 				AND p.name LIKE '%' || #{keyword} || '%'
@@ -73,7 +73,38 @@
 			</if>
 		</where>
 
-		ORDER BY p.product_no DESC
+		ORDER BY
+		<choose>
+		  <when test="sortBy == 'name'">
+		    p.name
+		  </when>
+		  <when test="sortBy == 'price'">
+		    p.price
+		  </when>
+		  <when test="sortBy == 'discountRate'">
+		    p.discount_rate
+		  </when>
+		  <when test="sortBy == 'salePrice'">
+		    TRUNC((p.price - (p.price * p.discount_rate / 100)) / 100) * 100
+		  </when>
+		  <when test="sortBy == 'viewCount'">
+		    p.view_count
+		  </when>
+		  <when test="sortBy == 'createdAt'">
+		    p.created_at
+		  </when>
+		  <otherwise>
+		    p.product_no
+		  </otherwise>
+		</choose>
+		<choose>
+		  <when test="sortDirection == 'asc'">
+		    ASC
+		  </when>
+		  <otherwise>
+		    DESC
+		  </otherwise>
+		</choose>
 		OFFSET (#{page} - 1) * #{size} ROWS
 		FETCH
 		NEXT #{size} ROWS ONLY
