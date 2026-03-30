@@ -16,6 +16,8 @@ public class CartItemResponseDTO {
 	private String color;
 	private String sizeName;
 	private Integer price;
+	private Integer discountRate;
+	private Long salePrice;
 
 	// 이미지 테이블 조인 붙일 때 사용
 	private String imageUrl;

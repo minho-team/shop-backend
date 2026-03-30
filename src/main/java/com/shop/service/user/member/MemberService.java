@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.shop.domain.Member;
 import com.shop.dto.user.auth.RegisterRequestDto;
+import com.shop.dto.user.member.MemberUpdateRequestDTO;
 
 public interface MemberService {
 
@@ -14,14 +15,16 @@ public interface MemberService {
 	public void updateRefreshToken(String memberId, String refreshToken) throws Exception;
 
 	public void register(RegisterRequestDto dto) throws Exception;
-	
+
 	public void insertAdmin(Member member) throws Exception;
-	
-	Member getOrCreateKakaoMember(Map<String, Object> kakaoUserInfo)throws Exception;
-	
+
+	Member getOrCreateKakaoMember(Map<String, Object> kakaoUserInfo) throws Exception;
+
 	void updateMemberGrade(Long memberNo) throws Exception;
-	
+
 	void increasePurchaseCount(Long memberNo) throws Exception;
-	
+
 	void decreasePurchaseCount(Long memberNo) throws Exception;
+
+	void updateMemberInfo(Long memberNo, MemberUpdateRequestDTO request) throws Exception;
 }

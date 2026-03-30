@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.user.WishlistMapper">
+	<select id="countByMemberNoAndProductNo" resultType="int">
+		SELECT COUNT(*)
+		FROM wishlist
+		WHERE member_no = #{memberNo}
+		AND product_no = #{productNo}
+	</select>
+
+	<insert id="insertWishlist"
+		parameterType="com.shop.domain.Wishlist">
+		<selectKey keyProperty="wishlistNo" resultType="long"
+			order="BEFORE">
+			SELECT seq_wishlist.NEXTVAL FROM dual
+		</selectKey>
+
+		INSERT INTO wishlist (
+		wishlist_no,
+		member_no,
+		product_no,
+		created_at
+		) VALUES (
+		#{wishlistNo},
+		#{memberNo},
+		#{productNo},
+		SYSTIMESTAMP
+		)
+	</insert>
+
+	<delete id="deleteWishlist">
+		DELETE FROM wishlist
+		WHERE member_no = #{memberNo}
+		AND product_no = #{productNo}
+	</delete>
+
+	<select id="selectMyWishlist"
+		resultType="com.shop.dto.user.wishlist.WishlistItemResponseDTO">
+		SELECT
+		w.wishlist_no AS wishlistNo,
+		w.product_no AS productNo,
+		p.name AS name,
+		p.price AS price,
+		p.discount_rate AS discountRate,
+		pi.image_url AS imageUrl,
+		p.same_day_delivery_yn AS sameDayDeliveryYn,
+		w.created_at AS wishedAt
+		FROM wishlist w
+		JOIN product p
+		ON p.product_no = w.product_no
+		LEFT JOIN product_img pi
+		ON pi.product_no = p.product_no
+		AND pi.image_type = 'THUMB'
+		WHERE w.member_no = #{memberNo}
+		AND p.use_yn = 'Y'
+		ORDER BY w.created_at DESC, w.wishlist_no DESC
+	</select>
+</mapper>

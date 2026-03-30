@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.shop.domain.Member;
 import com.shop.domain.MemberRole;
 import com.shop.dto.user.auth.RegisterRequestDto;
+import com.shop.dto.user.member.MemberUpdateRequestDTO;
 import com.shop.mapper.user.MemberMapper;
 import com.shop.service.user.roulette.RouletteService;
 
@@ -146,46 +147,123 @@ public class MemberServiceImpl implements MemberService {
 	// 구매 횟수 관련
 	// ================================================
 
-
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void updateMemberGrade(Long memberNo) throws Exception {
-	    if (memberNo == null) return;
+		if (memberNo == null)
+			return;
 
-	    // 1. 현재 구매 횟수 조회
-	    int count = memberMapper.getPurchaseCount(memberNo);
-	    
-	    // 2. 등급 판정 (DB 제약 조건과 동일하게 대문자 사용)
-	    String newGrade = determineGrade(count);
+		// 1. 현재 구매 횟수 조회
+		int count = memberMapper.getPurchaseCount(memberNo);
 
-	    // 3. DB의 'grade' 컬럼 업데이트
-	    memberMapper.updateGrade(memberNo, newGrade);
-	    
-	    log.info("(MemberService) 회원 {}번 등급 최신화 완료: {}회 -> {}", memberNo, count, newGrade);
+		// 2. 등급 판정 (DB 제약 조건과 동일하게 대문자 사용)
+		String newGrade = determineGrade(count);
+
+		// 3. DB의 'grade' 컬럼 업데이트
+		memberMapper.updateGrade(memberNo, newGrade);
+
+		log.info("(MemberService) 회원 {}번 등급 최신화 완료: {}회 -> {}", memberNo, count, newGrade);
 	}
 
 	// 구매횟수 증가 후 등급도 바로 갱신
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void increasePurchaseCount(Long memberNo) throws Exception {
-	    memberMapper.incrementPurchaseCount(memberNo);
-	    this.updateMemberGrade(memberNo);
+		memberMapper.incrementPurchaseCount(memberNo);
+		this.updateMemberGrade(memberNo);
 	}
 
 	// 구매횟수 차감 후 등급도 바로 갱신
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void decreasePurchaseCount(Long memberNo) throws Exception {
-	    memberMapper.decrementPurchaseCount(memberNo);
-	    this.updateMemberGrade(memberNo);
+		memberMapper.decrementPurchaseCount(memberNo);
+		this.updateMemberGrade(memberNo);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void updateMemberInfo(Long memberNo, MemberUpdateRequestDTO request) throws Exception {
+		if (memberNo == null) {
+			throw new IllegalArgumentException("회원 번호가 없습니다.");
+		}
+
+		if (request == null) {
+			throw new IllegalArgumentException("수정할 정보가 없습니다.");
+		}
+
+		// 비밀번호 변경
+		if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
+
+			if (request.getCurrentPassword() == null || request.getCurrentPassword().isBlank()) {
+				throw new IllegalArgumentException("현재 비밀번호를 입력해주세요.");
+			}
+
+			Member existing = memberMapper.readOneMemberByNo(memberNo);
+			if (existing == null) {
+				throw new IllegalArgumentException("회원 정보를 찾을 수 없습니다.");
+			}
+
+			if (!passwordEncoder.matches(request.getCurrentPassword(), existing.getPassword())) {
+				throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
+			}
+
+			String encodedPassword = passwordEncoder.encode(request.getNewPassword());
+			memberMapper.updatePassword(memberNo, encodedPassword);
+
+			log.info("(MemberService) 회원 {}번 비밀번호 변경 완료", memberNo);
+			return;
+		}
+
+		// 이메일 형식 검사
+		if (request.getEmail() != null && !request.getEmail().isBlank()) {
+			if (!isValidEmail(request.getEmail().trim())) {
+				throw new IllegalArgumentException("올바른 이메일 형식이 아닙니다.");
+			}
+		}
+
+		Member member = new Member();
+		member.setMemberNo(memberNo);
+
+		member.setName(trimToNull(request.getName()));
+		member.setNickName(trimToNull(request.getNickName()));
+		member.setEmail(trimToNull(request.getEmail()));
+		member.setPhoneNumber(trimToNull(request.getPhoneNumber()));
+
+		// gender는 "", "M", "F" 그대로 사용
+		member.setGender(request.getGender());
+		member.setBirthday(request.getBirthday());
+
+		member.setZipCode(trimToNull(request.getZipCode()));
+		member.setBasicAddress(trimToNull(request.getBasicAddress()));
+		member.setDetailAddress(trimToNull(request.getDetailAddress()));
+
+		memberMapper.updateMemberInfo(member);
+
+		log.info("(MemberService) 회원 {}번 정보 수정 완료", memberNo);
 	}
 
 	// 등급 기준 (DB 제약 조건 준수)
 	public String determineGrade(int count) {
-	    if (count >= 30) return "VVIP";
-	    if (count >= 20) return "VIP";
-	    if (count >= 10) return "GOLD";
-	    if (count >= 5)  return "SILVER";
-	    return "BASIC";
+		if (count >= 30)
+			return "VVIP";
+		if (count >= 20)
+			return "VIP";
+		if (count >= 10)
+			return "GOLD";
+		if (count >= 5)
+			return "SILVER";
+		return "BASIC";
+	}
+
+	private String trimToNull(String value) {
+		if (value == null)
+			return null;
+		String trimmed = value.trim();
+		return trimmed.isEmpty() ? null : trimmed;
+	}
+
+	private boolean isValidEmail(String email) {
+		return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 	}
 }
