@@ -29,10 +29,10 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_PORT }}
-          source: "target/*.war"
+          source: "target/shop-0.0.1-SNAPSHOT.war"
           target: "/home/ubuntu/"
 
-      - name: Restart shop service
+      - name: Replace WAR and restart
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -40,5 +40,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_PORT }}
           script: |
+            mv /home/ubuntu/target/shop-0.0.1-SNAPSHOT.war /home/ubuntu/shop-0.0.1-SNAPSHOT.war
             sudo systemctl restart shop
             sudo systemctl status shop --no-pager
+            ls -l /home/ubuntu/shop-0.0.1-SNAPSHOT.war
