@@ -32,6 +32,25 @@
 		= #{orderNo}
 	</select>
 
+	<!-- 주문 취소/환불 로직 실행 시 사용 -->
+	<select id="selectOrderItemsByOrderNo"
+		resultType="com.shop.dto.user.order.OrderItemDTO">
+		SELECT
+		order_item_no as orderItemNo,
+		order_no as orderNo,
+		product_option_no as productOptionNo,
+		item_name as itemName,
+		item_size
+		as itemSize,
+		item_color as itemColor,
+		quantity,
+		unit_price as unitPrice,
+		order_item_status as orderItemStatus
+		FROM order_item
+		WHERE order_no =
+		#{orderNo}
+	</select>
+
 	<!-- orderNo를 받아서 order_item 상태 변경 -->
 	<update id="updateOrderItemStatusByOrderNo">
 		UPDATE order_item
@@ -70,7 +89,6 @@
 		)
 	</insert>
 
-
 	<delete id="deleteByOrderNo" parameterType="long">
 		DELETE FROM
 		order_item
@@ -82,20 +100,24 @@
 		resultType="com.shop.dto.user.payment.PaymentPrepareItemDTO">
 		SELECT
 		oi.product_option_no AS productOptionNo,
-		oi.quantity AS quantity,
+		oi.quantity
+		AS quantity,
 		oi.unit_price AS unitPrice,
 		oi.item_name AS itemName,
 		oi.item_size AS itemSize,
 		oi.item_color AS itemColor,
 		CASE
-		WHEN img.image_url IS NOT NULL THEN '/upload/' || img.image_url
+		WHEN
+		img.image_url IS NOT NULL THEN '/upload/' || img.image_url
 		ELSE NULL
 		END AS imageUrl
 		FROM order_item oi
 		JOIN product_option po
-		ON oi.product_option_no = po.product_option_no
+		ON
+		oi.product_option_no = po.product_option_no
 		JOIN product p
-		ON po.product_no = p.product_no
+		ON
+		po.product_no = p.product_no
 		LEFT JOIN (
 		SELECT product_no, image_url
 		FROM (
@@ -103,15 +125,18 @@
 		pi.product_no,
 		pi.image_url,
 		ROW_NUMBER() OVER (
-		PARTITION BY pi.product_no
+		PARTITION BY
+		pi.product_no
 		ORDER BY
-		CASE WHEN pi.image_type = 'THUMB' THEN 0 ELSE 1 END,
+		CASE WHEN pi.image_type = 'THUMB' THEN 0 ELSE 1
+		END,
 		NVL(pi.sort_order, 9999)
 		) AS rn
 		FROM product_img pi
 		)
 		WHERE rn = 1
-		) img
+		)
+		img
 		ON p.product_no = img.product_no
 		WHERE oi.order_no = #{orderNo}
 		ORDER BY oi.order_item_no ASC

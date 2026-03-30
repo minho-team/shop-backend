@@ -141,4 +141,29 @@ public class OrdersServiceImpl implements OrdersService {
 		return mapper.getAllOrders(memberNo);
 	}
 
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void cancelOrder(Long orderNo) throws Exception {
+	    // 1. 주문 정보 조회
+	    Orders order = mapper.getOneOrder(orderNo); 
+	    if (order == null) throw new Exception("주문 정보가 없습니다.");
+
+	    // 2. 상태 검증
+	    if (!"PENDING_PAYMENT".equals(order.getOrderStatus())) {
+	        throw new Exception("결제대기 상태의 주문만 취소가 가능합니다.");
+	    }
+
+	    // 3. 주문 상태 변경 
+	    mapper.updateOrderStatus(orderNo, "CANCELED");
+
+	    // 4. 주문 아이템 상태 변경
+	    orderItemMapper.updateOrderItemStatusByOrderNo(orderNo, "CANCELED");
+
+	    // 5. 재고 복구 로직
+	    List<OrderItemDTO> items = orderItemMapper.selectOrderItemsByOrderNo(orderNo);
+	    for (OrderItemDTO item : items) {
+	        mapper.increaseProductStock(item.getProductOptionNo(), item.getQuantity());
+	    }
+	}
+	
 }

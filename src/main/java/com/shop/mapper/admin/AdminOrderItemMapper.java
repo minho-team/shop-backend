@@ -22,6 +22,11 @@ public interface AdminOrderItemMapper {
 	            @Param("orderNo") Long orderNo,
 	            @Param("orderStatus") String orderStatus
 	    );
-
+	    
+	    // 변경 전 현재 상태 조회 (중복 DELIVERED 방지용)
+	    String getOrderItemStatus(@Param("orderItemNo") Long orderItemNo);
+	    
+	    // orderItemNo로 memberNo 조회 (purchaseCount 증가용)
+	    Long getMemberNoByOrderItemNo(@Param("orderItemNo") Long orderItemNo);
 
 }

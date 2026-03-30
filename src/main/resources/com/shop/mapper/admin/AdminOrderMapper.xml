@@ -88,7 +88,13 @@
 		JOIN orders o ON oi.order_no = o.order_no
 		WHERE oi.order_item_no = #{orderItemNo}
 	</select>
-
+	
+	 <!-- 주문상품 현재 상태 조회 (중복 DELIVERED 방지용) -->
+    <select id="getOrderItemStatus" resultType="String">
+        SELECT order_item_status
+        FROM order_item
+        WHERE order_item_no = #{orderItemNo}
+    </select>
 
 	<!-- ========================= 4. 주문 상태 변경 ========================== -->
 	<update id="updateOrderStatus">
