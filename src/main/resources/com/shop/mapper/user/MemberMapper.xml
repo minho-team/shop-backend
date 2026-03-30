@@ -41,9 +41,11 @@
 		m.phone_number, m.zip_code, m.basic_address, m.detail_address,
 		m.gender, m.birthday, m.refresh_token, m.created_at, m.purchase_count,
 		m.bank_name, m.bank_code, m.account_holder_name, m.status,m.provider,
+		m.grade,
 		r.member_role_no, r.role_name
 		FROM member m
-		JOIN member_role r ON
+		JOIN member_role r
+		ON
 		m.member_no = r.member_no
 		WHERE m.member_id = #{memberId}
 	</select>
@@ -52,6 +54,11 @@
 	<select id="readOneMember" resultMap="memberMap">
 		SELECT * FROM member WHERE
 		member_id = #{memberId}
+	</select>
+
+	<!-- memberNo로 회원 한 명 조회 -->
+	<select id="readOneMemberByNo" resultMap="memberMap">
+		SELECT * FROM member WHERE member_no = #{memberNo}
 	</select>
 
 	<!-- 로그인 시 리프레시 토큰 업데이트 -->
@@ -138,9 +145,11 @@
 
 	<update id="decrementPurchaseCount">
 		UPDATE member
-		SET purchase_count = CASE WHEN purchase_count > 0 THEN purchase_count - 1
+		SET purchase_count = CASE WHEN
+		purchase_count > 0 THEN purchase_count - 1
 		ELSE 0 END
-		WHERE member_no = #{memberNo}
+		WHERE member_no =
+		#{memberNo}
 	</update>
 
 	<select id="getPurchaseCount" resultType="int">
@@ -151,7 +160,8 @@
 	<update id="updateGrade">
 		UPDATE member
 		SET grade = #{grade}
-		WHERE member_no = #{memberNo}
+		WHERE member_no =
+		#{memberNo}
 	</update>
 
 	<update id="updateBankInfo">
@@ -160,5 +170,28 @@
 		where member_no = #{memberNo}
 	</update>
 
+	<!-- 본인 정보 수정 -->
+	<update id="updateMemberInfo">
+		UPDATE member
+		<set>
+			<if test="name != null">name = #{name},</if>
+			<if test="nickName != null">nick_name = #{nickName},</if>
+			<if test="email != null">email = #{email},</if>
+			<if test="phoneNumber != null">phone_number = #{phoneNumber},</if>
+			<if test="gender != null">gender = #{gender},</if>
+			<if test="birthday != null">birthday = #{birthday},</if>
+			<if test="zipCode != null">zip_code = #{zipCode},</if>
+			<if test="basicAddress != null">basic_address = #{basicAddress},</if>
+			<if test="detailAddress != null">detail_address = #{detailAddress},</if>
+		</set>
+		WHERE member_no = #{memberNo}
+	</update>
+
+	<!-- 비밀번호만 변경 -->
+	<update id="updatePassword">
+		UPDATE member
+		SET password = #{password}
+		WHERE member_no = #{memberNo}
+	</update>
 
 </mapper>
