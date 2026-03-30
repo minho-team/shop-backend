@@ -136,6 +136,9 @@ public class MemberServiceImpl implements MemberService {
 		memberMapper.insertKakaoMember(newMember);
 		memberMapper.insertRoleByMemberNo(newMember.getMemberNo(), "USER");
 
+		// ★ 신규 카카오 회원에게도 가입 쿠폰 자동 지급
+		rouletteService.issueSignupCoupon(newMember.getMemberNo());
+
 		return memberMapper.readOneMemberWithRoles(memberId);
 	}
 

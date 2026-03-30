@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,9 @@ import lombok.RequiredArgsConstructor;
 public class RouletteServiceImpl implements RouletteService {
 
     private final RouletteMapper rouletteMapper;
+
+    @Value("${signup.coupon.no}")
+    private Long signupCouponNo;
 
     // ================================================
     // 룰렛 확률 설정 (1~1000 기준)
@@ -37,11 +41,8 @@ public class RouletteServiceImpl implements RouletteService {
     };
 
     // DB coupon 테이블 coupon_no 매핑
-    // null = 꽝(쿠폰 없음), 4=1000원, 5=3000원, 6=5000원, 7=10000원
-    private static final Long[] COUPON_NOS = { null, 4L, 5L, 6L, 7L };
-
-    // 신규가입 웰컴 쿠폰 번호 (coupon_no = 2)
-    private static final Long SIGNUP_COUPON_NO = 2L;
+    // null = 꽝(쿠폰 없음), 3=1000원, 4=3000원, 5=5000원, 6=10000원
+    private static final Long[] COUPON_NOS = { null, 3L, 4L, 5L, 6L };
 
     // ================================================
     // 룰렛 돌리기
@@ -104,7 +105,7 @@ public class RouletteServiceImpl implements RouletteService {
         LocalDateTime now = LocalDateTime.now();
         MemberCoupon mc = MemberCoupon.builder()
                 .memberNo(memberNo)
-                .couponNo(SIGNUP_COUPON_NO)
+                .couponNo(signupCouponNo)
                 .usedYn("N")
                 .issuedAt(now)
                 .startAt(now)
