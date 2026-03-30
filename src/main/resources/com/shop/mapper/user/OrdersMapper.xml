@@ -16,6 +16,13 @@
     <update id="updateOrderStatus">
         UPDATE orders SET order_status = #{orderStatus} WHERE order_no = #{orderNo}
     </update>
+    	
+	<!-- 주문 취소 시 상품 재고 복구 -->
+	<update id="increaseProductStock">
+	    UPDATE product_option 
+	    SET stock = stock + #{quantity} 
+	    WHERE product_option_no = #{productOptionNo}
+	</update>
 
     <!-- 주문 생성 -->
     <insert id="createOrder" parameterType="com.shop.domain.Orders">

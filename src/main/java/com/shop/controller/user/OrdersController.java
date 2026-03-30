@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -123,6 +124,16 @@ public class OrdersController {
 			log.error("주문 상세 조회 에러: ", e);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("에러 발생: " + e.getMessage());
 		}
+	}
+	
+	@PutMapping("/{orderNo}/cancel")
+	public ResponseEntity<?> cancelOrder(@PathVariable Long orderNo, Authentication authentication) {
+	    try {
+	        ordersService.cancelOrder(orderNo);
+	        return ResponseEntity.ok("주문이 정상적으로 취소되었습니다.");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+	    }
 	}
 
 }
