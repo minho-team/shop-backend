@@ -27,6 +27,9 @@ public interface AdminOrderMapper {
     void updateOrderItemStatus(
     		@Param("orderItemNo") Long orderItemNo,
             @Param("status") String status) throws Exception;
+    
+    // 주문상품의 현재 상태 조회 (중복 DELIVERED 방지용)
+    String getOrderItemStatus(@Param("orderItemNo") Long orderItemNo);
 
     // 환불 상태 변경
     void updateRefundStatus(

@@ -45,4 +45,7 @@ public interface OrdersMapper {
     void updateOrderStatus(
             @Param("orderNo") Long orderNo,
             @Param("orderStatus") String orderStatus);
+    
+    void increaseProductStock(@Param("productOptionNo") Long productOptionNo, 
+            @Param("quantity") Integer quantity);
 }

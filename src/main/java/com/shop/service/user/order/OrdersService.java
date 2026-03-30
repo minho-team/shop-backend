@@ -20,4 +20,6 @@ public interface OrdersService {
     OrderDetailResponseDTO getOrderDetail(Long orderNo) throws Exception;
     
     Orders getOneOrder(Long orderNo);
+    
+    void cancelOrder(Long orderNo) throws Exception;
 }

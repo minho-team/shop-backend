@@ -8,6 +8,7 @@ public class AdminRefundDetailFlatRowDTO {
     private Long orderNo;
     private String refundStatus;
     private String requestedAt;
+    private Long memberNo; 
     private String memberId;
     private String name;
     private Long totalRefundAmount;

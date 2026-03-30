@@ -5,78 +5,78 @@
 
 <mapper namespace="com.shop.mapper.admin.AdminOrderItemMapper">
 
+    <select id="getAdminOrderItemList" resultType="com.shop.dto.admin.order.AdminOrderItemDetailResponseDTO">
+        SELECT 
+            oi.order_item_no AS orderItemNo, 
+            oi.item_name AS itemName, 
+            oi.quantity AS quantity, 
+            oi.unit_price AS unitPrice,
+            oi.order_item_status AS orderItemStatus, 
+            img.image_url AS imageUrl,
+            oi.product_option_no AS productOptionNo, 
+            oi.item_size AS optionSize,
+            oi.item_color AS optionColor, 
+            o.orderer_name AS ordererName,
+            o.created_at AS createdAt,
+            o.total_price AS totalPrice 
+        FROM orders o
+        INNER JOIN order_item oi ON o.order_no = oi.order_no 
+        INNER JOIN product_option po ON oi.product_option_no = po.product_option_no 
+        LEFT JOIN (
+            SELECT product_no, image_url 
+            FROM (
+                SELECT 
+                    pi.product_no,
+                    pi.image_url,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY pi.product_no 
+                        ORDER BY pi.sort_order ASC, pi.product_img_no ASC
+                    ) AS rn 
+                FROM product_img pi
+                WHERE pi.image_type = 'THUMB'
+            ) ranked_img
+            WHERE rn = 1
+        ) img ON po.product_no = img.product_no 
+        WHERE o.order_no = #{orderNo} 
+        ORDER BY oi.order_item_no ASC
+    </select>
 
-	<!-- 관리자 화면에서 주문 아이템 리스트 받아오기 -->
-	<select id="getAdminOrderItemList"
-		resultType="com.shop.dto.admin.order.AdminOrderItemDetailResponseDTO">
-		SELECT
-		oi.order_item_no AS orderItemNo,
-		oi.item_name AS itemName,
-		oi.quantity AS quantity,
-		oi.unit_price AS unitPrice,
-		oi.order_item_status AS orderItemStatus,
-
-		img.image_url AS imageUrl,
-
-		oi.product_option_no AS productOptionNo,
-		oi.item_size AS optionSize,
-		oi.item_color AS optionColor,
-
-		o.orderer_name AS ordererName,
-		o.created_at AS createdAt,
-		o.total_price AS totalPrice
-		FROM orders o
-		INNER JOIN order_item oi
-		ON o.order_no = oi.order_no
-		INNER JOIN product_option po
-		ON oi.product_option_no = po.product_option_no
-		LEFT JOIN (
-		SELECT product_no, image_url
-		FROM (
-		SELECT
-		pi.product_no,
-		pi.image_url,
-		ROW_NUMBER() OVER (
-		PARTITION BY pi.product_no
-		ORDER BY pi.sort_order ASC, pi.product_img_no ASC
-		) AS rn
-		FROM product_img pi
-		WHERE pi.image_type = 'THUMB'
-		)
-		WHERE rn = 1
-		) img
-		ON po.product_no = img.product_no
-		WHERE o.order_no = #{orderNo}
-		ORDER BY oi.order_item_no ASC
-	</select>
-	
-	<!-- 주문서 안의 각 아이템에 대한 상태 업데이트 -->
-	<update id="updateOrderItemStatus">
-        UPDATE order_item
-        SET order_item_status = #{orderItemStatus}
+    <update id="updateOrderItemStatus">
+        UPDATE order_item 
+        SET order_item_status = #{orderItemStatus} 
         WHERE order_item_no = #{orderItemNo}
     </update>
 
-	<!-- orderItemNo로 orderNo 알아오기 -->
     <select id="findOrderNoByOrderItemNo" resultType="long">
-        SELECT order_no
-        FROM order_item
+        SELECT order_no 
+        FROM order_item 
         WHERE order_item_no = #{orderItemNo}
     </select>
 
-	<!-- OrderNo로 주문에 대한 상태 받아오기 -->
     <select id="findOrderItemStatusesByOrderNo" resultType="string">
-        SELECT order_item_status
-        FROM order_item
-        WHERE order_no = #{orderNo}
+        SELECT order_item_status 
+        FROM order_item 
+        WHERE order_no = #{orderNo} 
         ORDER BY order_item_no ASC
     </select>
 
-	<!-- order의 상태 변경 -->
     <update id="updateOrderStatus">
-        UPDATE orders
+        UPDATE orders 
         SET order_status = #{orderStatus}
         WHERE order_no = #{orderNo}
     </update>
+
+    <select id="getOrderItemStatus" resultType="string">
+        SELECT order_item_status 
+        FROM order_item 
+        WHERE order_item_no = #{orderItemNo}
+    </select>
+
+    <select id="getMemberNoByOrderItemNo" resultType="long">
+        SELECT o.member_no 
+        FROM order_item oi 
+        JOIN orders o ON oi.order_no = o.order_no 
+        WHERE oi.order_item_no = #{orderItemNo}
+    </select>
 
 </mapper>
