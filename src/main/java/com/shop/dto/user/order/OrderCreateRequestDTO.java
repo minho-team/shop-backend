@@ -4,10 +4,14 @@ import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class OrderCreateRequestDTO {
+	private Long orderNo;
+	
 	private String ordererName;
 	private String ordererPhoneNumber;
 	private String ordererEmail;

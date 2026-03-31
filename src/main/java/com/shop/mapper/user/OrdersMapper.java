@@ -14,6 +14,9 @@ public interface OrdersMapper {
 
     // 주문 생성
     void createOrder(Orders orders);
+    
+    // 기존 주문 정보 업데이트
+    void updateOrder(Orders orders);
 
     // 특정 회원 전체 주문 조회
     List<Orders> getAllOrders(Long memberNo);
@@ -48,4 +51,5 @@ public interface OrdersMapper {
     
     void increaseProductStock(@Param("productOptionNo") Long productOptionNo, 
             @Param("quantity") Integer quantity);
+    
 }
