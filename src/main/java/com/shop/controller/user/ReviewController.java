@@ -10,14 +10,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shop.domain.Member;
 import com.shop.domain.Review;
 import com.shop.dto.user.review.MyReviewResponseDTO;
+import com.shop.dto.user.review.ReviewDTO;
 import com.shop.dto.user.review.ReviewSaveRequestDTO;
 import com.shop.service.user.member.MemberService;
 import com.shop.service.user.review.ReviewService;
@@ -96,6 +99,28 @@ public class ReviewController {
 		} catch (Exception e) {
 			log.error("나의 리뷰 조회 중 에러 발생", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("에러 발생: " + e.getMessage());
+		}
+	}
+	
+	@PutMapping("/{reviewNo}")
+	public ResponseEntity<?> updateReview(
+			@PathVariable Long reviewNo,
+			@RequestPart(value = "dto") ReviewDTO dto, 
+			@RequestPart(value = "uploadFile", required = false) MultipartFile uploadFile) {
+		
+		log.info("리뷰 수정 요청 수신 - 리뷰번호: {}, 제목: {}", reviewNo, dto.getTitle());
+
+		try {
+			dto.setReviewNo(reviewNo);
+
+			reviewService.updateReview(dto, uploadFile);
+
+			log.info("리뷰 수정 완료 - 리뷰번호: {}", reviewNo);
+			return ResponseEntity.ok("리뷰가 성공적으로 수정되었습니다.");
+
+		} catch (Exception e) {
+			log.error("리뷰 수정 중 예외 발생 - 리뷰번호: {}", reviewNo, e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정 실패: " + e.getMessage());
 		}
 	}
 

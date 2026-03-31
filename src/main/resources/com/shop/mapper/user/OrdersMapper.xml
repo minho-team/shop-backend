@@ -16,6 +16,19 @@
     <update id="updateOrderStatus">
         UPDATE orders SET order_status = #{orderStatus} WHERE order_no = #{orderNo}
     </update>
+    
+    <update id="updateOrder">
+	    UPDATE orders 
+	    SET 
+	        receiver_name = #{receiverName},
+	        receiver_phone_number = #{receiverPhoneNumber},
+	        receiver_zip_code = #{receiverZipCode},
+	        receiver_base_address = #{receiverBaseAddress},
+	        receiver_detail_address = #{receiverDetailAddress},
+	        total_price = #{totalPrice},
+	        message = #{message}
+	    WHERE order_no = #{orderNo}
+	</update>
     	
 	<!-- 주문 취소 시 상품 재고 복구 -->
 	<update id="increaseProductStock">

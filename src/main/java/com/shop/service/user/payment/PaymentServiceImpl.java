@@ -33,7 +33,6 @@ import com.shop.mapper.user.MemberMapper;
 import com.shop.mapper.user.OrderItemMapper;
 import com.shop.mapper.user.OrdersMapper;
 import com.shop.mapper.user.PaymentMapper;
-import com.shop.service.user.member.MemberService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +43,6 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentServiceImpl implements PaymentService {
 
 	private final MemberMapper memberMapper;
-	private final MemberService memberService;
 	private final OrdersMapper ordersMapper;
 	private final OrderItemMapper orderItemMapper;
 	private final PaymentMapper paymentMapper;
@@ -103,28 +101,62 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new IllegalArgumentException("주문 금액이 올바르지 않습니다.");
 		}
 
-		Orders order = new Orders();
-		order.setMemberNo(member.getMemberNo());
-		order.setOrdererName(request.getOrdererName());
-		order.setOrdererPhoneNumber(request.getOrdererPhoneNumber());
-		order.setOrdererEmail(request.getOrdererEmail());
-		order.setOrderStatus("PENDING_PAYMENT");
-		order.setTotalPrice(finalPrice);
-		order.setReceiverName(request.getReceiverName());
-		order.setReceiverPhoneNumber(request.getReceiverPhoneNumber());
-		order.setReceiverZipCode(request.getReceiverZipCode());
-		order.setReceiverBaseAddress(request.getReceiverBaseAddress());
-		order.setReceiverDetailAddress(request.getReceiverDetailAddress());
-		order.setMessage(request.getMessage());
+		// =========================================================
+		// [결제 대기시] 기존 주문 번호(orderNo) 존재 여부에 따른 분기 처리
+		// =========================================================
+		Long existingOrderNo = request.getOrderNo();
+		Orders order;
 
-		ordersMapper.createOrder(order);
+		if (existingOrderNo != null && existingOrderNo > 0) {
+			// [재결제] 기존 주문 정보 가져오기
+			order = ordersMapper.getOneOrder(existingOrderNo);
+			if (order == null) throw new IllegalArgumentException("존재하지 않는 주문 번호입니다.");
 
+			// 기존 상품 내역 지우기 (중복 삽입 방지)
+			orderItemMapper.deleteByOrderNo(existingOrderNo);
+
+			// 배송지 및 금액 최신화
+			order.setOrdererName(request.getOrdererName());
+			order.setOrdererPhoneNumber(request.getOrdererPhoneNumber());
+			order.setOrdererEmail(request.getOrdererEmail());
+			order.setTotalPrice(finalPrice);
+			order.setReceiverName(request.getReceiverName());
+			order.setReceiverPhoneNumber(request.getReceiverPhoneNumber());
+			order.setReceiverZipCode(request.getReceiverZipCode());
+			order.setReceiverBaseAddress(request.getReceiverBaseAddress());
+			order.setReceiverDetailAddress(request.getReceiverDetailAddress());
+			order.setMessage(request.getMessage());
+
+			// DB 업데이트 (INSERT가 아닌 UPDATE 호출)
+			ordersMapper.updateOrder(order);
+
+		} else {
+			// [신규 결제] 시퀀스 작동하여 새 번호 생성
+			order = new Orders();
+			order.setMemberNo(member.getMemberNo());
+			order.setOrdererName(request.getOrdererName());
+			order.setOrdererPhoneNumber(request.getOrdererPhoneNumber());
+			order.setOrdererEmail(request.getOrdererEmail());
+			order.setOrderStatus("PENDING_PAYMENT");
+			order.setTotalPrice(finalPrice);
+			order.setReceiverName(request.getReceiverName());
+			order.setReceiverPhoneNumber(request.getReceiverPhoneNumber());
+			order.setReceiverZipCode(request.getReceiverZipCode());
+			order.setReceiverBaseAddress(request.getReceiverBaseAddress());
+			order.setReceiverDetailAddress(request.getReceiverDetailAddress());
+			order.setMessage(request.getMessage());
+
+			ordersMapper.createOrder(order);
+		}
+
+		// [주의] 토스 결제는 재시도 시 pgOrderId가 중복되면 에러 가능성. 
+		// 기존 주문이더라도 뒤에 붙는 시간값을 갱신하여 새 pgOrderId를 부여.
 		String pgOrderId = "ORDER_" + order.getOrderNo() + "_" + System.currentTimeMillis();
 		ordersMapper.updatePgOrderId(order.getOrderNo(), pgOrderId);
 
 		for (PaymentPrepareItemDTO dto : request.getItems()) {
 			OrderItem orderItem = new OrderItem();
-			orderItem.setOrderNo(order.getOrderNo());
+			orderItem.setOrderNo(order.getOrderNo()); // 기존 주문 번호 유지
 			orderItem.setProductOptionNo(dto.getProductOptionNo());
 			orderItem.setQuantity(dto.getQuantity());
 			orderItem.setUnitPrice(dto.getUnitPrice());
@@ -203,7 +235,6 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new IllegalArgumentException("토스 승인 응답이 비어 있습니다.");
 		}
 
-		String method = result.get("method") == null ? "CARD" : String.valueOf(result.get("method"));
 		String paymentKey = String.valueOf(result.get("paymentKey"));
 
 		paymentMapper.completePayment(order.getOrderNo(), paymentKey, paymentKey);

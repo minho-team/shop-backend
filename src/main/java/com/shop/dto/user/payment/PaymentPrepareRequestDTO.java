@@ -6,6 +6,8 @@ import lombok.Data;
 
 @Data
 public class PaymentPrepareRequestDTO {
+	private Long orderNo;
+	
     private String ordererName;
     private String ordererPhoneNumber;
     private String ordererEmail;
