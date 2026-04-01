@@ -8,6 +8,7 @@ import com.shop.dto.admin.order.RefundStatusUpdateRequestDTO;
 
 public interface AdminOrderService {
 	
+	// 관리자 주문 리스트 모두 조회
     AdminOrderListResponse getOrderList(AdminOrderListRequest request) throws Exception;
 
     AdminOrderReadDTO getOrder(Long orderNo) throws Exception;
