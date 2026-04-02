@@ -58,4 +58,17 @@ public interface MemberMapper {
 
 	// 비밀번호만 변경
 	void updatePassword(@Param("memberNo") Long memberNo, @Param("password") String encodedPassword) throws Exception;
+
+	//아이디 중복 체크
+	public int checkMemberId(String memberId) throws Exception;
+
+	int checkNickName(String nickName) throws Exception;
 }
+
+
+
+
+
+
+
+

@@ -27,4 +27,10 @@ public interface MemberService {
 	void decreasePurchaseCount(Long memberNo) throws Exception;
 
 	void updateMemberInfo(Long memberNo, MemberUpdateRequestDTO request) throws Exception;
+
+	// id 중복 체크
+	public int checkMemberId(String memberId) throws Exception;
+
+	// 닉네임 중복 체크
+	public int checkMemberNickName(String nickName) throws Exception;
 }
