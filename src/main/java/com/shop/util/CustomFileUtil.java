@@ -27,13 +27,14 @@ public class CustomFileUtil {
 	@Value("${upload.path}")
 	private String uploadPath;
 
-	@PostConstruct
+	@PostConstruct // 스프링이 이 객체를 만들고 값 주입까지 끝낸 뒤 자동 실행, 서버 시작할때 딱 한번만 실행
 	public void init() {
-		File tempFolder = new File(uploadPath);
+		File tempFolder = new File(uploadPath); // uploadPath 경로를 기준으로 폴더 객체를 생성
+		// 폴더가 없으면 새로 생성
 		if (tempFolder.exists() == false) {
 			tempFolder.mkdirs();
 		}
-		// 경로 설정 및 로그 출력
+		// 절대 경로로 다시 저장 및 로그 출력
 		uploadPath = tempFolder.getAbsolutePath();
 		log.info("tempFolder.getAbsolutePath()" + uploadPath);
 	}
@@ -50,7 +51,8 @@ public class CustomFileUtil {
 		if (file.isEmpty()) {
 			return null;
 		}
-
+		
+		// 원본 파일명 가져오기
 		String originalFilename = file.getOriginalFilename();
 
 		// 원본 파일명이 없거나 공백이면 비정상 파일로 판단
@@ -60,11 +62,13 @@ public class CustomFileUtil {
 
 		// 중복 방지를 위해 UUID를 붙여 저장 파일명 생성
 		String savedName = UUID.randomUUID().toString() + "_" + originalFilename;
+		// 저장 경로 생성
 		Path savePath = Paths.get(uploadPath, savedName);
 
 		try {
+			// 실제 파일 저장
 			Files.copy(file.getInputStream(), savePath);
-			return savedName;
+			return savedName; // 저장 성공 시 파일명 반환
 		} catch (IOException e) {
 			// 저장 실패를 상위 계층에 전달
 			throw new RuntimeException("File save error: " + e.getMessage(), e);

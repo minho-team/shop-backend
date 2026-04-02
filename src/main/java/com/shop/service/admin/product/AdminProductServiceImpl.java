@@ -127,7 +127,7 @@ public class AdminProductServiceImpl implements AdminProductService{
 	@Override
 	@Transactional
 	public void insertProduct(AdminProductInsertDTO dto) {
-
+		// 상품 등록 중간에 에러 발생 시 저장된 파일들을 삭제하기 위해 저장된 파일 이름들을 기록
 	    List<String> savedFileNames = new ArrayList<>();
 
 	    try {
@@ -178,7 +178,7 @@ public class AdminProductServiceImpl implements AdminProductService{
 
 	        // 상품 기본 정보 저장
 	        adminProductMapper.insertProduct(dto);
-
+	        // 생성된 상품번호 꺼내기 (
 	        Long productNo = dto.getProductNo();
 
 	        if (productNo == null) {
