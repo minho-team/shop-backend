@@ -48,6 +48,8 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginDto dto, HttpServletResponse response) {
 
+		
+		log.info("id: [{}], pw: [{}]", dto.getMemberId(), dto.getPassword());
 		try {
 			if (dto.getMemberId() == null || dto.getMemberId().isBlank()) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("아이디를 입력해주세요.");
