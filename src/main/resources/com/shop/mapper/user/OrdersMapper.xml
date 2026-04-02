@@ -157,10 +157,14 @@
 	<!-- 주문 상품 목록 조회 -->
 	<select id="getOrderItemList"
 		resultType="com.shop.dto.user.order.OrderItemDTO">
-		SELECT oi.*, pi.image_url AS imageUrl
+		SELECT
+		oi.*,
+		po.product_no AS productNo,
+		pi.image_url AS imageUrl
 		FROM order_item oi
-		LEFT JOIN product_img pi ON oi.product_no = pi.product_no AND
-		pi.image_type = 'THUMB'
+		INNER JOIN product_option po ON oi.product_option_no = po.product_option_no
+		LEFT JOIN product_img pi ON po.product_no = pi.product_no
+		AND pi.image_type = 'THUMB'
 		WHERE oi.order_no = #{orderNo}
 	</select>
 </mapper>
