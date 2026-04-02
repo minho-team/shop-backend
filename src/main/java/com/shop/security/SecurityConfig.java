@@ -80,7 +80,9 @@ public class SecurityConfig {
 	CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowedOrigins(List.of("http://localhost:5173",
-				"https://shop-frontend-topaz.vercel.app"));
+				"https://shop-frontend-topaz.vercel.app",
+				"https://www.khshop.best",
+				"https://khshop.best"));
 		config.setAllowedMethods(List.of("PUT", "PATCH", "POST", "DELETE", "GET"));
 		config.setAllowedHeaders(List.of("*"));
 		config.setAllowCredentials(true);
