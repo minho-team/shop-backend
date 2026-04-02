@@ -12,11 +12,22 @@ import com.shop.dto.user.review.ReviewDTO;
 
 @Mapper
 public interface ReviewMapper {
+	
 	void insertReview(Review review);
+	
 	List<Review> getReviewListByProduct(Long productNo);
+	
+	Review getOneReview(Long reviewNo);
+	
 	Review getOneReviewByOrderItem(Long orderItemNo);
+	
 	List<MyReviewResponseDTO> selectReviewsByMemberNo(Long memberNo);
+	
 	List<HomeReviewDto> selectHomeRecentReviews();
-	void deleteReview(@Param("reviewNo") Long reviewNo, @Param("memberNo") Long memberNo);
+	
 	int updateReview(ReviewDTO dto);
+	
+	void deleteReview(@Param("reviewNo") Long reviewNo, @Param("memberNo") Long memberNo);
+	
+	void deleteReviewByOrderItemNo(Long orderItemNo);
 }

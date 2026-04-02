@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import com.shop.domain.Orders;
 import com.shop.dto.user.order.OrderDTO;
 import com.shop.dto.user.order.OrderItemDTO;
+import com.shop.dto.user.order.OrderListRequest;
 
 // 사용자 주문 DB 접근 Mapper
 // 관리자용 주문 조회는 AdminOrdersMapper로 분리
@@ -28,14 +29,12 @@ public interface OrdersMapper {
     List<OrderItemDTO> getOrderItemList(Long orderNo);
 
     // 특정 회원 주문 전체 건수 (마이페이지 페이징 계산용)
-    int getTotalCount(@Param("memberNo") Long memberNo);
+    int getTotalCount(@Param("memberNo") Long memberNo, 
+    		@Param("req") OrderListRequest req);
 
     // 내 주문 페이징 조회 (마이페이지용)
-    List<OrderDTO> getMyOrderList(
-            @Param("memberNo") Long memberNo,
-            @Param("startRow") int startRow,
-            @Param("endRow") int endRow);
-
+    List<OrderDTO> getMyOrderList(@Param("memberNo") Long memberNo, @Param("req") OrderListRequest request);
+    
     // pg_order_id로 주문 조회 (결제 완료 콜백 처리용)
     Orders findByPgOrderId(String pgOrderId);
 

@@ -138,10 +138,12 @@
 		UPDATE review
 		SET
 		title = #{title},
-		content = #{content},
+		content =
+		#{content},
 		rating = #{rating},
 		user_height = #{userHeight},
-		user_weight = #{userWeight},
+		user_weight
+		= #{userWeight},
 		size_rating = #{sizeRating},
 		image_url = #{imageUrl},
 		updated_at = SYSTIMESTAMP
@@ -153,6 +155,11 @@
 		WHERE review_no = #{reviewNo}
 		AND
 		member_no = #{memberNo}
+	</delete>
+
+	<delete id="deleteReviewByOrderItemNo" parameterType="long">
+		DELETE FROM review
+		WHERE order_item_no = #{orderItemNo}
 	</delete>
 
 </mapper>

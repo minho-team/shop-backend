@@ -19,6 +19,7 @@ import com.shop.dto.user.order.OrderCreateRequestDTO;
 import com.shop.dto.user.order.OrderCreateResponseDTO;
 import com.shop.dto.user.order.OrderDetailResponseDTO;
 import com.shop.dto.user.order.OrderItemDTO;
+import com.shop.dto.user.order.OrderListRequest;
 import com.shop.dto.user.order.OrderResponseDTO;
 import com.shop.service.user.member.MemberService;
 import com.shop.service.user.order.OrdersService;
@@ -64,24 +65,42 @@ public class OrdersController {
 
 	// 로그인된 사용자의 모든 주문 내역을 불러온다
 	@GetMapping
-	public ResponseEntity<?> getMyOrderList(Authentication authentication,
-			@RequestParam(value = "page", defaultValue = "1") int page) { // page 파라미터 수신 확인
+	public ResponseEntity<?> getMyOrderList(
+	        Authentication authentication,
+	        @RequestParam(defaultValue = "1") int page,
+	        @RequestParam(defaultValue = "10") int size,
+	        @RequestParam(required = false) String searchType,
+	        @RequestParam(required = false) String keyword,
+	        @RequestParam(required = false) String datePreset,
+	        @RequestParam(required = false) String startDate,
+	        @RequestParam(required = false) String endDate,
+	        @RequestParam(required = false) String orderStatus
+	) {
+	    log.info("사용자 주문 내역 조회 진입 - page: {}", page);
+	    
+	    try {
+	        String memberId = authentication.getName();
+	        Member member = memberService.readOneMember(memberId);
 
-		log.info("orders컨트롤러의 getMyOrderList");
-		String memberId = authentication.getName();
-		try {
-			Member member = memberService.readOneMember(memberId);
-			log.info("orders컨트롤러의 getMyOrderList결과1:" + page);
+	        // 관리자와 동일한 Request 객체 생성
+	        OrderListRequest request = new OrderListRequest();
+	        request.setPage(page);
+	        request.setSize(size);
+	        request.setSearchType(searchType);
+	        request.setKeyword(keyword);
+	        request.setDatePreset(datePreset);
+	        request.setStartDate(startDate);
+	        request.setEndDate(endDate);
+	        request.setOrderStatus(orderStatus);
 
-			// 중요: 반드시 getMyOrderList를 호출해서 OrderResponseDTO를 받아야 함!
-			OrderResponseDTO response = ordersService.getMyOrderList(member.getMemberNo(), page);
-			log.info("orders컨트롤러의 getMyOrderList결과2:" + response);
-			// DTO 자체를 리턴 (이 안에 리스트와 페이지 정보가 다 들어있음)
-
-			return ResponseEntity.ok(response);
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("에러발생");
-		}
+	        // 서비스 호출 (memberNo와 request 객체 전달)
+	        OrderResponseDTO response = ordersService.getMyOrderList(member.getMemberNo(), request);
+	        
+	        return ResponseEntity.ok(response);
+	    } catch (Exception e) {
+	        log.error("주문 목록 조회 중 에러: ", e);
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("주문 목록을 불러오지 못했습니다.");
+	    }
 	}
 
 	@GetMapping("/{orderNo}")
