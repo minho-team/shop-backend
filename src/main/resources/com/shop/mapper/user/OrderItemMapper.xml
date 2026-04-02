@@ -141,4 +141,10 @@
 		WHERE oi.order_no = #{orderNo}
 		ORDER BY oi.order_item_no ASC
 	</select>
+
+	<update id="updateSingleOrderItemStatus">
+		UPDATE order_item
+		SET order_item_status = #{orderItemStatus}
+		WHERE order_item_no = #{orderItemNo}
+	</update>
 </mapper>

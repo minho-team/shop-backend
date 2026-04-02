@@ -19,6 +19,7 @@ import com.shop.dto.admin.refund.AdminRefundPageResponseDTO;
 import com.shop.dto.admin.refund.AdminRefundStatusUpdateRequestDTO;
 import com.shop.dto.admin.refund.AdminRefundStatusUpdateResponseDTO;
 import com.shop.mapper.admin.AdminRefundMapper;
+import com.shop.mapper.user.ReviewMapper;
 import com.shop.service.user.member.MemberService;
  
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,10 @@ public class AdminRefundServiceImpl implements AdminRefundService {
     private final AdminRefundMapper adminRefundMapper;
     // 환불 완료 시 purchaseCount 차감 및 grade 갱신을 위해 주입
     private final MemberService memberService;
-
+    
+    // 환불 완료 시 리뷰 삭제를 위해 ReviewMapper 주입
+    private final ReviewMapper reviewMapper;
+    
     //환불 리스트 받아오기, 검색어, 페이징 포함
     @Override
     public AdminRefundPageResponseDTO getRefundList(AdminRefundListRequestDTO request) {
@@ -134,7 +138,7 @@ public class AdminRefundServiceImpl implements AdminRefundService {
         return dto;
     }
 
-    // 환불 상태 변경
+ // 환불 상태 변경
     @Override
     @Transactional
     public AdminRefundStatusUpdateResponseDTO updateRefundStatus(
@@ -150,7 +154,7 @@ public class AdminRefundServiceImpl implements AdminRefundService {
             throw new IllegalArgumentException("환불 정보를 찾을 수 없습니다.");
         }
  
-        // 상태별 refund / refund_item / order_item 동기화
+        // 1. 상태 동기화 로직 시작
         if ("REQUESTED".equals(refundStatus)) {
             adminRefundMapper.updateRefundItemsStatus(refundNo, "REQUESTED");
             adminRefundMapper.updateRefundHeaderStatus(refundNo, "REQUESTED");
@@ -167,41 +171,51 @@ public class AdminRefundServiceImpl implements AdminRefundService {
             adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "REJECTED");
  
         } else if ("COMPLETED".equals(refundStatus)) {
-            adminRefundMapper.updateRefundItemsStatus(refundNo, "COMPLETED");
-            adminRefundMapper.updateRefundHeaderStatus(refundNo, "COMPLETED");
-            adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "REFUNDED");
- 
-            // ★ 환불 완료: 해당 환불건의 회원 memberNo 조회 후 purchaseCount -1, grade 재산정
+            
+            // 상태를 바꾸기 '전'에 먼저 환불 상세 데이터
             List<AdminRefundDetailFlatRowDTO> rows = adminRefundMapper.getRefundDetail(refundNo);
+            
             if (rows != null && !rows.isEmpty()) {
-                Long memberNo = rows.get(0).getMemberNo(); // ← 아래 DTO 수정 참고
+                // 가져온 데이터를 바탕으로 리뷰를 먼저 삭제
+                for (AdminRefundDetailFlatRowDTO row : rows) {
+                    if (row.getOrderItemNo() != null) {
+                        reviewMapper.deleteReviewByOrderItemNo(row.getOrderItemNo());
+                        log.info("환불 승인 완료 - 연결된 리뷰 삭제 처리됨 (orderItemNo: {})", row.getOrderItemNo());
+                    }
+                }
+            	
+                //회원 등급 및 구매 횟수 조정
+                Long memberNo = rows.get(0).getMemberNo();
                 if (memberNo != null) {
                     try {
                         memberService.decreasePurchaseCount(memberNo);
                         memberService.updateMemberGrade(memberNo);
-                        log.info("환불 완료 처리 - 회원 {}번 purchaseCount-1, grade 갱신 완료 (refundNo: {})",
-                                memberNo, refundNo);
+                        log.info("환불 완료 처리 - 회원 {}번 데이터 갱신 완료", memberNo);
                     } catch (Exception e) {
-                        log.error("환불 완료 후 purchaseCount 차감 실패 - refundNo: {}, 사유: {}",
-                                refundNo, e.getMessage());
-                        throw new RuntimeException("purchaseCount 차감 중 오류가 발생했습니다.", e);
+                        log.error("회원 데이터 갱신 실패 사유: {}", e.getMessage());
+                        throw new RuntimeException("회원 정보 수정 중 오류 발생", e);
                     }
-                } else {
-                    log.warn("환불 완료 처리 - memberNo 조회 실패 (refundNo: {})", refundNo);
                 }
             }
+
+            // 모든 처리가 끝난 후 마지막에 DB 상태를 'COMPLETED' 변경
+            adminRefundMapper.updateRefundItemsStatus(refundNo, "COMPLETED");
+            adminRefundMapper.updateRefundHeaderStatus(refundNo, "COMPLETED");
+            adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "REFUNDED");
         }
  
-        // 최종 헤더 상태 확인 (모든 item 이 COMPLETED 면 헤더도 COMPLETED)
+        // 최종 헤더 상태 확인 및 반환 데이터 구성
         String finalHeaderStatus;
         int notCompletedCount = adminRefundMapper.countNotCompletedRefundItems(refundNo);
+        
         if (notCompletedCount == 0) {
             finalHeaderStatus = "COMPLETED";
             adminRefundMapper.updateRefundHeaderStatus(refundNo, "COMPLETED");
             adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "REFUNDED");
         } else {
-            List<AdminRefundDetailFlatRowDTO> rows = adminRefundMapper.getRefundDetail(refundNo);
-            finalHeaderStatus = rows.get(0).getRefundStatus();
+            // 상세 정보를 다시 조회하여 현재 헤더 상태를 가져옴
+            List<AdminRefundDetailFlatRowDTO> finalRows = adminRefundMapper.getRefundDetail(refundNo);
+            finalHeaderStatus = finalRows.get(0).getRefundStatus();
         }
  
         return AdminRefundStatusUpdateResponseDTO.builder()
@@ -210,13 +224,17 @@ public class AdminRefundServiceImpl implements AdminRefundService {
                 .message("환불 상태가 변경되었습니다.")
                 .build();
     }
- 
+    
+    /**
+     * 환불 상태값 유효성 검증 메서드
+     * @param refundStatus 입력받은 상태값
+     */
     private void validateRefundStatus(String refundStatus) {
         if (!"REQUESTED".equals(refundStatus)
                 && !"APPROVED".equals(refundStatus)
                 && !"REJECTED".equals(refundStatus)
                 && !"COMPLETED".equals(refundStatus)) {
-            throw new IllegalArgumentException("허용되지 않는 환불 상태입니다.");
+            throw new IllegalArgumentException("허용되지 않는 환불 상태입니다: " + refundStatus);
         }
     }
 }

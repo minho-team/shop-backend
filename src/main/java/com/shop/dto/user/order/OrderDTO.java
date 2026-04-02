@@ -1,15 +1,21 @@
 package com.shop.dto.user.order;
 
-import java.util.Date; // java.util 패키지 확인
-import lombok.Getter;
-import lombok.Setter;
+import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrderDTO {
-    private int orderNo;
-    private int memberNo;
+    private Long orderNo;
+    private String mainImageUrl;
+    private String mainProductName;
+    private int totalQuantity;
     private String orderStatus;
-    private long totalPrice;
-    private Date createdAt; // Timestamp 대신 Date 사용
+    private Long totalPrice;
+    private LocalDateTime createdAt;
 }

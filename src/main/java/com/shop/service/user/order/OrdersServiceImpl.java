@@ -14,6 +14,7 @@ import com.shop.dto.user.order.OrderDTO;
 import com.shop.dto.user.order.OrderDetailResponseDTO;
 import com.shop.dto.user.order.OrderItemCreateRequestDTO;
 import com.shop.dto.user.order.OrderItemDTO;
+import com.shop.dto.user.order.OrderListRequest;
 import com.shop.dto.user.order.OrderResponseDTO;
 import com.shop.mapper.user.OrderItemMapper;
 import com.shop.mapper.user.OrdersMapper;
@@ -30,6 +31,7 @@ public class OrdersServiceImpl implements OrdersService {
 	private final OrdersMapper mapper;
 	private final OrderItemMapper orderItemMapper;
 	private final MemberService memberService;
+	private final com.shop.mapper.user.ReviewMapper reviewMapper;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -101,14 +103,30 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
-	public OrderResponseDTO getMyOrderList(Long memberNo, int page) {
-		int size = 10;
-		int startRow = (page - 1) * size + 1;
-		int endRow = page * size;
-		List<OrderDTO> list = mapper.getMyOrderList(memberNo, startRow, endRow);
-		int totalCount = mapper.getTotalCount(memberNo);
-		return new OrderResponseDTO(list, totalCount, page, size);
+	public OrderResponseDTO getMyOrderList(Long memberNo, OrderListRequest request) throws Exception {
+		
+		log.info("orders서비스의 getMyOrderList 진입 - 검색어: {}", request.getKeyword());
+
+		// [해결] 호출 대상을 'ordersMapper'에서 필드명인 'mapper'로 수정함
+		// 1. 검색 조건이 포함된 전체 데이터 개수 조회 (페이징 계산용)
+		int totalCount = mapper.getTotalCount(memberNo, request);
+
+		// 2. 검색 조건 및 페이징(offset, size)이 포함된 실제 리스트 조회
+		List<OrderDTO> orderList = mapper.getMyOrderList(memberNo, request);
+
+		log.info("조회된 주문 건수: {}", orderList.size());
+		
+		if (orderList != null) {
+	        for (OrderDTO dto : orderList) {
+	            if (dto.getMainImageUrl() != null && !dto.getMainImageUrl().isBlank()) {
+	                dto.setMainImageUrl("/upload/" + dto.getMainImageUrl());
+	            }
+	        }
+	    }
+
+		// 3. 사용자님이 만드신 OrderResponseDTO 생성자를 호출하여 페이징 계산 및 반환
+		// 생성자 순서: (리스트, 전체개수, 현재페이지, 페이지당개수)
+		return new OrderResponseDTO(orderList, totalCount, request.getPage(), request.getSize());
 	}
 
 	@Override
@@ -186,6 +204,19 @@ public class OrdersServiceImpl implements OrdersService {
 		for (OrderItemDTO item : items) {
 			mapper.increaseProductStock(item.getProductOptionNo(), item.getQuantity());
 		}
+	}
+	
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void completeRefund(Long orderItemNo) throws Exception {
+	    
+	    // 1. 해당 주문 상품의 상태를 '환불완료(REFUNDED)'로 변경
+	    orderItemMapper.updateSingleOrderItemStatus(orderItemNo, "REFUNDED");
+	    
+	    // 2. 해당 주문 상품 번호(orderItemNo)와 연결된 리뷰를 찾아 삭제
+	    reviewMapper.deleteReviewByOrderItemNo(orderItemNo);
+	    
+	    // ※ 참고: 필요한 경우 여기에 환불에 따른 재고 증가 로직(increaseProductStock)을 추가할 수 있습니다.
 	}
 
 }
