@@ -76,4 +76,13 @@ public interface AdminMemberMapper {
 
 	// 쿠폰 사용 내역 조회 (관리자용 - 사용된 쿠폰 + 연결 주문)
 	List<Map<String, Object>> selectCouponUsageHistory(Long memberNo) throws Exception;
+
+	// 전체 활성 회원 번호 목록 조회 (전체 지급용)
+	List<Long> selectAllActiveMemberNos() throws Exception;
+
+	// 전체 지급용 쿠폰 발급 - 이미 동일 쿠폰 보유 시 스킵 (중복 오류 방지)
+	void insertMemberCouponIfNotExists(MemberCoupon memberCoupon) throws Exception;
+
+	// 쿠폰 마스터 생성 후 생성된 coupon_no 반환 (등급 달성 쿠폰 자동 지급용)
+	void insertCouponAndGetNo(com.shop.domain.Coupon coupon) throws Exception;
 }

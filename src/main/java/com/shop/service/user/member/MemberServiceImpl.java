@@ -2,14 +2,19 @@ package com.shop.service.user.member;
 
 import java.util.Map;
 
+import java.time.LocalDateTime;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.shop.domain.Coupon;
 import com.shop.domain.Member;
+import com.shop.domain.MemberCoupon;
 import com.shop.domain.MemberRole;
 import com.shop.dto.user.auth.RegisterRequestDto;
 import com.shop.dto.user.member.MemberUpdateRequestDTO;
+import com.shop.mapper.admin.AdminMemberMapper;
 import com.shop.mapper.user.MemberMapper;
 import com.shop.service.user.roulette.RouletteService;
 
@@ -23,8 +28,8 @@ public class MemberServiceImpl implements MemberService {
 
 	private final MemberMapper memberMapper;
 	private final PasswordEncoder passwordEncoder;
-	// ★ 신규가입 쿠폰 자동 지급을 위해 RouletteService 주입
 	private final RouletteService rouletteService;
+	private final AdminMemberMapper adminMemberMapper;
 
 	// memberId로 회원 + 권한 목록 함께 조회 (JWT 인증용)
 	@Override
@@ -165,12 +170,61 @@ public class MemberServiceImpl implements MemberService {
 		log.info("(MemberService) 회원 {}번 등급 최신화 완료: {}회 -> {}", memberNo, count, newGrade);
 	}
 
-	// 구매횟수 증가 후 등급도 바로 갱신
+	// ================================================
+	// 구매 횟수 증가 + 등급 갱신 + 등급 상승 시 축하 쿠폰 자동 지급
+	// - 주문 완료(OrdersServiceImpl) 에서 호출
+	// - 등급이 BASIC→SILVER→GOLD→VIP→VVIP 순서로 오를 때마다
+	//   해당 등급 달성 쿠폰을 자동 생성 후 회원에게 즉시 지급 (30일 유효)
+	// ================================================
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void increasePurchaseCount(Long memberNo) throws Exception {
+		// 1. 증가 전 구매 횟수 및 등급 저장
+		int prevCount = memberMapper.getPurchaseCount(memberNo);
+		String prevGrade = determineGrade(prevCount);
+
+		// 2. 구매 횟수 1 증가
 		memberMapper.incrementPurchaseCount(memberNo);
-		this.updateMemberGrade(memberNo);
+
+		// 3. 증가 후 새 등급 계산 및 DB 업데이트
+		int newCount = memberMapper.getPurchaseCount(memberNo);
+		String newGrade = determineGrade(newCount);
+		memberMapper.updateGrade(memberNo, newGrade);
+
+		// 4. 등급이 상승했을 때만 축하 쿠폰 자동 지급 (정률 RATE)
+		//    SILVER: 3% / GOLD: 5% / VIP: 7% / VVIP: 10%
+		if (!newGrade.equals(prevGrade)) {
+			long couponRate = 0L;
+			String couponName = "";
+			switch (newGrade) {
+				case "SILVER": couponRate = 3L;  couponName = "SILVER 등급 달성 축하 쿠폰 (3% 할인)";  break;
+				case "GOLD":   couponRate = 5L;  couponName = "GOLD 등급 달성 축하 쿠폰 (5% 할인)";    break;
+				case "VIP":    couponRate = 7L;  couponName = "VIP 등급 달성 축하 쿠폰 (7% 할인)";     break;
+				case "VVIP":   couponRate = 10L; couponName = "VVIP 등급 달성 축하 쿠폰 (10% 할인)";   break;
+				default: break;
+			}
+			if (couponRate > 0) {
+				// 4-1. 쿠폰 마스터 레코드 생성 (seq_coupon 시퀀스로 coupon_no 자동 채번)
+				Coupon coupon = new Coupon();
+				coupon.setCouponName(couponName);
+				coupon.setDiscountType("RATE"); // 정률 할인
+				coupon.setDiscountValue(couponRate);
+				adminMemberMapper.insertCouponAndGetNo(coupon); // selectKey로 couponNo 반환
+
+				// 4-2. 생성된 쿠폰을 해당 회원에게 즉시 발급 (유효기간 30일)
+				LocalDateTime now = java.time.LocalDateTime.now();
+				MemberCoupon mc = MemberCoupon.builder()
+						.memberNo(memberNo)
+						.couponNo(coupon.getCouponNo())
+						.usedYn("N")
+						.issuedAt(now)
+						.startAt(now)
+						.endAt(now.plusDays(30))
+						.build();
+				adminMemberMapper.insertMemberCoupon(mc);
+				log.info("(MemberService) 회원 {}번 등급 상승 {} → {} → 축하 쿠폰 {}% 자동 지급", memberNo, prevGrade, newGrade, couponRate);
+			}
+		}
 	}
 
 	// 구매횟수 차감 후 등급도 바로 갱신

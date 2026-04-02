@@ -87,9 +87,11 @@ public class PaymentServiceImpl implements PaymentService {
 			}
 			String discountType = String.valueOf(coupon.get("discountType"));
 			long discountValue = Long.parseLong(String.valueOf(coupon.get("discountValue")));
+			// FIXED: 정액 할인 / RATE·PERCENT: 정률 할인
+			// ★ PERCENT는 관리자가 쿠폰 생성 시 프론트에서 보낼 수 있는 별칭 값으로 RATE와 동일 처리
 			if ("FIXED".equals(discountType)) {
 				discountAmount = discountValue;
-			} else if ("RATE".equals(discountType)) {
+			} else if ("RATE".equals(discountType) || "PERCENT".equals(discountType)) {
 				discountAmount = recalculatedTotal * discountValue / 100;
 			}
 			discountAmount = Math.min(discountAmount, recalculatedTotal);
@@ -262,6 +264,73 @@ public class PaymentServiceImpl implements PaymentService {
 		List<PaymentPrepareItemDTO> items = orderItemMapper.selectPaymentResultItemsByOrderNo(order.getOrderNo());
 
 		return PaymentConfirmResponseDTO.builder().orderNo(order.getOrderNo()).amount(request.getAmount())
+				.ordererName(order.getOrdererName()).approvedAt(LocalDateTime.now()).items(items).build();
+	}
+
+	// ================================================
+	// 0원 결제 확정 (쿠폰으로 전액 할인된 주문 처리)
+	// - 쿠폰 할인액 >= 상품 금액 → 결제금액 0원 → Toss SDK 호출 불가
+	// - Toss API 호출을 건너뛰고 주문 상태만 직접 PAYMENT_COMPLETED로 변경
+	// - confirmPayment와 동일한 후처리(쿠폰 사용, 장바구니 삭제) 수행
+	// ================================================
+	@Override
+	@Transactional
+	public PaymentConfirmResponseDTO confirmFreePayment(String memberId, PaymentConfirmRequestDTO request) {
+		// 1. 회원 조회
+		Member member = null;
+		try {
+			member = memberMapper.readOneMember(memberId);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (member == null) {
+			throw new IllegalArgumentException("회원 정보를 찾을 수 없습니다.");
+		}
+
+		// 2. pgOrderId로 주문 조회
+		Orders order = ordersMapper.findByPgOrderId(request.getOrderId());
+		if (order == null) {
+			throw new IllegalArgumentException("주문 정보를 찾을 수 없습니다.");
+		}
+
+		// 3. 본인 주문 여부 검증
+		if (!order.getMemberNo().equals(member.getMemberNo())) {
+			throw new IllegalArgumentException("본인 주문만 결제할 수 있습니다.");
+		}
+
+		// 4. 실제 0원 주문인지 검증 (비정상 호출 방어)
+		if (order.getTotalPrice() != 0L) {
+			throw new IllegalArgumentException("0원 결제가 아닙니다.");
+		}
+
+		// 5. 결제 레코드를 완료 상태로 변경 (paymentKey = "FREE_PAYMENT" 고정)
+		paymentMapper.completePayment(order.getOrderNo(), "FREE_PAYMENT", "FREE_PAYMENT");
+
+		// 6. 주문 및 주문 아이템 상태 → PAYMENT_COMPLETED
+		ordersMapper.updateOrderStatus(order.getOrderNo(), "PAYMENT_COMPLETED");
+		orderItemMapper.updateOrderItemStatusByOrderNo(order.getOrderNo(), "PAYMENT_COMPLETED");
+
+		// 7. 사용한 쿠폰 사용 처리 (used_yn = 'Y')
+		if (request.getMemberCouponNo() != null) {
+			adminMemberMapper.updateMemberCouponUsed(request.getMemberCouponNo());
+		}
+
+		// 8. 장바구니에서 주문한 상품 삭제
+		List<Long> orderedCartItemNos = request.getOrderedCartItemNos();
+		if (orderedCartItemNos != null && !orderedCartItemNos.isEmpty()) {
+			for (Long cartItemNo : orderedCartItemNos) {
+				try {
+					cartItemMapper.deleteCartItemByMemberNoAndCartItemNo(member.getMemberNo(), cartItemNo);
+				} catch (Exception e) {
+					throw new RuntimeException("장바구니 상품 삭제 중 오류가 발생했습니다.", e);
+				}
+			}
+		}
+
+		// 9. 주문 결과 아이템 조회 후 응답 반환
+		List<PaymentPrepareItemDTO> items = orderItemMapper.selectPaymentResultItemsByOrderNo(order.getOrderNo());
+
+		return PaymentConfirmResponseDTO.builder().orderNo(order.getOrderNo()).amount(0L)
 				.ordererName(order.getOrdererName()).approvedAt(LocalDateTime.now()).items(items).build();
 	}
 }

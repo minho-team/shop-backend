@@ -12,7 +12,9 @@ import com.shop.dto.admin.member.AdminCartItemDTO;
 import com.shop.dto.admin.member.AdminMemberDetailResponse;
 import com.shop.dto.admin.member.AdminMemberSearchDTO;
 import com.shop.dto.admin.member.AdminMemberUpdateRequest;
+import com.shop.dto.admin.member.AdminOrderSummaryDTO; // 주문 목록 전용 DTO - 상품명 포함, Orders 도메인 불변 유지
 import com.shop.dto.user.inquiry.PageResponse;
+import com.shop.dto.user.review.MyReviewResponseDTO;   // 리뷰 목록 조회 응답 DTO
 
 public interface AdminMemberService {
 
@@ -31,8 +33,8 @@ public interface AdminMemberService {
     // 회원 삭제
     void deleteMember(Long memberNo) throws Exception;
 
-    // 특정 회원 주문 목록 페이징 조회
-    PageResponse<Orders> getMemberOrderPage(Long memberNo, int page, int size) throws Exception;
+    // 특정 회원 주문 목록 페이징 조회 (AdminOrderSummaryDTO: 상품명 포함, Orders 도메인 불변)
+    PageResponse<AdminOrderSummaryDTO> getMemberOrderPage(Long memberNo, int page, int size) throws Exception;
 
     // 특정 회원 문의 목록 페이징 조회
     PageResponse<Inquiry> getMemberInquiryPage(Long memberNo, int page, int size) throws Exception;
@@ -69,4 +71,10 @@ public interface AdminMemberService {
 
     // 쿠폰 사용 내역 조회 (관리자용)
     List<Map<String, Object>> getCouponUsageHistory(Long memberNo) throws Exception;
+
+    // 전체 회원 쿠폰 일괄 지급
+    void issueCouponToAll(Long couponNo, int validDays) throws Exception;
+
+    // 특정 회원 리뷰 목록 조회 (관리자용)
+    List<MyReviewResponseDTO> getMemberReviews(Long memberNo) throws Exception;
 }

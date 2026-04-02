@@ -11,12 +11,13 @@ import com.shop.domain.Coupon;
 import com.shop.domain.Inquiry;
 import com.shop.domain.Member;
 import com.shop.domain.MemberMemo;
-import com.shop.domain.Orders;
 import com.shop.dto.admin.member.AdminCartItemDTO;
 import com.shop.dto.admin.member.AdminMemberDetailResponse;
 import com.shop.dto.admin.member.AdminMemberSearchDTO;
 import com.shop.dto.admin.member.AdminMemberUpdateRequest;
+import com.shop.dto.admin.member.AdminOrderSummaryDTO; // 주문 목록 전용 DTO - 상품명 포함, 공유 도메인(Orders) 불변 유지
 import com.shop.dto.user.inquiry.PageResponse;
+import com.shop.dto.user.review.MyReviewResponseDTO;   // 관리자 회원 상세 - 리뷰 목록 조회용
 import com.shop.service.admin.member.AdminMemberService;
 
 import lombok.RequiredArgsConstructor;
@@ -89,10 +90,10 @@ public class AdminMemberController {
 	// 2. 활동 내역 조회
 	// ================================================
 
-	// 특정 회원 주문 목록 페이징
+	// 특정 회원 주문 목록 페이징 (AdminOrderSummaryDTO: 상품명 포함, Orders 도메인 불변)
 	// GET /api/admin/member/{memberNo}/orders?page=1&size=5
 	@GetMapping("/{memberNo}/orders")
-	public ResponseEntity<PageResponse<Orders>> getMemberOrderPage(@PathVariable Long memberNo,
+	public ResponseEntity<PageResponse<AdminOrderSummaryDTO>> getMemberOrderPage(@PathVariable Long memberNo,
 			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "5") int size) throws Exception {
 		return ResponseEntity.ok(adminMemberService.getMemberOrderPage(memberNo, page, size));
 	}
@@ -110,6 +111,13 @@ public class AdminMemberController {
 	@GetMapping("/{memberNo}/cart")
 	public ResponseEntity<List<AdminCartItemDTO>> getMemberCartItems(@PathVariable Long memberNo) throws Exception {
 		return ResponseEntity.ok(adminMemberService.getMemberCartItems(memberNo));
+	}
+
+	// 특정 회원 리뷰 목록 조회 (관리자용)
+	// GET /api/admin/member/{memberNo}/reviews
+	@GetMapping("/{memberNo}/reviews")
+	public ResponseEntity<List<MyReviewResponseDTO>> getMemberReviews(@PathVariable Long memberNo) throws Exception {
+		return ResponseEntity.ok(adminMemberService.getMemberReviews(memberNo));
 	}
 
 	// ================================================
@@ -195,5 +203,14 @@ public class AdminMemberController {
 	@GetMapping("/{memberNo}/coupons/history")
 	public ResponseEntity<List<Map<String, Object>>> getCouponUsageHistory(@PathVariable Long memberNo) throws Exception {
 		return ResponseEntity.ok(adminMemberService.getCouponUsageHistory(memberNo));
+	}
+
+	// 전체 회원 쿠폰 일괄 지급
+	// POST /api/admin/member/coupons/issue-all?couponNo=1&validDays=30
+	@PostMapping("/coupons/issue-all")
+	public ResponseEntity<String> issueCouponToAll(@RequestParam Long couponNo,
+			@RequestParam(defaultValue = "30") int validDays) throws Exception {
+		adminMemberService.issueCouponToAll(couponNo, validDays);
+		return ResponseEntity.ok("전체 회원에게 쿠폰이 지급되었습니다.");
 	}
 }
