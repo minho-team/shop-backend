@@ -324,6 +324,26 @@ public class AuthController {
 		}
 	} 
 	
+	@PostMapping("/checkNickName")
+	public ResponseEntity<?> checkNickName(@RequestParam String nickName){
+		
+		log.info(nickName);
+		try {
+			log.info("checkNickName로 넘어온 nickName:" + nickName);
+			int count = memberService.checkMemberNickName(nickName);
+			log.info("존재하는 닉네임의 개수" + count);
+			if(count >= 1) {
+				return ResponseEntity.ok(List.of("0","이미 사용 중인 닉네임입니다."));
+			}else {
+				return ResponseEntity.ok(List.of("1","사용 가능한 닉네임입니다."));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("닉네임 중복 체크 중 에러 발생");
+
+		}
+	} 
+	
 	
 	
 	

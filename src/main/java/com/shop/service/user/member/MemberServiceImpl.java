@@ -326,4 +326,10 @@ public class MemberServiceImpl implements MemberService {
 		return memberMapper.checkMemberId(memberId);
 		
 	}
+
+	@Override
+	public int checkMemberNickName(String nickName) throws Exception {
+		
+		return memberMapper.checkNickName(nickName);
+	}
 }
