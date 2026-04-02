@@ -20,28 +20,33 @@
         WHERE ROWNUM &lt;= 5
     </select>
 
-    <!-- 특정 회원 주문 전체 페이징 조회 -->
-    <select id="selectOrderPageByMemberNo" resultType="com.shop.domain.Orders">
+    <!-- 특정 회원 주문 전체 페이징 조회
+         firstItemName: 첫 번째 상품명 (요약 행 표시용)
+         itemCount: 주문에 포함된 상품 총 수 (외 N건 계산용)
+         Orders 도메인 대신 AdminOrderSummaryDTO 사용 → 공유 도메인 변경 없이 안전하게 필드 추가 -->
+    <select id="selectOrderPageByMemberNo" resultType="com.shop.dto.admin.member.AdminOrderSummaryDTO">
         SELECT *
         FROM (
             SELECT a.*, ROWNUM AS rnum
             FROM (
                 SELECT
-                    order_no                AS orderNo,
-                    member_no               AS memberNo,
-                    orderer_name            AS ordererName,
-                    order_status            AS orderStatus,
-                    total_price             AS totalPrice,
-                    created_at              AS createdAt,
-                    receiver_name           AS receiverName,
-                    receiver_phone_number   AS receiverPhoneNumber,
-                    receiver_zip_code       AS receiverZipCode,
-                    receiver_base_address   AS receiverBaseAddress,
-                    receiver_detail_address AS receiverDetailAddress,
-                    message
-                FROM orders
-                WHERE member_no = #{memberNo}
-                ORDER BY created_at DESC
+                    o.order_no                AS orderNo,
+                    o.member_no               AS memberNo,
+                    o.orderer_name            AS ordererName,
+                    o.order_status            AS orderStatus,
+                    o.total_price             AS totalPrice,
+                    o.created_at              AS createdAt,
+                    o.receiver_name           AS receiverName,
+                    o.receiver_phone_number   AS receiverPhoneNumber,
+                    o.receiver_zip_code       AS receiverZipCode,
+                    o.receiver_base_address   AS receiverBaseAddress,
+                    o.receiver_detail_address AS receiverDetailAddress,
+                    o.message,
+                    (SELECT oi.item_name FROM order_item oi WHERE oi.order_no = o.order_no AND ROWNUM = 1) AS first_item_name,
+                    (SELECT COUNT(*) FROM order_item oi2 WHERE oi2.order_no = o.order_no) AS item_count
+                FROM orders o
+                WHERE o.member_no = #{memberNo}
+                ORDER BY o.created_at DESC
             ) a
             WHERE ROWNUM &lt;= #{endRow}
         )

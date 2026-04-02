@@ -226,4 +226,29 @@
 		ORDER BY mc.used_at DESC
 	</select>
 
+	<!-- 전체 활성 회원 번호 목록 (전체 쿠폰 지급용) -->
+	<select id="selectAllActiveMemberNos" resultType="long">
+		SELECT member_no FROM member WHERE status = 'ACTIVE'
+	</select>
+
+	<!-- 전체 지급용 쿠폰 발급 - 동일 쿠폰을 이미 보유한 회원은 스킵하여 중복 오류 방지 -->
+	<insert id="insertMemberCouponIfNotExists">
+		INSERT INTO member_coupon (member_coupon_no, member_no, coupon_no, used_yn, issued_at, start_at, end_at)
+		SELECT seq_member_coupon.NEXTVAL, #{memberNo}, #{couponNo}, 'N', SYSTIMESTAMP, #{startAt}, #{endAt}
+		FROM DUAL
+		WHERE NOT EXISTS (
+		    SELECT 1 FROM member_coupon
+		    WHERE member_no = #{memberNo} AND coupon_no = #{couponNo}
+		)
+	</insert>
+
+	<!-- 쿠폰 마스터 생성 + 생성된 coupon_no 반환 (등급 달성 쿠폰 자동 지급용) -->
+	<insert id="insertCouponAndGetNo" parameterType="com.shop.domain.Coupon">
+		<selectKey keyProperty="couponNo" resultType="long" order="BEFORE">
+			SELECT seq_coupon.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO coupon (coupon_no, coupon_name, discount_type, discount_value, delete_yn, created_at)
+		VALUES (#{couponNo}, #{couponName}, #{discountType}, #{discountValue}, 'N', SYSTIMESTAMP)
+	</insert>
+
 </mapper>

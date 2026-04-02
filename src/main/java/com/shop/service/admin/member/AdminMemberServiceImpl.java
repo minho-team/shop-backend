@@ -18,10 +18,13 @@ import com.shop.dto.admin.member.AdminMemberDetailResponse;
 import com.shop.dto.admin.member.AdminMemberSearchDTO;
 import com.shop.dto.admin.member.AdminMemberUpdateRequest;
 import com.shop.dto.user.inquiry.PageResponse;
+import com.shop.dto.admin.member.AdminOrderSummaryDTO; // 주문 목록 전용 DTO - 상품명 포함, Orders 도메인 불변 유지
+import com.shop.dto.user.review.MyReviewResponseDTO;   // 리뷰 목록 조회 응답 DTO
 import com.shop.mapper.admin.AdminCartItemMapper;
 import com.shop.mapper.admin.AdminInquiryMapper;
 import com.shop.mapper.admin.AdminMemberMapper;
 import com.shop.mapper.admin.AdminOrdersMapper;
+import com.shop.mapper.user.ReviewMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,6 +40,8 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     private final AdminCartItemMapper adminCartItemMapper;
     // ★ 분리: InquiryMapper → AdminInquiryMapper
     private final AdminInquiryMapper adminInquiryMapper;
+    // 회원 리뷰 조회용 (관리자 회원 상세 페이지)
+    private final ReviewMapper reviewMapper;
 
     // ================================================
     // 1. 회원 기본 관리
@@ -103,14 +108,14 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     // 2. 활동 내역 조회
     // ================================================
 
-    // 특정 회원 주문 목록 페이징 조회
+    // 특정 회원 주문 목록 페이징 조회 (AdminOrderSummaryDTO 사용 - 상품명 포함, Orders 도메인 불변)
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<Orders> getMemberOrderPage(Long memberNo, int page, int size) throws Exception {
+    public PageResponse<AdminOrderSummaryDTO> getMemberOrderPage(Long memberNo, int page, int size) throws Exception {
         int startRow = (page - 1) * size;
         int endRow = page * size;
         int totalCount = adminOrdersMapper.countOrdersByMemberNo(memberNo);
-        List<Orders> list = adminOrdersMapper.selectOrderPageByMemberNo(memberNo, startRow, endRow);
+        List<AdminOrderSummaryDTO> list = adminOrdersMapper.selectOrderPageByMemberNo(memberNo, startRow, endRow);
         return new PageResponse<>(list, totalCount, page, size);
     }
 
@@ -211,5 +216,31 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getCouponUsageHistory(Long memberNo) throws Exception {
         return adminMemberMapper.selectCouponUsageHistory(memberNo);
+    }
+
+    // 전체 활성 회원에게 쿠폰 일괄 지급
+    // insertMemberCouponIfNotExists: 이미 동일 쿠폰 보유한 회원은 스킵하여 중복 오류 방지
+    @Override
+    public void issueCouponToAll(Long couponNo, int validDays) throws Exception {
+        List<Long> memberNos = adminMemberMapper.selectAllActiveMemberNos();
+        LocalDateTime now = LocalDateTime.now();
+        for (Long memberNo : memberNos) {
+            MemberCoupon mc = MemberCoupon.builder()
+                    .memberNo(memberNo)
+                    .couponNo(couponNo)
+                    .usedYn("N")
+                    .issuedAt(now)
+                    .startAt(now)
+                    .endAt(now.plusDays(validDays))
+                    .build();
+            adminMemberMapper.insertMemberCouponIfNotExists(mc);
+        }
+    }
+
+    // 특정 회원의 리뷰 목록 조회 (관리자 회원 상세 페이지용)
+    @Override
+    @Transactional(readOnly = true)
+    public List<MyReviewResponseDTO> getMemberReviews(Long memberNo) throws Exception {
+        return reviewMapper.selectReviewsByMemberNo(memberNo);
     }
 }

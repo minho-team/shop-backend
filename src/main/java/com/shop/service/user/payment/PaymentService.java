@@ -9,4 +9,6 @@ public interface PaymentService {
 	PaymentPrepareResponseDTO preparePayment(String memberId, PaymentPrepareRequestDTO request);
 
 	PaymentConfirmResponseDTO confirmPayment(String memberId, PaymentConfirmRequestDTO request);
+
+	PaymentConfirmResponseDTO confirmFreePayment(String memberId, PaymentConfirmRequestDTO request);
 }

@@ -40,4 +40,15 @@ public class PaymentController {
         String memberId = authentication.getName();
         return ResponseEntity.ok(paymentService.confirmPayment(memberId, request));
     }
+
+    // 0원 결제 확정 - 쿠폰 전액 할인 시 Toss 없이 직접 주문 완료
+    // POST /api/payments/confirm-free
+    @PostMapping("/confirm-free")
+    public ResponseEntity<PaymentConfirmResponseDTO> confirmFreePayment(
+            Authentication authentication,
+            @RequestBody PaymentConfirmRequestDTO request
+    ) {
+        String memberId = authentication.getName();
+        return ResponseEntity.ok(paymentService.confirmFreePayment(memberId, request));
+    }
 }
