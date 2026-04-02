@@ -193,5 +193,11 @@
 		SET password = #{password}
 		WHERE member_no = #{memberNo}
 	</update>
+	
+	<select id="checkMemberId">
+		select COUNT(*) from member where member_id = #{memberId}
+	</select>
+	
+	
 
 </mapper>

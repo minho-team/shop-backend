@@ -320,4 +320,10 @@ public class MemberServiceImpl implements MemberService {
 	private boolean isValidEmail(String email) {
 		return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 	}
+
+	@Override
+	public int checkMemberId(String memberId) throws Exception {
+		return memberMapper.checkMemberId(memberId);
+		
+	}
 }

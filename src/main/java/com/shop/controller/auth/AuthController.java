@@ -1,5 +1,6 @@
 package com.shop.controller.auth;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.domain.Member;
@@ -86,11 +88,11 @@ public class AuthController {
 			response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 			response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
-			log.info("로그인 성공 - memberId: {}", member.getMemberId());
+			log.info("로그인 성공 - memberId:", member.getMemberId());
 			return ResponseEntity.ok(Map.of("message", "로그인 성공"));
 
 		} catch (Exception e) {
-			log.warn("로그인 실패 - 사유: {}", e.getMessage());
+			log.warn("로그인 실패 - 사유:", e.getMessage());
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 또는 비밀번호가 올바르지 않습니다.");
 		}
 	}
@@ -300,4 +302,38 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("카카오 로그인 실패: " + e.getMessage());
 		}
 	}
+	
+	
+	@PostMapping("/checkId")
+	public ResponseEntity<?> checkId(@RequestParam String memberId){
+		
+		log.info(memberId);
+		try {
+			log.info("checkId로 넘어온 id:" + memberId);
+			int count = memberService.checkMemberId(memberId);
+			log.info("존재하는 아이디의 개수" + count);
+			if(count >= 1) {
+				return ResponseEntity.ok(List.of("0","이미 사용 중인 아이디입니다."));
+			}else {
+				return ResponseEntity.ok(List.of("1","사용 가능한 아이디입니다."));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("아이디 중복체크 중 에러 발생");
+
+		}
+	} 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
