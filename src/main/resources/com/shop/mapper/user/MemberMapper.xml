@@ -76,7 +76,8 @@
 		INSERT INTO member (
 		member_no, member_id, password, name, nick_name,
 		email, phone_number, zip_code, basic_address, detail_address,
-		gender, birthday, bank_name, bank_code, account_holder_name
+		gender,
+		birthday, bank_name, bank_code, account_holder_name
 		) VALUES (
 		#{memberNo}, #{memberId}, #{password}, #{name}, #{nickName}, #{email},
 		#{phoneNumber}, #{zipCode}, #{basicAddress}, #{detailAddress},
@@ -97,9 +98,11 @@
 			SELECT seq_member.NEXTVAL FROM dual
 		</selectKey>
 		INSERT INTO member (
-		member_no, member_id, password, name, nick_name, email, phone_number
+		member_no, member_id, password, name, nick_name,
+		email, phone_number
 		) VALUES (
-		#{memberNo}, #{memberId}, #{password}, #{name}, #{nickName}, #{email},
+		#{memberNo}, #{memberId}, #{password},
+		#{name}, #{nickName}, #{email},
 		#{phoneNumber}
 		)
 	</insert>
@@ -137,12 +140,13 @@
 		INSERT INTO member_role VALUES (#{memberRoleNo},
 		#{memberNo}, #{roleName})
 	</insert>
-	
+
 	<!-- 멤버 등급 업데이트 -->
 	<update id="updateGrade">
 		UPDATE member
 		SET grade = #{grade}
-		WHERE member_no = #{memberNo}
+		WHERE member_no =
+		#{memberNo}
 	</update>
 
 	<!-- 본인 정보 수정 -->
@@ -180,5 +184,15 @@
 		SELECT COUNT(*) FROM
 		member WHERE nick_name = #{nickName}
 	</select>
+
+	<!-- 환불요청 -->
+	<update id="updateBankInfo">
+		UPDATE members
+		SET
+		bank_name = #{bankName},
+		bank_code = #{bankCode}
+		WHERE
+		member_no = #{memberNo}
+	</update>
 
 </mapper>

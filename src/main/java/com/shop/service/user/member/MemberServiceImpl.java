@@ -30,17 +30,35 @@ public class MemberServiceImpl implements MemberService {
 	// memberId로 회원 + 권한 목록 함께 조회 (JWT 인증용)
 	@Override
 	public Member readOneMemberWithRoles(String memberId) throws Exception {
-		Member member = memberMapper.readOneMemberWithRoles(memberId);
-		
-		if (member != null) {
-			// DB에서 배송완료(DELIVERED)된 총 금액을 계산해 가져옵니다.
-			Long total = ordersMapper.selectTotalPurchaseAmount(member.getMemberNo());
-			member.setTotalSpent(total != null ? total : 0L);
-			
-			log.info("[내 정보 조회] 회원: {}, 누적 금액: {}원", memberId, member.getTotalSpent());
-		}
-		
-		return member;
+	    Member member = memberMapper.readOneMemberWithRoles(memberId);
+	    
+	    if (member != null) {
+	        // 1. 누적 금액 계산
+	        Long total = ordersMapper.selectTotalPurchaseAmount(member.getMemberNo());
+	        long totalSpent = (total != null ? total : 0L);
+	        member.setTotalSpent(totalSpent);
+	        
+	        // 2. 누적 금액에 따른 새로운 등급 결정 (New Grade Calculation)
+	        String newGrade = "GENERAL"; // 기본 등급
+	        if (totalSpent >= 1000000) {
+	            newGrade = "VVIP";
+	        } else if (totalSpent >= 500000) {
+	            newGrade = "VIP";
+	        } else if (totalSpent >= 300000) {
+	            newGrade = "GOLD";
+	        }
+
+	        // 3. 현재 DB 등급과 계산된 등급이 다를 경우에만 DB 업데이트
+	        if (!newGrade.equals(member.getGrade())) {
+	            memberMapper.updateGrade(member.getMemberNo(), newGrade);
+	            member.setGrade(newGrade); // 현재 객체의 등급도 변경
+	            log.info("[등급 상향] 회원: {}, 기존: {}, 변경: {}", memberId, member.getGrade(), newGrade);
+	        }
+	        
+	        log.info("[내 정보 조회] 회원: {}, 누적 금액: {}원, 현재 등급: {}", memberId, member.getTotalSpent(), member.getGrade());
+	    }
+	    
+	    return member;
 	}
 
 	// memberId로 회원 단건 조회
