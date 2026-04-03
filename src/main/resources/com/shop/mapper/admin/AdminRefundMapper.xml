@@ -32,12 +32,15 @@
 		m.bank_name AS bankName
 		FROM refund r
 		JOIN member m
-		ON r.member_no = m.member_no
+		ON r.member_no =
+		m.member_no
 		JOIN refund_item ri
 		ON r.refund_no = ri.refund_no
-		JOIN order_item oi
+		JOIN
+		order_item oi
 		ON ri.order_item_no = oi.order_item_no
-		WHERE r.refund_no = #{refundNo}
+		WHERE r.refund_no =
+		#{refundNo}
 		ORDER BY ri.refund_item_no ASC
 	</select>
 
@@ -53,6 +56,28 @@
 		UPDATE refund
 		SET refund_status = #{refundStatus}
 		WHERE refund_no = #{refundNo}
+	</update>
+
+	<!-- 환불 거절 시간 업데이트 -->
+	<update id="updateRefundHeaderTime">
+		update refund
+		<set>
+			<if test="refundStatus=='REQUESTED'">
+				REQUESTED_at = SYSTIMESTAMP
+			</if>
+			<if test="refundStatus=='APPROVED'">
+				APPROVED_at = SYSTIMESTAMP
+			</if>
+			<if test="refundStatus=='REJECTED'">
+				REJECTED_at = SYSTIMESTAMP
+			</if>
+			<if test="refundStatus=='COMPLETED'">
+				COMPLETED_at = SYSTIMESTAMP
+			</if>
+		</set>
+		where refund_no = #{refundNo}
+
+
 	</update>
 
 	<!-- 해당 환불건의 refund_item 전체 상태 변경 -->
