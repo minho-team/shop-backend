@@ -54,8 +54,8 @@ public class AdminMemberController {
 		return ResponseEntity.ok(adminMemberService.getMemberDetail(memberNo));
 	}
 
-	// 회원 상태 변경
-	// PATCH /api/admin/member/{memberNo}/status?status=SUSPENDED
+	// ① 상태 변경 전용 PATCH — 전체 수정(PUT)과 분리해 상태만 변경하는 전용 엔드포인트
+	// 요청 파라미터: ACTIVE / DORMANT / SUSPENDED
 	@PatchMapping("/{memberNo}/status")
 	public ResponseEntity<String> updateMemberStatus(@PathVariable Long memberNo, @RequestParam String status)
 			throws Exception {

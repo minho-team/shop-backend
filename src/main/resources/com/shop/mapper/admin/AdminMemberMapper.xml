@@ -36,15 +36,18 @@
 	</resultMap>
 
 	<!-- 회원 수 조회 (페이징 계산용) -->
+	<!-- ② 동적 WHERE 절 — 프론트가 파라미터를 생략하면 <if> 조건이 빠져 전체 조회 -->
 	<select id="selectMemberCount"
 		parameterType="com.shop.dto.admin.member.AdminMemberSearchDTO"
 		resultType="int">
 		SELECT COUNT(*)
 		FROM member
 		<where>
+			<!-- ③ status 없으면 조건 생략 → 전체 상태 조회 -->
 			<if test="status != null and status != ''">
 				AND status = #{status}
 			</if>
+			<!-- ② keyword 없으면 조건 생략 → 전체 회원 반환 -->
 			<if test="keyword != null and keyword != ''">
 				AND (member_id LIKE '%' || #{keyword} || '%'
 				OR name LIKE '%' || #{keyword} || '%')
@@ -136,9 +139,8 @@
 		DELETE FROM member_memo WHERE memo_no = #{memoNo}
 	</delete>
 
-	<!-- 회원 보유 쿠폰 목록 조회
-	     ★ TO_CHAR로 Oracle TIMESTAMP → String 변환
-	       (Jackson 직렬화 오류 방지: oracle.sql.TIMESTAMP는 Jackson이 직렬화 불가) -->
+	<!-- ② TIMESTAMP → String 변환
+	     Oracle TIMESTAMP는 Jackson이 직렬화 불가 → TO_CHAR로 문자열 변환 후 반환 -->
 	<select id="selectMemberCouponList" resultType="map">
 		SELECT
 		    mc.member_coupon_no                          AS "memberCouponNo",
@@ -231,7 +233,7 @@
 		SELECT member_no FROM member WHERE status = 'ACTIVE'
 	</select>
 
-	<!-- 전체 지급용 쿠폰 발급 - 동일 쿠폰을 이미 보유한 회원은 스킵하여 중복 오류 방지 -->
+	<!-- ② 중복 방지 INSERT — 이미 같은 쿠폰을 가진 회원은 조용히 건너뜀 -->
 	<insert id="insertMemberCouponIfNotExists">
 		INSERT INTO member_coupon (member_coupon_no, member_no, coupon_no, used_yn, issued_at, start_at, end_at)
 		SELECT seq_member_coupon.NEXTVAL, #{memberNo}, #{couponNo}, 'N', SYSTIMESTAMP, #{startAt}, #{endAt}
