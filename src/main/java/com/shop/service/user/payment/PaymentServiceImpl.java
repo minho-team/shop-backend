@@ -61,7 +61,6 @@ public class PaymentServiceImpl implements PaymentService {
 		try {
 			member = memberMapper.readOneMember(memberId);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (member == null) {
@@ -196,7 +195,6 @@ public class PaymentServiceImpl implements PaymentService {
 		try {
 			member = memberMapper.readOneMember(memberId);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (member == null) {
@@ -304,7 +302,6 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 
 		// 5. 결제 레코드를 완료 상태로 변경 (paymentKey = "FREE_PAYMENT" 고정)
-		paymentMapper.completePayment(order.getOrderNo(), "FREE_PAYMENT", "FREE_PAYMENT");
 
 		// 6. 주문 및 주문 아이템 상태 → PAYMENT_COMPLETED
 		ordersMapper.updateOrderStatus(order.getOrderNo(), "PAYMENT_COMPLETED");

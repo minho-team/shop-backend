@@ -20,11 +20,15 @@
 
     <!-- 금월 총환불금액 -->
     <select id="getMonthRefundAmount" resultType="long">
+    <![CDATA[
         SELECT NVL(SUM(total_refund_amount), 0)
-        FROM refund
-        WHERE refund_status = 'COMPLETED'
-          AND completed_at &gt;= TRUNC(SYSDATE, 'MM')
-          AND completed_at &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+        FROM refund r
+        JOIN refund_item ri
+        	  ON r.refund_no = ri.refund_no
+        WHERE r.refund_status IN ('APPROVED', 'COMPLETED')
+          AND r.approved_at >= TRUNC(SYSDATE, 'MM')
+  		  AND r.approved_at < ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1);
+  	]]>
     </select>
 
     <!-- 금월 주문 수 -->
