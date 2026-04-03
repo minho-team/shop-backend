@@ -35,21 +35,21 @@ public class MemberController {
 	// 내 정보 조회
 	@GetMapping("/me")
 	public ResponseEntity<?> getMyInfo(Authentication authentication) {
-		try {
-			if (authentication == null || authentication.getName() == null) {
-				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-			}
+	    try {
+	        if (authentication == null || authentication.getName() == null) {
+	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+	        }
 
-			String memberId = authentication.getName();
-			Member member = memberService.readOneMember(memberId);
+	        String memberId = authentication.getName();
+	        Member member = memberService.readOneMemberWithRoles(memberId);
+	        
+	        if (member == null) {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("회원 정보를 찾을 수 없습니다.");
+	        }
 
-			if (member == null) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("회원 정보를 찾을 수 없습니다.");
-			}
-
-			MemberInfoResponseDTO dto = new MemberInfoResponseDTO();
-			dto.setMemberNo(member.getMemberNo());
-			dto.setMemberId(member.getMemberId());
+	        MemberInfoResponseDTO dto = new MemberInfoResponseDTO();
+	        dto.setMemberNo(member.getMemberNo());
+	        dto.setMemberId(member.getMemberId());
 
 			dto.setName(member.getName());
 			dto.setNickName(member.getNickName());
@@ -64,13 +64,15 @@ public class MemberController {
 			dto.setBirthday(member.getBirthday());
 
 			dto.setProvider(member.getProvider());
+			dto.setTotalSpent(member.getTotalSpent());
+			dto.setGrade(member.getGrade()); 
 
 			return ResponseEntity.ok(dto);
 
-		} catch (Exception e) {
-			log.error("내 정보 조회 실패", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("내 정보 조회 중 오류가 발생했습니다.");
-		}
+	    } catch (Exception e) {
+	        log.error("내 정보 조회 실패", e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("내 정보 조회 중 오류가 발생했습니다.");
+	    }
 	}
 
 	// 내 정보 수정

@@ -13,42 +13,29 @@ import com.shop.dto.user.order.OrderListRequest;
 @Mapper
 public interface OrdersMapper {
 
-    // 주문 생성
+	// --- 주문 생성 및 수정 ---
     void createOrder(Orders orders);
-    
-    // 기존 주문 정보 업데이트
     void updateOrder(Orders orders);
+    void updatePgOrderId(@Param("orderNo") Long orderNo, @Param("pgOrderId") String pgOrderId);
 
-    // 특정 회원 전체 주문 조회
+    // --- 주문 조회 ---
     List<Orders> getAllOrders(Long memberNo);
-
-    // 주문 단건 조회
     Orders getOneOrder(Long orderNo);
-
-    // 주문 상품 목록 조회
-    List<OrderItemDTO> getOrderItemList(Long orderNo);
-
-    // 특정 회원 주문 전체 건수 (마이페이지 페이징 계산용)
-    int getTotalCount(@Param("memberNo") Long memberNo, 
-    		@Param("req") OrderListRequest req);
-
-    // 내 주문 페이징 조회 (마이페이지용)
-    List<OrderDTO> getMyOrderList(@Param("memberNo") Long memberNo, @Param("req") OrderListRequest request);
-    
-    // pg_order_id로 주문 조회 (결제 완료 콜백 처리용)
     Orders findByPgOrderId(String pgOrderId);
-
-    // pg_order_id 업데이트 (결제 요청 시)
-    void updatePgOrderId(
-            @Param("orderNo") Long orderNo,
-            @Param("pgOrderId") String pgOrderId);
-
-    // 주문 상태 변경
-    void updateOrderStatus(
-            @Param("orderNo") Long orderNo,
-            @Param("orderStatus") String orderStatus);
     
-    void increaseProductStock(@Param("productOptionNo") Long productOptionNo, 
-            @Param("quantity") Integer quantity);
-    
+    // --- 마이페이지 및 페이징 ---
+    List<OrderItemDTO> getOrderItemList(Long orderNo);
+    int getTotalCount(@Param("memberNo") Long memberNo, @Param("req") OrderListRequest req);
+    List<OrderDTO> getMyOrderList(@Param("memberNo") Long memberNo, @Param("req") OrderListRequest request);
+
+    // --- 상태 변경 및 재고 관리 ---
+    void updateOrderStatus(@Param("orderNo") Long orderNo, @Param("orderStatus") String orderStatus);
+    void increaseProductStock(@Param("productOptionNo") Long productOptionNo, @Param("quantity") Integer quantity);
+
+    // 특정 회원의 배송완료(DELIVERED)된 총 주문 금액 합산
+    long selectTotalPurchaseAmount(@Param("memberNo") Long memberNo);
+
+    // 주문 상품 번호(orderItemNo)로 부모 주문 번호(orderNo) 조회
+    // (환불 시 해당 주문의 상태를 변경하여 금액을 차감하기 위함)
+    Long getOrderNoByItemNo(@Param("orderItemNo") Long orderItemNo);
 }

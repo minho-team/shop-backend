@@ -45,8 +45,7 @@
 		r.member_role_no, r.role_name
 		FROM member m
 		JOIN member_role r
-		ON
-		m.member_no = r.member_no
+		ON m.member_no = r.member_no
 		WHERE m.member_id = #{memberId}
 	</select>
 
@@ -58,7 +57,8 @@
 
 	<!-- memberNo로 회원 한 명 조회 -->
 	<select id="readOneMemberByNo" resultMap="memberMap">
-		SELECT * FROM member WHERE member_no = #{memberNo}
+		SELECT * FROM member
+		WHERE member_no = #{memberNo}
 	</select>
 
 	<!-- 로그인 시 리프레시 토큰 업데이트 -->
@@ -75,16 +75,12 @@
 		</selectKey>
 		INSERT INTO member (
 		member_no, member_id, password, name, nick_name,
-		email, phone_number,
-		zip_code, basic_address, detail_address, gender,
-		birthday,
-		bank_name, bank_code, account_holder_name
+		email, phone_number, zip_code, basic_address, detail_address,
+		gender, birthday, bank_name, bank_code, account_holder_name
 		) VALUES (
 		#{memberNo}, #{memberId}, #{password}, #{name}, #{nickName}, #{email},
-		#{phoneNumber},
-		#{zipCode}, #{basicAddress}, #{detailAddress},
-		#{gender}, #{birthday},
-		#{bankName}, #{bankCode}, #{accountHolderName}
+		#{phoneNumber}, #{zipCode}, #{basicAddress}, #{detailAddress},
+		#{gender}, #{birthday}, #{bankName}, #{bankCode}, #{accountHolderName}
 		)
 	</insert>
 
@@ -96,10 +92,16 @@
 
 	<!-- 관리자 계정 등록 -->
 	<insert id="insertAdmin">
-		INSERT INTO member (member_no, member_id, password,
-		name, nick_name, email, phone_number)
-		VALUES (#{memberNo}, #{memberId},
-		#{password}, #{name}, #{nickName}, #{email}, #{phoneNumber})
+		<selectKey keyProperty="memberNo" resultType="long"
+			order="BEFORE">
+			SELECT seq_member.NEXTVAL FROM dual
+		</selectKey>
+		INSERT INTO member (
+		member_no, member_id, password, name, nick_name, email, phone_number
+		) VALUES (
+		#{memberNo}, #{memberId}, #{password}, #{name}, #{nickName}, #{email},
+		#{phoneNumber}
+		)
 	</insert>
 
 	<!-- 카카오 맴버 인서트 -->
@@ -135,39 +137,12 @@
 		INSERT INTO member_role VALUES (#{memberRoleNo},
 		#{memberNo}, #{roleName})
 	</insert>
-
-	<!-- 회원 등급: purchase_count를 활용 -->
-	<update id="incrementPurchaseCount">
-		UPDATE member
-		SET purchase_count = purchase_count + 1
-		WHERE member_no = #{memberNo}
-	</update>
-
-	<update id="decrementPurchaseCount">
-		UPDATE member
-		SET purchase_count = CASE WHEN
-		purchase_count > 0 THEN purchase_count - 1
-		ELSE 0 END
-		WHERE member_no =
-		#{memberNo}
-	</update>
-
-	<select id="getPurchaseCount" resultType="int">
-		SELECT
-		NVL(purchase_count, 0) FROM member WHERE member_no = #{memberNo}
-	</select>
-
+	
+	<!-- 멤버 등급 업데이트 -->
 	<update id="updateGrade">
 		UPDATE member
 		SET grade = #{grade}
-		WHERE member_no =
-		#{memberNo}
-	</update>
-
-	<update id="updateBankInfo">
-		update member set bank_name = #{bankName},
-		bank_code=#{bankCode}
-		where member_no = #{memberNo}
+		WHERE member_no = #{memberNo}
 	</update>
 
 	<!-- 본인 정보 수정 -->
@@ -189,23 +164,21 @@
 
 	<!-- 비밀번호만 변경 -->
 	<update id="updatePassword">
-		UPDATE member
-		SET password = #{password}
-		WHERE member_no = #{memberNo}
+		UPDATE member SET password = #{password} WHERE
+		member_no = #{memberNo}
 	</update>
-	
+
 	<!-- 아이디 중복 체크 -->
-	<select id="checkMemberId">
-		select COUNT(*) from member where member_id = #{memberId}
+	<select id="checkMemberId" resultType="int">
+		SELECT COUNT(*)
+		FROM member
+		WHERE member_id = #{memberId}
 	</select>
-	
+
 	<!-- 닉네임 중복 체크 -->
-	<select id="checkNickName">
-		select COUNT(*) from member where nick_name = #{nickName}
+	<select id="checkNickName" resultType="int">
+		SELECT COUNT(*) FROM
+		member WHERE nick_name = #{nickName}
 	</select>
-	
-	
-	
-	
 
 </mapper>

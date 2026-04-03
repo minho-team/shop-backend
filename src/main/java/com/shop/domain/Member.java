@@ -35,7 +35,8 @@ public class Member {
 	private String status;
 	private String provider;
 	private String grade;
-
+	private Long totalSpent;
+	
 	// user_role 테이블 매핑용
 	private List<MemberRole> memberRoleList;
 }

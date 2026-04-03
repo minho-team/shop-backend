@@ -218,34 +218,34 @@ public class AuthController {
 	// =============================================
 	@GetMapping("/me")
 	public ResponseEntity<?> me(Authentication authentication) {
+	    if (authentication == null || !authentication.isAuthenticated()) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+	    }
 
-		if (authentication == null || !authentication.isAuthenticated()) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-		}
+	    try {
+	        String memberId = authentication.getName();
+	        Member member = memberService.readOneMemberWithRoles(memberId);
 
-		try {
-			String memberId = authentication.getName();
-			Member member = memberService.readOneMember(memberId);
+	        Map<String, Object> result = new java.util.HashMap<>();
+	        result.put("memberNo", member.getMemberNo());
+	        result.put("memberId", member.getMemberId());
+	        result.put("memberName", member.getName());
+	        result.put("email", member.getEmail());
+	        result.put("purchaseCount", member.getPurchaseCount());
+	        result.put("grade", member.getGrade());
+	        
+	        // 프론트엔드가 기다리는 누적 금액 필드 추가
+	        result.put("totalSpent", member.getTotalSpent()); 
+	        
+	        result.put("roles", authentication.getAuthorities().stream().map(a -> a.getAuthority()).toList());
 
-			Map<String, Object> result = new java.util.HashMap<>();
-			result.put("memberNo", member.getMemberNo());
-			result.put("memberId", member.getMemberId());
-			result.put("memberName", member.getName());
-			result.put("email", member.getEmail());
-			result.put("phoneNumber", member.getPhoneNumber());
-			result.put("zipCode", member.getZipCode());
-			result.put("basicAddress", member.getBasicAddress());
-			result.put("detailAddress", member.getDetailAddress());
-			result.put("purchaseCount", member.getPurchaseCount());
-			result.put("grade", member.getGrade());
-			result.put("roles", authentication.getAuthorities().stream().map(a -> a.getAuthority()).toList());
+	        log.info("[API/auth/me] 회원 {} 조회 - 누적금액: {}", memberId, member.getTotalSpent());
+	        return ResponseEntity.ok(result);
 
-			return ResponseEntity.ok(result);
-
-		} catch (Exception e) {
-			log.warn("/me 조회 실패: {}", e.getMessage());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("내 정보 조회 실패");
-		}
+	    } catch (Exception e) {
+	        log.warn("/me 조회 실패: {}", e.getMessage());
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("내 정보 조회 실패");
+	    }
 	}
 
 	// =============================================
