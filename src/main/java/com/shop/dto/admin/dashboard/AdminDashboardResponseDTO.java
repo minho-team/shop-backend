@@ -41,4 +41,7 @@ public class AdminDashboardResponseDTO {
     private List<AdminDashboardTopProductDTO> topProductList;
     private List<AdminDashboardRecentOrderDTO> recentOrderList;
     private List<AdminDashboardLowStockDTO> lowStockProductList;
+    
+    private Long currentWeekSales;
+    private Double weekOverWeekRate;
 }

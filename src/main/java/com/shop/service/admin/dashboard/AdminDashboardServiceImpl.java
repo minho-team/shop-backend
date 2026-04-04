@@ -61,7 +61,10 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         List<AdminDashboardTopProductDTO> topProductList = adminDashboardMapper.getTopProductList();
         List<AdminDashboardRecentOrderDTO> recentOrderList = adminDashboardMapper.getRecentOrderList();
         List<AdminDashboardLowStockDTO> lowStockProductList = adminDashboardMapper.getLowStockProductList();
-
+        
+        Long currentWeekSales = adminDashboardMapper.getCurrentWeekSales();
+        Long previousWeekSales = adminDashboardMapper.getPreviousWeekSales();
+        
         // null 방어
         if (monthOrderCount == null) monthOrderCount = 0;
         if (totalMemberCount == null) totalMemberCount = 0;
@@ -72,7 +75,17 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         if (newMemberCount == null) newMemberCount = 0;
         if (lowStockCount == null) lowStockCount = 0;
         if (refundRequestCount == null) refundRequestCount = 0;
-
+        
+        if (currentWeekSales == null) currentWeekSales = 0L;
+        if (previousWeekSales == null) previousWeekSales = 0L;
+        
+        Double weekOverWeekRate = null;
+        if (previousWeekSales > 0) {
+            weekOverWeekRate = ((double) (currentWeekSales - previousWeekSales) / previousWeekSales) * 100;
+            weekOverWeekRate = Math.round(weekOverWeekRate * 10) / 10.0;
+        }
+       
+        
         return AdminDashboardResponseDTO.builder()
                 .monthGrossSales(monthGrossSales)
                 .monthRefundAmount(monthRefundAmount)
@@ -89,6 +102,9 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 .topProductList(topProductList)
                 .recentOrderList(recentOrderList)
                 .lowStockProductList(lowStockProductList)
+                .currentWeekSales(currentWeekSales)
+                .weekOverWeekRate(weekOverWeekRate)
                 .build();
     }
+	    
 }
