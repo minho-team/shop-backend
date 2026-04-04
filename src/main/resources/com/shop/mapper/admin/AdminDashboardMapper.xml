@@ -130,6 +130,27 @@
 	   ]]>
 	</select>
 	
+	<!-- 금주 매출 -->
+	<select id="getCurrentWeekSales" resultType="long">
+		<![CDATA[
+		    SELECT NVL(SUM(payment_amount), 0)
+		    FROM payment
+		    WHERE payment_status = 'COMPLETED'
+		      AND approved_at >= TRUNC(SYSDATE) - 6
+		      AND approved_at < TRUNC(SYSDATE) + 1
+		]]>
+	</select>
+	
+	<!-- 전주 매출 -->
+	<select id="getPreviousWeekSales" resultType="long">
+		<![CDATA[
+		    SELECT NVL(SUM(payment_amount), 0)
+		    FROM payment
+		    WHERE payment_status = 'COMPLETED'
+		      AND approved_at >= TRUNC(SYSDATE) - 13
+		      AND approved_at < TRUNC(SYSDATE) - 6
+		]]>
+	</select>
 
 
     <!-- 많이 팔린 상품 TOP 5 -->
@@ -174,13 +195,14 @@
         )
         WHERE ROWNUM &lt;= 5
     </select>
-
+    
+	<!-- 재고 부족 상품 5건 -->
     <select id="getLowStockProductList"
         resultType="com.shop.dto.admin.dashboard.AdminDashboardLowStockDTO">
 	    <![CDATA[
 	    SELECT
 	        p.product_no AS productNo,
-	        p.name AS name,
+	        p.name AS productName,
 	        po.product_option_no AS productOptionNo,
 	        po.color AS color,
 	        po.option_Size AS optionSize,

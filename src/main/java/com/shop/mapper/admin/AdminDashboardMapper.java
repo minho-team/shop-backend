@@ -42,5 +42,7 @@ public interface AdminDashboardMapper {
     List<AdminDashboardRecentOrderDTO> getRecentOrderList();
     List<AdminDashboardLowStockDTO> getLowStockProductList();
 	
+    Long getCurrentWeekSales();
+    Long getPreviousWeekSales();
 	
 }
