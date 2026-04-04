@@ -193,5 +193,7 @@
 		order_item
 		WHERE order_item_no = #{orderItemNo}
 	</select>
+	
+
 
 </mapper>

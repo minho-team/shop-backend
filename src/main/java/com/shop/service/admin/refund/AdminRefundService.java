@@ -16,4 +16,7 @@ public interface AdminRefundService {
             Long refundNo,
             AdminRefundStatusUpdateRequestDTO request
     );
+    
+    public void decideRefund(Long refundNo, String status) throws Exception;
+    
 }

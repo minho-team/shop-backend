@@ -38,4 +38,8 @@ public interface OrdersMapper {
     // 주문 상품 번호(orderItemNo)로 부모 주문 번호(orderNo) 조회
     // (환불 시 해당 주문의 상태를 변경하여 금액을 차감하기 위함)
     Long getOrderNoByItemNo(@Param("orderItemNo") Long orderItemNo);
+    
+
+    
+    
 }

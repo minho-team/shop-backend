@@ -10,10 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.shop.dto.admin.refund.AdminRefundDetailResponseDTO;
 import com.shop.dto.admin.refund.AdminRefundListRequestDTO;
 import com.shop.dto.admin.refund.AdminRefundStatusUpdateRequestDTO;
-import com.shop.dto.admin.refund.AdminRefundStatusUpdateResponseDTO;
 import com.shop.service.admin.refund.AdminRefundService;
 
 import lombok.RequiredArgsConstructor;
@@ -50,16 +48,31 @@ public class AdminRefundController {
 		}
 	}
 
-	// 환불아이템에 대한 상태 업데이트
-	@PutMapping("/{refundNo}/status")
-	public ResponseEntity<?> updateRefundStatus(@PathVariable Long refundNo,
+	// 환불아이템에 대한 승인/거절 의사결정
+	@PutMapping("/{refundNo}")
+	public ResponseEntity<?> decideRefundStatus(@PathVariable Long refundNo,
 			@RequestBody AdminRefundStatusUpdateRequestDTO request) {
+		log.info("환불 의사결정 컨트롤러 진입 status:"+request.getStatus());
 		try {
-			return ResponseEntity.ok(adminRefundService.updateRefundStatus(refundNo, request));
+			adminRefundService.decideRefund(refundNo, request.getStatus());
+			return ResponseEntity.ok("환불 의사 결정 완료:"+request.getStatus());
 		} catch (Exception e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("admin/refund: updateRefundStatus오류 발생");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("admin/refund: decideRefundStatus오류 발생");
 
 		}
 	}
+
+//	// 환불아이템에 대한 상태 업데이트
+//	@PutMapping("/{refundNo}/status")
+//	public ResponseEntity<?> updateRefundStatus(@PathVariable Long refundNo,
+//			@RequestBody AdminRefundStatusUpdateRequestDTO request) {
+//		try {
+//			return ResponseEntity.ok(adminRefundService.updateRefundStatus(refundNo, request));
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("admin/refund: updateRefundStatus오류 발생");
+//
+//		}
+//	}
 }

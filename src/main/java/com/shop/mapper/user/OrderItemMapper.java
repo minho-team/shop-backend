@@ -18,7 +18,10 @@ public interface OrderItemMapper {
     
     void deleteByOrderNo(Long orderNo);
     
+    //orderNo로 order_item의 상태 변경
     void updateOrderItemStatusByOrderNo(@Param("orderNo") Long orderNo, @Param("orderItemStatus") String orderItemStatus);
+    
+    void updateOrderItemStatusByOrderItemNo(@Param("orderItemNo") Long orderItemNo, @Param("orderItemStatus") String orderItemStatus);
     
     List<PaymentPrepareItemDTO> selectPaymentResultItemsByOrderNo(Long orderNo);
     
@@ -27,4 +30,12 @@ public interface OrderItemMapper {
     void updateSingleOrderItemStatus(@Param("orderItemNo") Long orderItemNo, @Param("orderItemStatus") String orderItemStatus);
     
     Long getOrderNoByItemNo(@Param("orderItemNo") Long orderItemNo);
+
 }
+
+
+
+
+
+
+

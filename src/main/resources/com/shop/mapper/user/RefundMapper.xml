@@ -82,5 +82,47 @@
 		WHERE order_no = #{orderNo}
 	</update>
 
+	<!-- refundNo로 orderNo 가져오기 -->
+	<select id="getOrderNoByRefundNo">
+		select order_no from refund where refund_no = #{refundNo}
+	</select>
+	
+	<!-- refund 테이블의 상태 변경 -->
+	<update id ="updateRefundStatus">
+		update refund set refund_status = #{status} where refund_no =#{refundNo}
+	</update>
+	
+	<!-- refund_item 테이블의 상태 변경 -->
+	<update id ="updateRefundItemStatus">
+		update refund_item set refund_status = #{status} where refund_no =#{refundNo}
+	</update>
+	
+	<!-- refundNo로 환불 금액 db에서 가져오기 -->
+	<select id ="getRefundAmountByRefundNo">
+		select total_refund_amount from refund where refund_no = #{refundNo}
+	</select>
+	
+	<!-- refundNo로 환불 승인 시각 기록 -->
+	<update id="updateApprovedAt">
+		update refund set approved_at = SYSTIMESTAMP where refund_no =#{refundNo}
+	</update>
+	
+	<!-- refundNo로 환불 완료 시각 기록 -->
+	<update id="updateCompletedAt">
+		update refund set completed_at = SYSTIMESTAMP where refund_no =#{refundNo}
+	</update>
+	
+	<!-- refundNo로 환불 거절 시각 기록 -->
+	<update id="updateRejectedAt">
+		update refund set rejected_at = SYSTIMESTAMP where refund_no =#{refundNo}
+	</update>
+	
+	<!-- refundNo로 order_item_no 가져오기 -->
+	<select id ="getOrderItemNoByRefundNo">
+		select order_item_no from refund_item where refund_no = #{refundNo}
+	</select>
+	
+	
+
 
 </mapper>	

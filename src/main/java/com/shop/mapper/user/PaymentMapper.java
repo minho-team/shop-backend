@@ -17,4 +17,6 @@ public interface PaymentMapper {
             @Param("orderNo") Long orderNo,
             @Param("failReason") String failReason
     );
+    
+    public String getPaymentKeyByOrderNo(Long OrderNo) throws Exception;
 }
