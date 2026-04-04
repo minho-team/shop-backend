@@ -54,4 +54,17 @@
 		#{orderNo}
 		AND payment_status = 'READY'
 	</update>
+	
+	<select id ="getPaymentKeyByOrderNo">
+		select payment_key from payment where order_no = #{orderNo}
+	</select>
+	
+	
 </mapper>
+
+
+
+
+
+
+
