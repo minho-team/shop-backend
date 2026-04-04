@@ -19,9 +19,10 @@ import com.shop.dto.admin.refund.AdminRefundPageResponseDTO;
 import com.shop.dto.admin.refund.AdminRefundStatusUpdateRequestDTO;
 import com.shop.dto.admin.refund.AdminRefundStatusUpdateResponseDTO;
 import com.shop.mapper.admin.AdminRefundMapper;
+import com.shop.mapper.user.OrdersMapper;
 import com.shop.mapper.user.ReviewMapper;
 import com.shop.service.user.member.MemberService;
- 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
  
@@ -36,6 +37,9 @@ public class AdminRefundServiceImpl implements AdminRefundService {
     
     // 환불 완료 시 리뷰 삭제를 위해 ReviewMapper 주입
     private final ReviewMapper reviewMapper;
+    
+    // 등급변환을 위한 주입
+    private final OrdersMapper ordersMapper;
     
     //환불 리스트 받아오기, 검색어, 페이징 포함
     @Override
@@ -159,16 +163,19 @@ public class AdminRefundServiceImpl implements AdminRefundService {
             adminRefundMapper.updateRefundItemsStatus(refundNo, "REQUESTED");
             adminRefundMapper.updateRefundHeaderStatus(refundNo, "REQUESTED");
             adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "REFUND_REQUESTED");
+            adminRefundMapper.updateRefundHeaderTime(refundNo,refundStatus);
  
         } else if ("APPROVED".equals(refundStatus)) {
             adminRefundMapper.updateRefundItemsStatus(refundNo, "APPROVED");
             adminRefundMapper.updateRefundHeaderStatus(refundNo, "APPROVED");
             adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "REFUND_APPROVED");
- 
+            adminRefundMapper.updateRefundHeaderTime(refundNo,refundStatus);
+            
         } else if ("REJECTED".equals(refundStatus)) {
             adminRefundMapper.updateRefundItemsStatus(refundNo, "REJECTED");
             adminRefundMapper.updateRefundHeaderStatus(refundNo, "REJECTED");
             adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "REJECTED");
+            adminRefundMapper.updateRefundHeaderTime(refundNo,refundStatus);
  
         } else if ("COMPLETED".equals(refundStatus)) {
             
@@ -185,15 +192,15 @@ public class AdminRefundServiceImpl implements AdminRefundService {
                 }
             	
                 //회원 등급 및 구매 횟수 조정
+                // 등급 하향 조정을 위한 재산정
                 Long memberNo = rows.get(0).getMemberNo();
                 if (memberNo != null) {
                     try {
-                        memberService.decreasePurchaseCount(memberNo);
-                        memberService.updateMemberGrade(memberNo);
-                        log.info("환불 완료 처리 - 회원 {}번 데이터 갱신 완료", memberNo);
+                        updateMemberGradeByAmount(memberNo);
+                        log.info("환불 완료 처리 - 회원 {}번 등급 재산정 완료", memberNo);
                     } catch (Exception e) {
-                        log.error("회원 데이터 갱신 실패 사유: {}", e.getMessage());
-                        throw new RuntimeException("회원 정보 수정 중 오류 발생", e);
+                        log.error("회원 데이터 갱신 실패: {}", e.getMessage());
+                        throw new RuntimeException("회원 등급 수정 중 오류 발생", e);
                     }
                 }
             }
@@ -202,6 +209,7 @@ public class AdminRefundServiceImpl implements AdminRefundService {
             adminRefundMapper.updateRefundItemsStatus(refundNo, "COMPLETED");
             adminRefundMapper.updateRefundHeaderStatus(refundNo, "COMPLETED");
             adminRefundMapper.updateOrderItemsStatusByRefundNo(refundNo, "REFUNDED");
+            adminRefundMapper.updateRefundHeaderTime(refundNo,refundStatus);
         }
  
         // 최종 헤더 상태 확인 및 반환 데이터 구성
@@ -223,6 +231,21 @@ public class AdminRefundServiceImpl implements AdminRefundService {
                 .refundStatus(finalHeaderStatus)
                 .message("환불 상태가 변경되었습니다.")
                 .build();
+    }
+    
+    private void updateMemberGradeByAmount(Long memberNo) throws Exception {
+        // 1. 배송완료(DELIVERED) 상태인 총 금액 합산 조회
+        long totalAmount = ordersMapper.selectTotalPurchaseAmount(memberNo);
+
+        // 2. 금액별 등급 판별
+        String newGrade = "BASIC";
+        if (totalAmount >= 1000000)      newGrade = "VVIP";
+        else if (totalAmount >= 500000)  newGrade = "VIP";
+        else if (totalAmount >= 300000)  newGrade = "GOLD";
+        else if (totalAmount >= 100000)  newGrade = "SILVER";
+
+        // 3. DB에 직접 반영
+        memberService.updateMemberGradeDirectly(memberNo, newGrade);
     }
     
     /**

@@ -26,4 +26,5 @@ public interface OrderItemMapper {
     
     void updateSingleOrderItemStatus(@Param("orderItemNo") Long orderItemNo, @Param("orderItemStatus") String orderItemStatus);
     
+    Long getOrderNoByItemNo(@Param("orderItemNo") Long orderItemNo);
 }

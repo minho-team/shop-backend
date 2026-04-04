@@ -20,7 +20,9 @@ public class MemberInfoResponseDTO {
 
 	private String gender;
 	private LocalDate birthday;
-
+	private Long totalSpent;
+	private String grade;
+	
 	// 일반 회원 / 카카오 회원 구분용
 	private String provider;
 }

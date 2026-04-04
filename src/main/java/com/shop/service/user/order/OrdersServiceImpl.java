@@ -1,11 +1,13 @@
 package com.shop.service.user.order;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.shop.domain.Member;
 import com.shop.domain.OrderItem;
 import com.shop.domain.Orders;
 import com.shop.dto.user.order.OrderCreateRequestDTO;
@@ -18,6 +20,7 @@ import com.shop.dto.user.order.OrderListRequest;
 import com.shop.dto.user.order.OrderResponseDTO;
 import com.shop.mapper.user.OrderItemMapper;
 import com.shop.mapper.user.OrdersMapper;
+import com.shop.mapper.user.ReviewMapper;
 import com.shop.service.user.member.MemberService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,9 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 public class OrdersServiceImpl implements OrdersService {
 
 	private final OrdersMapper mapper;
+	private final OrdersMapper ordersMapper;
 	private final OrderItemMapper orderItemMapper;
 	private final MemberService memberService;
-	private final com.shop.mapper.user.ReviewMapper reviewMapper;
+	private final ReviewMapper reviewMapper;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -55,13 +59,13 @@ public class OrdersServiceImpl implements OrdersService {
 
 			// 변경된 배송지 정보 및 금액 업데이트
 			orders.setReceiverName(request.getReceiverName());
-	        orders.setReceiverPhoneNumber(request.getReceiverPhoneNumber());
-	        orders.setReceiverZipCode(request.getReceiverZipCode());
-	        orders.setReceiverBaseAddress(request.getReceiverBaseAddress());
-	        orders.setReceiverDetailAddress(request.getReceiverDetailAddress());
-	        orders.setTotalPrice(request.getTotalPrice());
-	        orders.setMessage(request.getMessage());
-	        // DB에 업데이트
+			orders.setReceiverPhoneNumber(request.getReceiverPhoneNumber());
+			orders.setReceiverZipCode(request.getReceiverZipCode());
+			orders.setReceiverBaseAddress(request.getReceiverBaseAddress());
+			orders.setReceiverDetailAddress(request.getReceiverDetailAddress());
+			orders.setTotalPrice(request.getTotalPrice());
+			orders.setMessage(request.getMessage());
+			// DB에 업데이트
 			mapper.updateOrder(orders);
 
 		} else {
@@ -85,26 +89,29 @@ public class OrdersServiceImpl implements OrdersService {
 			// 신규 주문 INSERT (여기서 새 번호가 생성됨)
 			mapper.createOrder(orders);
 		}
+		if (memberNo != null) {
+			updateMemberGradeByAmount(memberNo); 
+		}
 
 		for (OrderItemCreateRequestDTO itemRequest : request.getItems()) {
-	        OrderItem orderItem = new OrderItem();
-	        orderItem.setOrderNo(orders.getOrderNo()); 
-	        orderItem.setProductOptionNo(itemRequest.getProductOptionNo());
-	        orderItem.setQuantity(itemRequest.getQuantity());
-	        orderItem.setUnitPrice(itemRequest.getUnitPrice());
-	        orderItem.setItemName(itemRequest.getItemName());
-	        orderItem.setItemSize(itemRequest.getItemSize());
-	        orderItem.setItemColor(itemRequest.getItemColor());
+			OrderItem orderItem = new OrderItem();
+			orderItem.setOrderNo(orders.getOrderNo());
+			orderItem.setProductOptionNo(itemRequest.getProductOptionNo());
+			orderItem.setQuantity(itemRequest.getQuantity());
+			orderItem.setUnitPrice(itemRequest.getUnitPrice());
+			orderItem.setItemName(itemRequest.getItemName());
+			orderItem.setItemSize(itemRequest.getItemSize());
+			orderItem.setItemColor(itemRequest.getItemColor());
 
-	        orderItemMapper.insertOrderItem(orderItem);
-	    }
+			orderItemMapper.insertOrderItem(orderItem);
+		}
 
-	    return new OrderCreateResponseDTO(orders.getOrderNo(), new Date(), orders.getTotalPrice());
+		return new OrderCreateResponseDTO(orders.getOrderNo(), new Date(), orders.getTotalPrice());
 	}
 
 	@Override
 	public OrderResponseDTO getMyOrderList(Long memberNo, OrderListRequest request) throws Exception {
-		
+
 		log.info("orders서비스의 getMyOrderList 진입 - 검색어: {}", request.getKeyword());
 
 		// [해결] 호출 대상을 'ordersMapper'에서 필드명인 'mapper'로 수정함
@@ -115,14 +122,14 @@ public class OrdersServiceImpl implements OrdersService {
 		List<OrderDTO> orderList = mapper.getMyOrderList(memberNo, request);
 
 		log.info("조회된 주문 건수: {}", orderList.size());
-		
+
 		if (orderList != null) {
-	        for (OrderDTO dto : orderList) {
-	            if (dto.getMainImageUrl() != null && !dto.getMainImageUrl().isBlank()) {
-	                dto.setMainImageUrl("/upload/" + dto.getMainImageUrl());
-	            }
-	        }
-	    }
+			for (OrderDTO dto : orderList) {
+				if (dto.getMainImageUrl() != null && !dto.getMainImageUrl().isBlank()) {
+					dto.setMainImageUrl("/upload/" + dto.getMainImageUrl());
+				}
+			}
+		}
 
 		// 3. 사용자님이 만드신 OrderResponseDTO 생성자를 호출하여 페이징 계산 및 반환
 		// 생성자 순서: (리스트, 전체개수, 현재페이지, 페이지당개수)
@@ -149,26 +156,61 @@ public class OrdersServiceImpl implements OrdersService {
 		return OrderDetailResponseDTO.builder().order(order).items(items).build();
 	}
 
-	@Override
-	@Transactional(rollbackFor = Exception.class) // [1] 트랜잭션 추가 (에러 발생 시 모두 취소)
-	public void createOrder(Orders orders) throws Exception { // [2] throws Exception 추가
+	private void updateMemberGradeByAmount(Long memberNo) throws Exception {
+	    // 로그 1: 파라미터 확인
+	    log.info("==> 등급 재계산 시작 - 회원번호: {}", memberNo);
+	    
+	    long totalAmount = ordersMapper.selectTotalPurchaseAmount(memberNo);
+	    
+	    // 로그 2: 쿼리 결과 확인
+	    log.info("==> DB 조회 결과(누적금액): {}원", totalAmount);
 
-		// 1. 먼저 주문을 DB에 저장합니다.
-		mapper.createOrder(orders);
+	    String newGrade = "BASIC";
+	    if (totalAmount >= 1000000)      newGrade = "VVIP";
+	    else if (totalAmount >= 500000)  newGrade = "VIP";
+	    else if (totalAmount >= 300000)  newGrade = "GOLD";
+	    else if (totalAmount >= 100000)  newGrade = "SILVER";
 
-		// 2. 저장된 orders 객체에서 memberNo를 꺼내옵니다.
-		Long memberNo = orders.getMemberNo();
-
-		if (memberNo != null) {
-			// 3. 구매 횟수 증가 및 등급 업데이트를 호출합니다.
-			memberService.increasePurchaseCount(memberNo);
-			memberService.updateMemberGrade(memberNo);
-
-			log.info("(OrdersServiceImpl) 주문 저장 완료 -> 회원 {}번 데이터 갱신", memberNo);
-		} else {
-			log.error("주문 정보에 memberNo가 없어 카운트를 올리지 못했습니다.");
-		}
+	    log.info("==> 판별된 등급: {}", newGrade);
+	    memberService.updateMemberGradeDirectly(memberNo, newGrade);
 	}
+
+	
+	/**
+	 * 관리자: 배송 완료 처리 (상향 트리거)
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void completeDelivery(Long orderNo) throws Exception {
+		Orders order = mapper.getOneOrder(orderNo);
+		mapper.updateOrderStatus(orderNo, "DELIVERED");
+
+		// 누적 금액 재계산 및 등급 업데이트
+		updateMemberGradeByAmount(order.getMemberNo());
+	}
+
+	/**
+	 * 관리자: 환불 완료 처리 (하향 트리거)
+	 */
+
+	@Override
+    @Transactional(rollbackFor = Exception.class)
+    public void completeRefund(Long orderItemNo) throws Exception {
+        // 1. 환불 상태 변경 및 리뷰 삭제
+        orderItemMapper.updateSingleOrderItemStatus(orderItemNo, "REFUNDED");
+        reviewMapper.deleteReviewByOrderItemNo(orderItemNo);
+
+        // 2. 환불된 상품이 속한 주문(Orders)의 정보 조회
+        Long orderNo = orderItemMapper.getOrderNoByItemNo(orderItemNo);
+        Orders order = mapper.getOneOrder(orderNo);
+
+        // 3. 주문 상태를 CANCELED로 변경하여 누적 금액(SUM)에서 제외
+        mapper.updateOrderStatus(orderNo, "CANCELED");
+
+        // 4. [핵심] 누적 금액 하락에 따른 등급 재계산 호출 (하향 조정)
+        updateMemberGradeByAmount(order.getMemberNo());
+
+        log.info("환불 완료 처리 및 회원({}) 등급 재산정 완료", order.getMemberNo());
+    }
 
 	@Override
 	public Orders getOneOrder(Long orderNo) {
@@ -183,40 +225,42 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void cancelOrder(Long orderNo) throws Exception {
-		// 1. 주문 정보 조회
 		Orders order = mapper.getOneOrder(orderNo);
 		if (order == null)
 			throw new Exception("주문 정보가 없습니다.");
 
-		// 2. 상태 검증
 		if (!"PENDING_PAYMENT".equals(order.getOrderStatus())) {
 			throw new Exception("결제대기 상태의 주문만 취소가 가능합니다.");
 		}
 
-		// 3. 주문 상태 변경
+		// 1. 상태 변경
 		mapper.updateOrderStatus(orderNo, "CANCELED");
-
-		// 4. 주문 아이템 상태 변경
 		orderItemMapper.updateOrderItemStatusByOrderNo(orderNo, "CANCELED");
 
-		// 5. 재고 복구 로직
+		// 2. 재고 복구
 		List<OrderItemDTO> items = orderItemMapper.selectOrderItemsByOrderNo(orderNo);
 		for (OrderItemDTO item : items) {
 			mapper.increaseProductStock(item.getProductOptionNo(), item.getQuantity());
 		}
+
+		// 3. 등급 재계산 (취소된 주문은 SUM에서 제외됨)
+		updateMemberGradeByAmount(order.getMemberNo());
 	}
 	
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public void completeRefund(Long orderItemNo) throws Exception {
-	    
-	    // 1. 해당 주문 상품의 상태를 '환불완료(REFUNDED)'로 변경
-	    orderItemMapper.updateSingleOrderItemStatus(orderItemNo, "REFUNDED");
-	    
-	    // 2. 해당 주문 상품 번호(orderItemNo)와 연결된 리뷰를 찾아 삭제
-	    reviewMapper.deleteReviewByOrderItemNo(orderItemNo);
-	    
-	    // ※ 참고: 필요한 경우 여기에 환불에 따른 재고 증가 로직(increaseProductStock)을 추가할 수 있습니다.
-	}
+	/**
+     * 도메인 객체(Orders)를 직접 전달받아 주문을 생성하고 등급을 갱신합니다.
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void createOrder(Orders orders) throws Exception {
+        // 1. 주문 기본 정보 DB 저장 (OrdersMapper 호출)
+        mapper.createOrder(orders);
+
+        // 2. 저장된 주문 정보를 바탕으로 누적 금액 기반 등급 갱신 호출
+        if (orders.getMemberNo() != null) {
+            updateMemberGradeByAmount(orders.getMemberNo());
+            log.info("(OrdersService) 도메인 기반 주문 저장 완료 -> 회원 {}번 등급 재산정 호출", orders.getMemberNo());
+        }
+    }
 
 }

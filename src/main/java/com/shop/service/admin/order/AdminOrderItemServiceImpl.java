@@ -4,11 +4,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
- 
+
 import com.shop.dto.admin.order.AdminOrderItemDetailResponseDTO;
 import com.shop.mapper.admin.AdminOrderItemMapper;
+import com.shop.mapper.user.OrdersMapper;
 import com.shop.service.user.member.MemberService;
- 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
  
@@ -19,6 +20,7 @@ public class AdminOrderItemServiceImpl implements AdminOrderItemService {
 
 	private final AdminOrderItemMapper adminOrderItemMapper;
 	private final MemberService memberService; 
+	private final OrdersMapper ordersMapper;
 
 	@Override
 	public List<AdminOrderItemDetailResponseDTO> getOrderItemList(Long orderNo) throws Exception {
@@ -33,47 +35,52 @@ public class AdminOrderItemServiceImpl implements AdminOrderItemService {
 
 		return list;
 	}
+	
 	// 주문상품 개별 상태 변경
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void updateOrderItemStatus(Long orderItemNo, String orderItemStatus) throws Exception {
- 
-		log.info("주문상품 상태 변경 - orderItemNo: {}, newStatus: {}", orderItemNo, orderItemStatus);
- 
-		// 1. 변경 전 현재 상태 조회 (중복 DELIVERED 방지)
-		String currentStatus = adminOrderItemMapper.getOrderItemStatus(orderItemNo);
-		log.info("현재 상태: {} → 변경할 상태: {}", currentStatus, orderItemStatus);
- 
-		// 2. 상태 업데이트
-		int updatedCount = adminOrderItemMapper.updateOrderItemStatus(orderItemNo, orderItemStatus);
-		if (updatedCount == 0) {
-			throw new RuntimeException("해당 주문상품이 없습니다.");
-		}
- 
-		// 3. DELIVERED 로 바뀌는 경우에만 purchaseCount 처리
-		if ("DELIVERED".equals(orderItemStatus)) {
-			if ("DELIVERED".equals(currentStatus)) {
-				log.warn("이미 DELIVERED 상태입니다. purchaseCount 증가 건너뜀 - orderItemNo: {}", orderItemNo);
-			} else {
-				Long memberNo = adminOrderItemMapper.getMemberNoByOrderItemNo(orderItemNo);
-				if (memberNo != null) {
-					memberService.increasePurchaseCount(memberNo);
-					log.info("purchaseCount +1, grade 갱신 완료 - 회원번호: {}, orderItemNo: {}", memberNo, orderItemNo);
-				} else {
-					log.warn("memberNo 조회 실패 - orderItemNo: {}", orderItemNo);
-				}
-			}
-		}
+	    log.info("주문상품 상태 변경 시작 - orderItemNo: {}, newStatus: {}", orderItemNo, orderItemStatus);
+
+	    // 1. 현재 상태 조회 삭제 (변수 미사용으로 인한 경고 해결)
+	    
+	    // 2. 상태 업데이트
+	    int updatedCount = adminOrderItemMapper.updateOrderItemStatus(orderItemNo, orderItemStatus);
+	    if (updatedCount == 0) throw new RuntimeException("해당 주문상품이 없습니다.");
+
+	    // 3. 등급 시스템 연동 (금액 기반이므로 중복 체크 없이 재계산 호출)
+	    if ("DELIVERED".equals(orderItemStatus) || "REFUNDED".equals(orderItemStatus) || "CANCELED".equals(orderItemStatus)) {
+	        Long memberNo = adminOrderItemMapper.getMemberNoByOrderItemNo(orderItemNo);
+	        if (memberNo != null) {
+	            updateGradeAfterStatusChange(memberNo);
+	        }
+	    }
+	    
+	    syncTotalOrderStatus(orderItemNo);
+	}
+	
+	// 상태 변경 후 등급을 재산정하는 프라이빗 메서드
+	private void updateGradeAfterStatusChange(Long memberNo) throws Exception {
+		// 1. 배송완료된 총 금액 조회 (Mapper 활용)
+		long totalAmount = ordersMapper.selectTotalPurchaseAmount(memberNo);
 		
-		// 4. 주문 전체 상태 자동 동기화 
+		// 2. 금액별 등급 판별
+		String newGrade = "BASIC";
+		if (totalAmount >= 1000000)      newGrade = "VVIP";
+		else if (totalAmount >= 500000)  newGrade = "VIP";
+		else if (totalAmount >= 300000)  newGrade = "GOLD";
+		else if (totalAmount >= 100000)  newGrade = "SILVER";
+
+		// 3. MemberService를 통해 DB 업데이트
+		memberService.updateMemberGradeDirectly(memberNo, newGrade);
+		log.info("[관리자 로직] 회원 {} 등급 갱신 완료: {} (누적금액: {})", memberNo, newGrade, totalAmount);
+	}
+	
+	private void syncTotalOrderStatus(Long orderItemNo) {
 		Long orderNo = adminOrderItemMapper.findOrderNoByOrderItemNo(orderItemNo);
-		if (orderNo == null) {
-			throw new RuntimeException("주문번호를 찾을 수 없습니다.");
-		}
 		List<String> orderItemStatuses = adminOrderItemMapper.findOrderItemStatusesByOrderNo(orderNo);
 		String calculatedOrderStatus = calculateOrderStatus(orderItemStatuses);
 		adminOrderItemMapper.updateOrderStatus(orderNo, calculatedOrderStatus);
-		log.info("주문 전체 상태 동기화 완료 - orderNo: {}, orderStatus: {}", orderNo, calculatedOrderStatus);
 	}
 
 	// 주문서의 아이템에 대해서 각자의 상태가 있기 때문에 이에 대한 order_state 동기화 정책이 필요함

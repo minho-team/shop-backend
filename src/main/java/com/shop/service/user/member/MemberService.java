@@ -20,11 +20,7 @@ public interface MemberService {
 
 	Member getOrCreateKakaoMember(Map<String, Object> kakaoUserInfo) throws Exception;
 
-	void updateMemberGrade(Long memberNo) throws Exception;
-
-	void increasePurchaseCount(Long memberNo) throws Exception;
-
-	void decreasePurchaseCount(Long memberNo) throws Exception;
+	void updateMemberGradeDirectly(Long memberNo, String grade) throws Exception;
 
 	void updateMemberInfo(Long memberNo, MemberUpdateRequestDTO request) throws Exception;
 

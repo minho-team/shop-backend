@@ -51,7 +51,11 @@ public interface MemberMapper {
 	int getPurchaseCount(@Param("memberNo") Long memberNo);
 
 	// 환불 신청 시, 사용자의 은행명, 계좌번호 업데이트
-	void updateBankInfo(Long memberNo, String bankName, String bankCode);
+	void updateBankInfo(
+		    @Param("memberNo") Long memberNo, 
+		    @Param("bankName") String bankName, 
+		    @Param("bankCode") String bankCode
+		);
 
 	// 본인 정보 수정
 	void updateMemberInfo(Member member) throws Exception;

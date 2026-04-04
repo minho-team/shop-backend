@@ -160,11 +160,32 @@
 		SELECT
 		oi.*,
 		po.product_no AS productNo,
-		pi.image_url AS imageUrl
+		pi.image_url AS
+		imageUrl
 		FROM order_item oi
-		INNER JOIN product_option po ON oi.product_option_no = po.product_option_no
-		LEFT JOIN product_img pi ON po.product_no = pi.product_no
+		INNER JOIN product_option po ON
+		oi.product_option_no = po.product_option_no
+		LEFT JOIN product_img pi ON
+		po.product_no = pi.product_no
 		AND pi.image_type = 'THUMB'
-		WHERE oi.order_no = #{orderNo}
+		WHERE
+		oi.order_no = #{orderNo}
 	</select>
+
+	<!-- 누적금액에 의한 회원등급 -->
+	<select id="selectTotalPurchaseAmount"
+		resultType="java.lang.Long">
+		SELECT NVL(SUM(total_price), 0)
+		FROM orders
+		WHERE member_no = #{memberNo}
+		AND UPPER(TRIM(order_status)) = 'DELIVERED'
+	</select>
+
+	<select id="getOrderNoByItemNo" resultType="long">
+		SELECT order_no
+		FROM
+		order_item
+		WHERE order_item_no = #{orderItemNo}
+	</select>
+
 </mapper>

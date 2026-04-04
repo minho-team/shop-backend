@@ -28,4 +28,6 @@ public interface AdminRefundMapper {
 
 	int updateOrderItemsStatusByRefundNo(@Param("refundNo") Long refundNo,
 			@Param("orderItemStatus") String orderItemStatus);
+	
+	void updateRefundHeaderTime(@Param("refundNo") Long refundNo, @Param("refundStatus") String refundStatus);
 }
