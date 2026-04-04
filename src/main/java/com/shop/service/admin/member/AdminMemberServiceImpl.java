@@ -218,22 +218,25 @@ public class AdminMemberServiceImpl implements AdminMemberService {
         return adminMemberMapper.selectCouponUsageHistory(memberNo);
     }
 
-    // 전체 활성 회원에게 쿠폰 일괄 지급
-    // insertMemberCouponIfNotExists: 이미 동일 쿠폰 보유한 회원은 스킵하여 중복 오류 방지
+    // ① 전체 지급 로직
+    // 1. 활성 회원 번호 전체 조회
+    // 2. 반복문으로 각 회원에게 MemberCoupon 객체 생성
+    // 3. endAt = now.plusDays(validDays) 로 유효기간 자동 계산
+    // 4. insertMemberCouponIfNotExists() 로 중복 방지
     @Override
     public void issueCouponToAll(Long couponNo, int validDays) throws Exception {
-        List<Long> memberNos = adminMemberMapper.selectAllActiveMemberNos();
+        List<Long> memberNos = adminMemberMapper.selectAllActiveMemberNos(); // 1
         LocalDateTime now = LocalDateTime.now();
-        for (Long memberNo : memberNos) {
+        for (Long memberNo : memberNos) {                                    // 2
             MemberCoupon mc = MemberCoupon.builder()
                     .memberNo(memberNo)
                     .couponNo(couponNo)
                     .usedYn("N")
                     .issuedAt(now)
                     .startAt(now)
-                    .endAt(now.plusDays(validDays))
+                    .endAt(now.plusDays(validDays))                          // 3
                     .build();
-            adminMemberMapper.insertMemberCouponIfNotExists(mc);
+            adminMemberMapper.insertMemberCouponIfNotExists(mc);             // 4
         }
     }
 
