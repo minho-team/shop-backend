@@ -15,7 +15,9 @@ public class OrderItem {
     private Long productOptionNo; 
     
     private Integer quantity;         
-    private Long unitPrice;      
+    private Long unitPrice;
+    // 주문상품에 배분된 쿠폰 할인금액
+    private Long couponDiscountAmount;
     
     private String itemName;      
     private String itemSize;     

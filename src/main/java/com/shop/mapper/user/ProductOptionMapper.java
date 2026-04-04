@@ -1,6 +1,7 @@
 package com.shop.mapper.user;
 
 import java.util.List;
+import java.util.Map;
 
 import com.shop.domain.ProductOption;
 
@@ -10,4 +11,6 @@ public interface ProductOptionMapper {
 	void insertSeedOption(ProductOption productOption);
 
 	List<ProductOption> getOptionsByProductNo(Long productNo) throws Exception;
+
+	Map<String, Object> selectPaymentValidationItem(Long productOptionNo);
 }

@@ -36,4 +36,25 @@
 		FROM product_option
 		WHERE product_no = #{productNo}
 	</select>
+
+	<select id="selectPaymentValidationItem" parameterType="long"
+		resultType="map">
+		SELECT
+			po.product_option_no AS "productOptionNo",
+			p.product_no AS "productNo",
+			p.name AS "productName",
+			po.option_size AS "optionSize",
+			po.color AS "color",
+			CASE
+				WHEN NVL(p.discount_rate, 0) > 0 THEN TRUNC((p.price * (100 - p.discount_rate) / 100) / 100) * 100
+				ELSE p.price
+			END AS "salePrice",
+			p.use_yn AS "productUseYn",
+			po.use_yn AS "optionUseYn",
+			po.stock AS "stock"
+		FROM product_option po
+		JOIN product p
+		  ON po.product_no = p.product_no
+		WHERE po.product_option_no = #{productOptionNo}
+	</select>
 </mapper>
