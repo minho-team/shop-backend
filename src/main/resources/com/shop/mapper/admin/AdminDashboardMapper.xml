@@ -27,7 +27,7 @@
         	  ON r.refund_no = ri.refund_no
         WHERE r.refund_status IN ('APPROVED', 'COMPLETED')
           AND r.approved_at >= TRUNC(SYSDATE, 'MM')
-  		  AND r.approved_at < ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1);
+  		  AND r.approved_at < ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
   	]]>
     </select>
 
