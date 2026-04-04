@@ -29,6 +29,10 @@
 		#{receiverZipCode},
 		receiver_base_address = #{receiverBaseAddress},
 		receiver_detail_address = #{receiverDetailAddress},
+		<!-- 쿠폰 할인 전 총주문금액 저장 -->
+		order_amount = #{orderAmount},
+		<!-- 실제 쿠폰 할인금액 저장 -->
+		coupon_discount_amount = #{couponDiscountAmount},
 		total_price =
 		#{totalPrice},
 		message = #{message}
@@ -79,23 +83,25 @@
 	</sql>
 
 	<!-- 주문 생성 -->
-	<insert id="createOrder" parameterType="com.shop.domain.Orders">
+		<insert id="createOrder" parameterType="com.shop.domain.Orders">
 		<selectKey keyProperty="orderNo" resultType="long"
 			order="BEFORE">
 			SELECT seq_orders.NEXTVAL FROM dual
 		</selectKey>
+		<!-- 주문 생성 시 할인 전 금액, 할인금액, 최종 결제금액을 함께 저장 -->
 		INSERT INTO orders (order_no, member_no, orderer_name,
-		orderer_phone_number, orderer_email, order_status, total_price,
-		created_at, paid_at, receiver_name, receiver_phone_number,
-		receiver_zip_code, receiver_base_address, receiver_detail_address,
-		message)
+			orderer_phone_number, orderer_email, order_status, order_amount,
+			coupon_discount_amount, total_price, created_at, paid_at,
+			receiver_name, receiver_phone_number, receiver_zip_code,
+			receiver_base_address, receiver_detail_address, message)
 		VALUES (#{orderNo}, #{memberNo}, #{ordererName},
-		#{ordererPhoneNumber},
-		#{ordererEmail}, #{orderStatus}, #{totalPrice},
-		SYSTIMESTAMP,
-		SYSTIMESTAMP, #{receiverName}, #{receiverPhoneNumber},
-		#{receiverZipCode}, #{receiverBaseAddress}, #{receiverDetailAddress},
-		#{message})
+			#{ordererPhoneNumber},
+			#{ordererEmail}, #{orderStatus}, #{orderAmount},
+			#{couponDiscountAmount}, #{totalPrice},
+			SYSTIMESTAMP,
+			SYSTIMESTAMP, #{receiverName}, #{receiverPhoneNumber},
+			#{receiverZipCode}, #{receiverBaseAddress}, #{receiverDetailAddress},
+			#{message})
 	</insert>
 
 	<!-- 특정 회원 전체 주문 조회 -->

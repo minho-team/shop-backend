@@ -67,12 +67,14 @@
 
     <!-- 오늘 매출 -->
     <select id="getTodaySales" resultType="long">
-        SELECT NVL(SUM(total_price), 0)
-        FROM orders
-        WHERE created_at &gt;= TRUNC(SYSDATE)
-          AND created_at &lt; TRUNC(SYSDATE) + 1
-          AND order_status != 'CANCELED'
-    </select>
+    <![CDATA[
+	    SELECT NVL(SUM(payment_amount), 0)
+	    FROM payment
+	    WHERE payment_status = 'COMPLETED'
+	      AND approved_at >= TRUNC(SYSDATE)
+	      AND approved_at < TRUNC(SYSDATE) + 1
+	]]>
+	</select>
 
     <!-- 오늘 신규 회원 수 -->
     <select id="getNewMemberCount" resultType="int">
@@ -104,51 +106,58 @@
 
     <!-- 최근 7일 매출 차트 -->
     <select id="getSalesChartList" resultType="com.shop.dto.admin.dashboard.AdminDashboardSalesChartDTO">
-        SELECT
-            TO_CHAR(order_date, 'MM-DD') AS label,
-            NVL(sales, 0) AS sales
-        FROM (
-            SELECT TRUNC(SYSDATE) - LEVEL + 1 AS order_date
-            FROM dual
-            CONNECT BY LEVEL &lt;= 7
-        ) d
-        LEFT JOIN (
-            SELECT
-                TRUNC(o.created_at) AS created_date,
-                NVL(SUM(o.total_price), 0) AS sales
-            FROM orders o
-            WHERE o.created_at &gt;= TRUNC(SYSDATE) - 6
-              AND o.created_at &lt; TRUNC(SYSDATE) + 1
-              AND o.order_status != 'CANCELED'
-            GROUP BY TRUNC(o.created_at)
-        ) s
-          ON d.order_date = s.created_date
-        ORDER BY d.order_date
-    </select>
+    <![CDATA[
+	    SELECT
+	        TO_CHAR(order_date, 'MM-DD') AS label,
+	        NVL(sales, 0) AS sales
+	    FROM (
+	        SELECT TRUNC(SYSDATE) - LEVEL + 1 AS order_date
+	        FROM dual
+	        CONNECT BY LEVEL <= 7
+	    ) d
+	    LEFT JOIN (
+	        SELECT
+	            TRUNC(p.approved_at) AS approved_date,
+	            NVL(SUM(p.payment_amount), 0) AS sales
+	        FROM payment p
+	        WHERE p.payment_status = 'COMPLETED'
+	          AND p.approved_at >= TRUNC(SYSDATE) - 6
+	          AND p.approved_at < TRUNC(SYSDATE) + 1
+	        GROUP BY TRUNC(p.approved_at)
+	    ) s
+	      ON d.order_date = s.approved_date
+	    ORDER BY d.order_date
+	   ]]>
+	</select>
+	
+
 
     <!-- 많이 팔린 상품 TOP 5 -->
     <select id="getTopProductList" resultType="com.shop.dto.admin.dashboard.AdminDashboardTopProductDTO">
-        SELECT *
-        FROM (
-            SELECT
-                ROW_NUMBER() OVER (
-                    ORDER BY SUM(oi.quantity) DESC, p.product_no DESC
-                ) AS product_rank,
-                p.product_no,
-                p.name,
-                SUM(oi.quantity) AS total_sales_count
-            FROM order_item oi
-            JOIN orders o
-              ON oi.order_no = o.order_no
-            JOIN product_option po
-              ON oi.product_option_no = po.product_option_no
-            JOIN product p
-              ON po.product_no = p.product_no
-            WHERE o.order_status != 'CANCELED'
-            GROUP BY p.product_no, p.name
-        )
-        WHERE product_rank &lt;= 5
-    </select>
+    		<![CDATA[
+	    SELECT *
+	    FROM (
+	        SELECT
+	            ROW_NUMBER() OVER (
+	                ORDER BY SUM(oi.quantity) DESC, p.product_no DESC
+	            ) AS rank,
+	            p.product_no AS productNo,
+	            p.name AS productName,
+	            SUM(oi.quantity) AS totalSoldQuantity
+	        FROM order_item oi
+	        JOIN orders o
+	          ON oi.order_no = o.order_no
+	        JOIN product_option po
+	          ON oi.product_option_no = po.product_option_no
+	        JOIN product p
+	          ON po.product_no = p.product_no
+	        WHERE o.order_status != 'CANCELED'
+	        GROUP BY p.product_no, p.name
+	    )
+	    WHERE rank <= 5
+	    ]]>
+	</select>
+
 
     <!-- 최근 주문 5건 -->
     <select id="getRecentOrderList" resultType="com.shop.dto.admin.dashboard.AdminDashboardRecentOrderDTO">

@@ -18,6 +18,8 @@
 		payment_method,
 		payment_status,
 		payment_amount,
+		<!-- 결제 이력용 쿠폰 할인금액 -->
+		discount_amount,
 		pg_provider,
 		created_at
 		) VALUES (
@@ -27,6 +29,7 @@
 		#{paymentMethod},
 		#{paymentStatus},
 		#{paymentAmount},
+		#{discountAmount},
 		#{pgProvider},
 		SYSTIMESTAMP
 		)

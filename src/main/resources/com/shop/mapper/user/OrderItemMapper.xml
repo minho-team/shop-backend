@@ -9,6 +9,8 @@
 		<result property="productOptionNo" column="product_option_no" />
 		<result property="quantity" column="quantity" />
 		<result property="unitPrice" column="unit_price" />
+		<!-- 주문상품에 배분된 쿠폰 할인금액 -->
+		<result property="couponDiscountAmount" column="coupon_discount_amount" />
 		<result property="itemName" column="item_name" />
 		<result property="itemSize" column="item_size" />
 		<result property="itemColor" column="item_color" />
@@ -23,6 +25,7 @@
 		product_option_no,
 		quantity,
 		unit_price,
+		coupon_discount_amount,
 		item_name,
 		item_size,
 		item_color
@@ -45,6 +48,7 @@
 		item_color as itemColor,
 		quantity,
 		unit_price as unitPrice,
+		coupon_discount_amount as couponDiscountAmount,
 		order_item_status as orderItemStatus
 		FROM order_item
 		WHERE order_no =
@@ -73,6 +77,7 @@
 		product_option_no,
 		quantity,
 		unit_price,
+		coupon_discount_amount,
 		item_name,
 		item_size,
 		item_color
@@ -83,6 +88,7 @@
 		#{productOptionNo},
 		#{quantity},
 		#{unitPrice},
+		#{couponDiscountAmount},
 		#{itemName},
 		#{itemSize},
 		#{itemColor}

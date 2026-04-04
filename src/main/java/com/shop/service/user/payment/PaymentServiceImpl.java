@@ -2,6 +2,7 @@ package com.shop.service.user.payment;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +34,7 @@ import com.shop.mapper.user.MemberMapper;
 import com.shop.mapper.user.OrderItemMapper;
 import com.shop.mapper.user.OrdersMapper;
 import com.shop.mapper.user.PaymentMapper;
+import com.shop.mapper.user.ProductOptionMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +49,7 @@ public class PaymentServiceImpl implements PaymentService {
 	private final OrderItemMapper orderItemMapper;
 	private final PaymentMapper paymentMapper;
 	private final CartItemMapper cartItemMapper;
+	private final ProductOptionMapper productOptionMapper;
 	private final AdminMemberMapper adminMemberMapper;
 	private final RestTemplate restTemplate;
 	
@@ -72,8 +75,33 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 
 		long recalculatedTotal = 0L;
+		List<Long> validatedUnitPrices = new ArrayList<>();
 		for (PaymentPrepareItemDTO item : request.getItems()) {
-			recalculatedTotal += (long) item.getQuantity() * item.getUnitPrice();
+			Map<String, Object> validationItem = productOptionMapper.selectPaymentValidationItem(item.getProductOptionNo());
+			if (validationItem == null) {
+				throw new IllegalArgumentException("유효하지 않은 상품 옵션입니다.");
+			}
+
+			String productUseYn = String.valueOf(validationItem.get("productUseYn"));
+			String optionUseYn = String.valueOf(validationItem.get("optionUseYn"));
+			long stock = Long.parseLong(String.valueOf(validationItem.get("stock")));
+			long actualUnitPrice = Long.parseLong(String.valueOf(validationItem.get("salePrice")));
+
+			if (!"Y".equals(productUseYn) || !"Y".equals(optionUseYn)) {
+				throw new IllegalArgumentException("판매 중이 아닌 상품이 포함되어 있습니다.");
+			}
+
+			if (stock < item.getQuantity()) {
+				throw new IllegalArgumentException("재고가 부족한 상품이 포함되어 있습니다.");
+			}
+
+			// 프론트가 보낸 주문상품 단가와 서버가 계산한 실제 판매가를 교차검증
+			if (!Objects.equals(actualUnitPrice, item.getUnitPrice())) {
+				throw new IllegalArgumentException("주문 상품 금액이 올바르지 않습니다.");
+			}
+
+			validatedUnitPrices.add(actualUnitPrice);
+			recalculatedTotal += (long) item.getQuantity() * actualUnitPrice;
 		}
 
 		// 쿠폰 할인 계산
@@ -120,6 +148,9 @@ public class PaymentServiceImpl implements PaymentService {
 			order.setOrdererName(request.getOrdererName());
 			order.setOrdererPhoneNumber(request.getOrdererPhoneNumber());
 			order.setOrdererEmail(request.getOrdererEmail());
+			// 할인 전 주문금액과 실제 쿠폰 할인금액을 함께 저장
+			order.setOrderAmount(recalculatedTotal);
+			order.setCouponDiscountAmount(discountAmount);
 			order.setTotalPrice(finalPrice);
 			order.setReceiverName(request.getReceiverName());
 			order.setReceiverPhoneNumber(request.getReceiverPhoneNumber());
@@ -139,6 +170,9 @@ public class PaymentServiceImpl implements PaymentService {
 			order.setOrdererPhoneNumber(request.getOrdererPhoneNumber());
 			order.setOrdererEmail(request.getOrdererEmail());
 			order.setOrderStatus("PENDING_PAYMENT");
+			// 신규 주문도 동일한 금액 정책으로 저장
+			order.setOrderAmount(recalculatedTotal);
+			order.setCouponDiscountAmount(discountAmount);
 			order.setTotalPrice(finalPrice);
 			order.setReceiverName(request.getReceiverName());
 			order.setReceiverPhoneNumber(request.getReceiverPhoneNumber());
@@ -155,12 +189,34 @@ public class PaymentServiceImpl implements PaymentService {
 		String pgOrderId = "ORDER_" + order.getOrderNo() + "_" + System.currentTimeMillis();
 		ordersMapper.updatePgOrderId(order.getOrderNo(), pgOrderId);
 
-		for (PaymentPrepareItemDTO dto : request.getItems()) {
+		long remainingDiscount = discountAmount;
+
+		for (int i = 0; i < request.getItems().size(); i++) {
+			PaymentPrepareItemDTO dto = request.getItems().get(i);
+			long actualUnitPrice = validatedUnitPrices.get(i);
+			// 현재 주문상품의 금액 = 주문 시점 단가 * 수량
+			long itemAmount = (long) dto.getQuantity() * actualUnitPrice;
+			long allocatedDiscount;
+
+			// 할인금액이 없거나 총 주문금액이 0원이면 상품별 배분 할인금액도 0원으로 처리
+			if (discountAmount <= 0L || recalculatedTotal <= 0L) {
+				allocatedDiscount = 0L;
+			// 마지막 상품은 남은 할인금액 전부를 배분하여 정수 나눗셈 오차를 보정
+			} else if (i == request.getItems().size() - 1) {
+				allocatedDiscount = remainingDiscount;
+			} else {
+				// 주문 전체 금액 대비 현재 상품 금액 비율만큼 쿠폰 할인금액을 배분
+				allocatedDiscount = (discountAmount * itemAmount) / recalculatedTotal;
+				remainingDiscount -= allocatedDiscount;
+			}
+
 			OrderItem orderItem = new OrderItem();
 			orderItem.setOrderNo(order.getOrderNo()); // 기존 주문 번호 유지
 			orderItem.setProductOptionNo(dto.getProductOptionNo());
 			orderItem.setQuantity(dto.getQuantity());
-			orderItem.setUnitPrice(dto.getUnitPrice());
+			orderItem.setUnitPrice(actualUnitPrice);
+			// 환불/정산 시 사용할 주문상품별 쿠폰 배분 할인금액 저장
+			orderItem.setCouponDiscountAmount(allocatedDiscount);
 			orderItem.setItemName(dto.getItemName());
 			orderItem.setItemSize(dto.getItemSize());
 			orderItem.setItemColor(dto.getItemColor());
@@ -174,7 +230,10 @@ public class PaymentServiceImpl implements PaymentService {
 		payment.setMemberNo(member.getMemberNo());
 		payment.setPaymentMethod("CARD");
 		payment.setPaymentStatus("READY");
-		payment.setPaymentAmount(recalculatedTotal);
+		// 결제 이력은 최종 결제금액 기준으로 저장
+		payment.setPaymentAmount(finalPrice);
+		// 결제 시 반영된 쿠폰 할인금액 저장
+		payment.setDiscountAmount(discountAmount);
 		payment.setPgProvider("TOSS");
 		paymentMapper.insertReadyPayment(payment);
 

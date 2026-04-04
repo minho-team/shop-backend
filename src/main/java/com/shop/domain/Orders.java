@@ -11,6 +11,11 @@ public class Orders {
 	private String ordererPhoneNumber;
 	private String ordererEmail;
 	private String orderStatus;
+	// 쿠폰 할인 적용 전 총주문금액
+	private Long orderAmount;
+	// 실제 적용된 쿠폰 할인금액
+	private Long couponDiscountAmount;
+	// 최종 결제금액
 	private Long totalPrice;
 	private LocalDateTime createdAt;
 	private LocalDateTime paidAt;
