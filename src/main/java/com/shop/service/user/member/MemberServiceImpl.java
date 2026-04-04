@@ -39,13 +39,15 @@ public class MemberServiceImpl implements MemberService {
 	        member.setTotalSpent(totalSpent);
 	        
 	        // 2. 누적 금액에 따른 새로운 등급 결정 (New Grade Calculation)
-	        String newGrade = "GENERAL"; // 기본 등급
+	        String newGrade = "BASIC"; // 기본 등급
 	        if (totalSpent >= 1000000) {
 	            newGrade = "VVIP";
 	        } else if (totalSpent >= 500000) {
 	            newGrade = "VIP";
 	        } else if (totalSpent >= 300000) {
 	            newGrade = "GOLD";
+	        }else if (totalSpent >= 150000) {
+	            newGrade = "SILVER";
 	        }
 
 	        // 3. 현재 DB 등급과 계산된 등급이 다를 경우에만 DB 업데이트
