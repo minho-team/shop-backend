@@ -30,6 +30,12 @@ public interface OrderItemMapper {
     void updateSingleOrderItemStatus(@Param("orderItemNo") Long orderItemNo, @Param("orderItemStatus") String orderItemStatus);
     
     Long getOrderNoByItemNo(@Param("orderItemNo") Long orderItemNo);
+    
+    // orderItemNo로 productOptionNo 가져오기
+    Long getProductOptionNoByOrderItemNo(Long orderItemNo) throws Exception;
+
+    // 결제 시 재고 차감하기
+	void deductStock(Long productOptionNo, Integer quantity);
 
 }
 

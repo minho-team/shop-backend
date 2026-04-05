@@ -210,6 +210,9 @@ public class PaymentServiceImpl implements PaymentService {
 				remainingDiscount -= allocatedDiscount;
 			}
 
+			Long productOptionNo = dto.getProductOptionNo();
+			Integer quantity = dto.getQuantity();
+			
 			OrderItem orderItem = new OrderItem();
 			orderItem.setOrderNo(order.getOrderNo()); // 기존 주문 번호 유지
 			orderItem.setProductOptionNo(dto.getProductOptionNo());
@@ -222,6 +225,8 @@ public class PaymentServiceImpl implements PaymentService {
 			orderItem.setItemColor(dto.getItemColor());
 			orderItem.setImageUrl(dto.getImageUrl());
 			orderItem.setOrderItemStatus("PENDING_PAYMENT");
+			
+			orderItemMapper.deductStock(productOptionNo,quantity);
 			orderItemMapper.insertOrderItem(orderItem);
 		}
 
@@ -296,9 +301,12 @@ public class PaymentServiceImpl implements PaymentService {
 
 		String paymentKey = String.valueOf(result.get("paymentKey"));
 
+		//payment의 status completed로 변경
 		paymentMapper.completePayment(order.getOrderNo(), paymentKey, paymentKey);
 		
+		//orders의 status를 PAYMENT_COMPLETED로 변경
 		ordersMapper.updateOrderStatus(order.getOrderNo(), "PAYMENT_COMPLETED");
+		//order_item의 status를 PAYMENT_COMPLETED로 변경
 		orderItemMapper.updateOrderItemStatusByOrderNo(order.getOrderNo(), "PAYMENT_COMPLETED");
 
 		// 쿠폰 사용 처리 (결제 확정 시 member_coupon.used_yn = 'Y')

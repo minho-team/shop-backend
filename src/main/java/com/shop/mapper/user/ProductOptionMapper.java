@@ -13,4 +13,7 @@ public interface ProductOptionMapper {
 	List<ProductOption> getOptionsByProductNo(Long productNo) throws Exception;
 
 	Map<String, Object> selectPaymentValidationItem(Long productOptionNo);
+
+	//환불 중 재고를 환불수량에 맞게 + 시키는 함수
+	void updateQuantityWhileRefunding(Long productOptionNo, Long refundQuantity);
 }

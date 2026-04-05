@@ -38,29 +38,29 @@ public class SecurityConfig {
 	        		
 	        		//사용자
 	        		.requestMatchers("/api/auth/**").permitAll()
-	        		.requestMatchers("/api/cart/**").permitAll()
-	        		.requestMatchers("/api/cart/item/**").permitAll()
+	        		.requestMatchers("/api/cart/**").hasRole("USER")
+	        		.requestMatchers("/api/cart/item/**").hasRole("USER")
 	        		.requestMatchers("/api/category/**").permitAll()
-	        		.requestMatchers("/api/comment/**").permitAll()
+	        		.requestMatchers("/api/comment/**").hasRole("USER")
 	        		.requestMatchers("/api/faq/**").permitAll()
-	            .requestMatchers("/api/inquiry/**").permitAll()
+	            .requestMatchers("/api/inquiry/**").hasRole("USER")
 	            .requestMatchers("/api/member/**").permitAll()
-	            .requestMatchers("/api/orders/**").permitAll()
-	            .requestMatchers("/api/orders/item/**").permitAll()
-	            .requestMatchers("/api/payment/**").permitAll()
+	            .requestMatchers("/api/orders/**").hasRole("USER")
+	            .requestMatchers("/api/orders/item/**").hasRole("USER")
+	            .requestMatchers("/api/payment/**").hasRole("USER")
 	            .requestMatchers("/api/product/**").permitAll()
 	            .requestMatchers("/api/product/image/**").permitAll()
 	            .requestMatchers("/api/product/option/**").permitAll()
-	            .requestMatchers("/api/refund/**").permitAll()
-	            .requestMatchers("/api/reviews/**").permitAll()
-	            .requestMatchers("/api/roulette/**").permitAll()
-	            .requestMatchers("/api/wishlist/**").permitAll()
+	            .requestMatchers("/api/refund/**").hasRole("USER")
+	            .requestMatchers("/api/reviews/**").hasRole("USER")
+	            .requestMatchers("/api/roulette/**").hasRole("USER")
+	            .requestMatchers("/api/wishlist/**").hasRole("USER")
 	            
 	            .requestMatchers("/upload/**").permitAll()
 	            
 	            // 관리자.hasRole("ADMIN") authenticated()
-	            .requestMatchers("/api/admin/**").permitAll()
-	            .anyRequest().permitAll()
+	            .requestMatchers("/api/admin/**").hasRole("ADMIN")
+	            .anyRequest().authenticated()
 	        );
 	    http.addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
 	    return http.build();

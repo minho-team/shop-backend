@@ -161,4 +161,18 @@
 		SET order_item_status = #{orderItemStatus}
 		WHERE order_item_no = #{orderItemNo}
 	</update>
+	
+	<!-- orderItemNo로 productOptionNo 가져오기 -->
+	<select id="getProductOptionNoByOrderItemNo">
+		select product_option_no from order_item where order_item_no = #{orderItemNo}
+	</select>
+	
+	<update id="deductStock">
+		update product_option set stock = stock - #{quantity} where product_option_no = #{productOptionNo}
+	</update>
+	
+	
+	
+	
+	
 </mapper>
