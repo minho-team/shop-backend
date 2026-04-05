@@ -25,7 +25,8 @@
 	</insert>
 
 	<select id="getCurrentRefundNo" resultType="long">
-		SELECT seq_refund.CURRVAL
+		SELECT
+		seq_refund.CURRVAL
 		FROM dual
 	</select>
 
@@ -52,77 +53,97 @@
 
 	<update id="updateRefundTotalAmount">
 		UPDATE refund
-		SET total_refund_amount = #{totalRefundAmount}
+		SET total_refund_amount =
+		#{totalRefundAmount}
 		WHERE refund_no = #{refundNo}
 	</update>
 
 	<!-- 해당 orderItemNo에 대해서 환불 수량 + 해주기 -->
 	<update id="increaseRefundedQuantity">
 		UPDATE order_item
-		SET refunded_quantity = refunded_quantity + #{refundQuantity}
-		WHERE order_item_no = #{orderItemNo}
+		SET refunded_quantity =
+		refunded_quantity + #{refundQuantity}
+		WHERE order_item_no =
+		#{orderItemNo}
 	</update>
 
 	<update id="updateOrderItemStatus">
 		UPDATE order_item
-		SET order_item_status = #{orderItemStatus}
+		SET order_item_status =
+		#{orderItemStatus}
 		WHERE order_item_no = #{orderItemNo}
 	</update>
 
 	<select id="findOrderItemStatusesByOrderNo" resultType="string">
-		SELECT order_item_status
+		SELECT
+		order_item_status
 		FROM order_item
 		WHERE order_no = #{orderNo}
-		ORDER BY order_item_no ASC
+		ORDER BY
+		order_item_no ASC
 	</select>
 
 	<update id="updateOrderStatus">
 		UPDATE orders
 		SET order_status = #{orderStatus}
-		WHERE order_no = #{orderNo}
+		WHERE
+		order_no = #{orderNo}
 	</update>
 
 	<!-- refundNo로 orderNo 가져오기 -->
 	<select id="getOrderNoByRefundNo">
-		select order_no from refund where refund_no = #{refundNo}
+		select order_no from refund where refund_no =
+		#{refundNo}
 	</select>
-	
+
 	<!-- refund 테이블의 상태 변경 -->
-	<update id ="updateRefundStatus">
-		update refund set refund_status = #{status} where refund_no =#{refundNo}
+	<update id="updateRefundStatus">
+		update refund set refund_status = #{status} where
+		refund_no =#{refundNo}
 	</update>
-	
+
 	<!-- refund_item 테이블의 상태 변경 -->
-	<update id ="updateRefundItemStatus">
-		update refund_item set refund_status = #{status} where refund_no =#{refundNo}
+	<update id="updateRefundItemStatus">
+		update refund_item set refund_status = #{status}
+		where refund_no =#{refundNo}
 	</update>
-	
+
 	<!-- refundNo로 환불 금액 db에서 가져오기 -->
-	<select id ="getRefundAmountByRefundNo">
-		select total_refund_amount from refund where refund_no = #{refundNo}
+	<select id="getRefundAmountByRefundNo">
+		select total_refund_amount from refund where
+		refund_no = #{refundNo}
 	</select>
-	
+
 	<!-- refundNo로 환불 승인 시각 기록 -->
 	<update id="updateApprovedAt">
-		update refund set approved_at = SYSTIMESTAMP where refund_no =#{refundNo}
+		update refund set approved_at = SYSTIMESTAMP where
+		refund_no =#{refundNo}
 	</update>
-	
+
 	<!-- refundNo로 환불 완료 시각 기록 -->
 	<update id="updateCompletedAt">
-		update refund set completed_at = SYSTIMESTAMP where refund_no =#{refundNo}
+		update refund set completed_at = SYSTIMESTAMP where
+		refund_no =#{refundNo}
 	</update>
-	
+
 	<!-- refundNo로 환불 거절 시각 기록 -->
 	<update id="updateRejectedAt">
-		update refund set rejected_at = SYSTIMESTAMP where refund_no =#{refundNo}
+		update refund set rejected_at = SYSTIMESTAMP where
+		refund_no =#{refundNo}
 	</update>
-	
+
 	<!-- refundNo로 order_item_no 가져오기 -->
-	<select id ="getOrderItemNoByRefundNo">
-		select order_item_no from refund_item where refund_no = #{refundNo}
+	<select id="getOrderItemNoByRefundNo">
+		select order_item_no from refund_item where refund_no
+		= #{refundNo}
 	</select>
 	
-	
+	<!-- refundNo 로 refund_item에서 환불 수량 가져오기 -->
+	<select id="getRefundQuantityByRefundNo">
+		select REFUND_QUANTITY from refund_item where refund_no = #{refundNo}
+	</select>
+
+
 
 
 </mapper>	

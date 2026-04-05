@@ -161,4 +161,14 @@
 		SET order_item_status = #{orderItemStatus}
 		WHERE order_item_no = #{orderItemNo}
 	</update>
+	
+	
+	<select id="getProductOptionNoByOrderItemNo">
+		select product_option_no from order_item where order_item_no = #{orderItemNo}
+	</select>
+	
+	
+	
+	
+	
 </mapper>

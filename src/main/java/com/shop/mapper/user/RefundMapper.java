@@ -47,4 +47,7 @@ public interface RefundMapper {
 
 	//refundNo로 order_item_no 가져오기
 	Long getOrderItemNoByRefundNo(Long refundNo) throws Exception;
+
+	//refundNo로 refund_item의 수량 가져오기
+	Long getRefundQuantityByRefundNo(Long refundNo) throws Exception;
 }

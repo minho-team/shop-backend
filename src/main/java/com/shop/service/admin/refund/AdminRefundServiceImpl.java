@@ -29,6 +29,7 @@ import com.shop.mapper.admin.AdminRefundMapper;
 import com.shop.mapper.user.OrderItemMapper;
 import com.shop.mapper.user.OrdersMapper;
 import com.shop.mapper.user.PaymentMapper;
+import com.shop.mapper.user.ProductOptionMapper;
 import com.shop.mapper.user.RefundMapper;
 import com.shop.mapper.user.ReviewMapper;
 import com.shop.service.user.member.MemberService;
@@ -53,6 +54,7 @@ public class AdminRefundServiceImpl implements AdminRefundService {
 	private final OrderItemMapper orderItemMapper;
 	private final RestTemplate restTemplate;
 	private final PaymentMapper paymentMapper;
+	private final ProductOptionMapper productOptionMapper;
 
 	
 	@Value("${toss.secret-key}")
@@ -182,16 +184,21 @@ public class AdminRefundServiceImpl implements AdminRefundService {
 		//refundNo로 orderNo 가져오기
 		Long orderNo = refundMapper.getOrderNoByRefundNo(refundNo);
 		
+		//주문 식별자 가져오기
 		String paymentKey =  paymentMapper.getPaymentKeyByOrderNo(orderNo);
 		log.info("paymentKey:" + paymentKey);
+		
 		//db에서 환불 금액 조회
 		Long refundAmount = refundMapper.getRefundAmountByRefundNo(refundNo);
+		
+		//db에서 환불 수량 조회
+		Long refundQuantity = refundMapper.getRefundQuantityByRefundNo(refundNo);
 		log.info("refundAmount:" + refundAmount);
 		
 		//환불하려는 아이템의 order_item_no를 가져와야하는데, refundNo로 가져오면 됨
 		Long orderItemNo = refundMapper.getOrderItemNoByRefundNo(refundNo);
 
-		
+		//프론트에서 승인버튼을 눌렀을 때 APPORVED/REJECTED를 넘겨줌, 그에 대한 분기
 		if(status.equals("APPROVED")){
 			
 			// 0.승인 버튼 누르는 순간 approved_at 기록
@@ -213,6 +220,14 @@ public class AdminRefundServiceImpl implements AdminRefundService {
 				refundMapper.updateRefundItemStatus(refundNo,"COMPLETED");
 				//4.완료 시각 기록
 				refundMapper.updateCompletedAt(refundNo);
+				//5.orderItemNo로 재고를 그 refund_quantity만큼 올려야함
+				//refundNo로 refundItem에서 가져온 refund_Quantity(프론트값 신뢰x)
+				
+				//order_item에 있는 product_option_no 가져와서
+				// 그 프로덕트 옵션의 stock을 +quantity하면될듯
+				Long productOptionNo= orderItemMapper.getProductOptionNoByOrderItemNo(orderItemNo);
+				productOptionMapper.updateQuantityWhileRefunding(productOptionNo,refundQuantity);
+				
 				
 				// 연결되어 있는 리뷰 삭제,종현님이 구현한거 가져옴
 				reviewMapper.deleteReviewByOrderItemNo(orderItemNo);

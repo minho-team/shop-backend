@@ -57,4 +57,20 @@
 		  ON po.product_no = p.product_no
 		WHERE po.product_option_no = #{productOptionNo}
 	</select>
+	
+	
+	
+	<update id="updateQuantityWhileRefunding">
+		update product_option set stock = stock + #{refundQuantity}
+		where product_option_no = #{productOptionNo} 
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	
+	
 </mapper>
