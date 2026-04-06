@@ -50,6 +50,7 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 
 		if (token == null) {
 			// 검사했는데 토큰이 없으면 다음 필터체인으로 넘김
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			filterChain.doFilter(request, response);
 			return;
 		}
