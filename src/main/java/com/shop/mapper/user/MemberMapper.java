@@ -66,7 +66,12 @@ public interface MemberMapper {
 	//아이디 중복 체크
 	public int checkMemberId(String memberId) throws Exception;
 
-	int checkNickName(String nickName) throws Exception;
+	//닉네임 중복 체크
+	public int checkNickName(String nickName) throws Exception;
+
+	//이메일 중복 체크
+	public int checkMemberEmail(String email) throws Exception;
+
 }
 
 

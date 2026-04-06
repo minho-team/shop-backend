@@ -29,4 +29,7 @@ public interface MemberService {
 
 	// 닉네임 중복 체크
 	public int checkMemberNickName(String nickName) throws Exception;
+
+	// 이메일 중복 체크
+	public int checkMemberEmail(String email) throws Exception;
 }

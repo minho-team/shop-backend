@@ -344,6 +344,26 @@ public class AuthController {
 		}
 	} 
 	
+	@PostMapping("/checkEmail")
+	public ResponseEntity<?> checkEmail(@RequestParam String email){
+		
+		log.info(email);
+		try {
+			log.info("checkEmail로 넘어온 email:" + email);
+			int count = memberService.checkMemberEmail(email);
+			log.info("존재하는 닉네임의 개수" + email);
+			if(count >= 1) {
+				return ResponseEntity.ok(List.of("0","이미 사용 중인 이메일입니다."));
+			}else {
+				return ResponseEntity.ok(List.of("1","사용 가능한 이메일입니다."));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일 중복 체크 중 에러 발생");
+			
+		}
+	} 
+	
 	
 	
 	

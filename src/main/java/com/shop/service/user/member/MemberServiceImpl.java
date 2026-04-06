@@ -266,4 +266,9 @@ public class MemberServiceImpl implements MemberService {
 	public int checkMemberNickName(String nickName) throws Exception {
 		return memberMapper.checkNickName(nickName);
 	}
+
+	@Override
+	public int checkMemberEmail(String email) throws Exception {
+		return memberMapper.checkMemberEmail(email);
+	}
 }

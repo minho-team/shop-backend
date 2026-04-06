@@ -184,8 +184,14 @@
 		SELECT COUNT(*) FROM
 		member WHERE nick_name = #{nickName}
 	</select>
+	
+	<!-- 이메일 중복 체크 -->
+	<select id="checkMemberEmail" resultType="int">
+		SELECT COUNT(*) FROM
+		member WHERE email = #{email}
+	</select>
 
-	<!-- 환불요청 -->
+	<!-- 사용자 환불요청에서 계좌정보 자동 업데이트 -->
 	<update id="updateBankInfo">
 		UPDATE member
 		SET
