@@ -83,25 +83,28 @@
 	</sql>
 
 	<!-- 주문 생성 -->
-		<insert id="createOrder" parameterType="com.shop.domain.Orders">
+	<insert id="createOrder" parameterType="com.shop.domain.Orders">
 		<selectKey keyProperty="orderNo" resultType="long"
 			order="BEFORE">
 			SELECT seq_orders.NEXTVAL FROM dual
 		</selectKey>
 		<!-- 주문 생성 시 할인 전 금액, 할인금액, 최종 결제금액을 함께 저장 -->
 		INSERT INTO orders (order_no, member_no, orderer_name,
-			orderer_phone_number, orderer_email, order_status, order_amount,
-			coupon_discount_amount, total_price, created_at, paid_at,
-			receiver_name, receiver_phone_number, receiver_zip_code,
-			receiver_base_address, receiver_detail_address, message)
-		VALUES (#{orderNo}, #{memberNo}, #{ordererName},
-			#{ordererPhoneNumber},
-			#{ordererEmail}, #{orderStatus}, #{orderAmount},
-			#{couponDiscountAmount}, #{totalPrice},
-			SYSTIMESTAMP,
-			SYSTIMESTAMP, #{receiverName}, #{receiverPhoneNumber},
-			#{receiverZipCode}, #{receiverBaseAddress}, #{receiverDetailAddress},
-			#{message})
+		orderer_phone_number, orderer_email, order_status, order_amount,
+		coupon_discount_amount, total_price, created_at, paid_at,
+		receiver_name, receiver_phone_number, receiver_zip_code,
+		receiver_base_address, receiver_detail_address, message)
+		VALUES
+		(#{orderNo}, #{memberNo}, #{ordererName},
+		#{ordererPhoneNumber},
+		#{ordererEmail}, #{orderStatus}, #{orderAmount},
+		#{couponDiscountAmount}, #{totalPrice},
+		SYSTIMESTAMP,
+		SYSTIMESTAMP,
+		#{receiverName}, #{receiverPhoneNumber},
+		#{receiverZipCode},
+		#{receiverBaseAddress}, #{receiverDetailAddress},
+		#{message})
 	</insert>
 
 	<!-- 특정 회원 전체 주문 조회 -->
@@ -135,6 +138,12 @@
             o.member_no    AS memberNo,
             o.total_price  AS totalPrice,
             o.order_status AS orderStatus,
+            
+            (SELECT MAX(oi.order_item_status) 
+             FROM order_item oi 
+             WHERE oi.order_no = o.order_no 
+               AND oi.order_item_status IN ('REFUND_REQUESTED', 'REFUNDED')) AS refundStatus,
+            
             o.created_at   AS createdAt,
             
             (SELECT pi.image_url 
@@ -183,7 +192,8 @@
 		resultType="java.lang.Long">
 		SELECT NVL(SUM(total_price), 0)
 		FROM orders
-		WHERE member_no = #{memberNo}
+		WHERE member_no =
+		#{memberNo}
 		AND UPPER(TRIM(order_status)) = 'DELIVERED'
 	</select>
 
@@ -193,7 +203,7 @@
 		order_item
 		WHERE order_item_no = #{orderItemNo}
 	</select>
-	
+
 
 
 </mapper>
