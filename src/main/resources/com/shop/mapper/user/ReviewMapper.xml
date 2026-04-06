@@ -101,12 +101,12 @@
 		oi.item_name AS itemName,
 		r.content AS content,
 		r.rating AS rating,
-		r.created_at AS createdAt
-		FROM review r
-		INNER JOIN order_item oi ON
-		r.order_item_no = oi.order_item_no
-		WHERE r.member_no = #{memberNo}
-		ORDER BY r.created_at DESC
+		r.created_at AS createdAt,
+		o.order_no AS orderNo, r.image_url AS imageUrl FROM review r
+		INNER JOIN order_item oi ON r.order_item_no = oi.order_item_no
+		INNER JOIN orders o ON oi.order_no = o.order_no WHERE r.member_no =
+		#{memberNo}
+		AND r.delete_yn = 'N' ORDER BY r.created_at DESC
 	</select>
 
 	<select id="selectHomeRecentReviews"
@@ -158,7 +158,8 @@
 	</delete>
 
 	<delete id="deleteReviewByOrderItemNo" parameterType="long">
-		DELETE FROM review
+		DELETE FROM
+		review
 		WHERE order_item_no = #{orderItemNo}
 	</delete>
 

@@ -12,4 +12,6 @@ public class MyReviewResponseDTO {
     private String content;
     private int rating;
     private LocalDateTime createdAt;
+    private Long orderNo;
+    private String imageUrl;
 }
