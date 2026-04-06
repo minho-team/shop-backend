@@ -16,6 +16,7 @@ public class OrderDTO {
     private String mainProductName;
     private int totalQuantity;
     private String orderStatus;
+    private String refundStatus;
     private Long totalPrice;
     private LocalDateTime createdAt;
 }
