@@ -190,11 +190,11 @@
 	<!-- 누적금액에 의한 회원등급 -->
 	<select id="selectTotalPurchaseAmount"
 		resultType="java.lang.Long">
-		SELECT NVL(SUM(total_price), 0)
-		FROM orders
-		WHERE member_no =
-		#{memberNo}
-		AND UPPER(TRIM(order_status)) = 'DELIVERED'
+		SELECT NVL(SUM(oi.unit_price * oi.quantity), 0)
+		FROM order_item oi
+		INNER JOIN orders o ON oi.order_no = o.order_no
+		WHERE o.member_no = #{memberNo}
+		AND oi.order_item_status = 'DELIVERED'
 	</select>
 
 	<select id="getOrderNoByItemNo" resultType="long">
