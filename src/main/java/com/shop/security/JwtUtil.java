@@ -18,7 +18,7 @@ public class JwtUtil {
 
 	private final String SECRET_KEY = "domino-my-super-key-12345160-domino-24843343";
 
-	private final long EXPIRATION_TIME = 900000; // 액세스 토큰 15분
+	private final long EXPIRATION_TIME = 1800000; // 액세스 토큰 30분
 	private final long REFRESH_EXPIRATION_TIME = 604800000; // 리프레시 토큰 7일
 
 	private Key getSigningKey() {
