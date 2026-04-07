@@ -83,7 +83,7 @@ public class SecurityConfig {
 				"https://shop-frontend-topaz.vercel.app",
 				"https://www.khshop.best",
 				"https://khshop.best"));
-		config.setAllowedMethods(List.of("PUT", "PATCH", "POST", "DELETE", "GET"));
+		config.setAllowedMethods(List.of("*"));
 		config.setAllowedHeaders(List.of("*"));
 		config.setAllowCredentials(true);
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
