@@ -113,4 +113,28 @@ public class RouletteServiceImpl implements RouletteService {
                 .build();
         rouletteMapper.insertMemberCoupon(mc);
     }
+    
+	 // ================================================
+	 // 등급 달성 쿠폰 자동 지급
+	 // - AdminOrderItemServiceImpl에서 등급 상향 시 호출
+	 // - 90일 유효 (등급 쿠폰은 신규가입 쿠폰보다 여유있게 설정)
+	 // ================================================
+	 @Override
+	 public void issueGradeCoupon(Long memberNo, Long couponNo) throws Exception {
+	     LocalDateTime now = LocalDateTime.now();
+	     MemberCoupon mc = MemberCoupon.builder()
+	             .memberNo(memberNo)
+	             .couponNo(couponNo)
+	             .usedYn("N")
+	             .issuedAt(now)
+	             .startAt(now)
+	             .endAt(now.plusDays(90))
+	             .build();
+	     rouletteMapper.insertMemberCoupon(mc);
+	 }
+	 // 쿠폰중복지급방지
+	 @Override
+	 public boolean isGradeCouponAlreadyIssued(Long memberNo, Long couponNo) throws Exception {
+	     return rouletteMapper.countMemberCouponByGrade(memberNo, couponNo) > 0;
+	 }
 }

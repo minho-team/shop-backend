@@ -96,17 +96,29 @@
 	<select id="selectReviewsByMemberNo"
 		resultType="com.shop.dto.user.review.MyReviewResponseDTO">
 		SELECT
-		r.review_no AS reviewNo,
-		r.product_no AS productNo,
-		oi.item_name AS itemName,
-		r.content AS content,
-		r.rating AS rating,
-		r.created_at AS createdAt,
-		o.order_no AS orderNo, r.image_url AS imageUrl FROM review r
+			r.review_no AS reviewNo,
+			r.product_no AS productNo,
+			oi.item_name AS itemName,
+			r.content AS content,
+			r.rating AS rating,
+			r.created_at AS createdAt,
+			o.order_no AS orderNo, 
+			r.image_url AS imageUrl,
+			
+			pi.image_url AS productMainImage 
+			
+		FROM review r
 		INNER JOIN order_item oi ON r.order_item_no = oi.order_item_no
-		INNER JOIN orders o ON oi.order_no = o.order_no WHERE r.member_no =
-		#{memberNo}
-		AND r.delete_yn = 'N' ORDER BY r.created_at DESC
+		INNER JOIN orders o ON oi.order_no = o.order_no
+		INNER JOIN product p ON r.product_no = p.product_no
+		
+		LEFT JOIN product_img pi 
+		  ON p.product_no = pi.product_no 
+		 AND pi.image_type = 'THUMB' -- (또는 'MAIN' 등 대표 이미지 타입)
+		 
+		WHERE r.member_no = #{memberNo}
+		AND r.delete_yn = 'N' 
+		ORDER BY r.created_at DESC
 	</select>
 
 	<select id="selectHomeRecentReviews"

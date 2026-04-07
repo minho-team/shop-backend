@@ -27,5 +27,13 @@
             'N', SYSTIMESTAMP, #{startAt}, #{endAt}
         )
     </insert>
+    
+    <!-- 쿠폰중복지급방지 -->
+    <select id="countMemberCouponByGrade" resultType="int">
+	    SELECT COUNT(*)
+	    FROM member_coupon
+	    WHERE member_no = #{memberNo}
+	      AND coupon_no = #{couponNo}
+	</select>
 
 </mapper>
