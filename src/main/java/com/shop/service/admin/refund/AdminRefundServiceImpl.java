@@ -189,14 +189,18 @@ public class AdminRefundServiceImpl implements AdminRefundService {
 		log.info("paymentKey:" + paymentKey);
 		
 		//db에서 환불 금액 조회
-		Long refundAmount = refundMapper.getRefundAmountByRefundNo(refundNo);
+		//Long refundAmount = refundMapper.getRefundAmountByRefundNo(refundNo);
+		//환불하려는 아이템의 order_item_no를 가져와야하는데, refundNo로 가져오면 됨
+		Long orderItemNo = refundMapper.getOrderItemNoByRefundNo(refundNo);
+		Integer unitPrice = orderItemMapper.getUnitPriceOfOrderItem(orderItemNo);
+		Integer couponDiscountAmount = orderItemMapper.getCoupontDiscountAmountOfOrderItem(orderItemNo);
+		Integer refundAmount = unitPrice - couponDiscountAmount;
+		
 		
 		//db에서 환불 수량 조회
 		Long refundQuantity = refundMapper.getRefundQuantityByRefundNo(refundNo);
 		log.info("refundAmount:" + refundAmount);
 		
-		//환불하려는 아이템의 order_item_no를 가져와야하는데, refundNo로 가져오면 됨
-		Long orderItemNo = refundMapper.getOrderItemNoByRefundNo(refundNo);
 
 		//프론트에서 승인버튼을 눌렀을 때 APPORVED/REJECTED를 넘겨줌, 그에 대한 분기
 		if(status.equals("APPROVED")){
@@ -211,28 +215,39 @@ public class AdminRefundServiceImpl implements AdminRefundService {
 			//3.refund_item상태 approved로 변경
 			refundMapper.updateRefundItemStatus(refundNo,"APPROVED");
 			try {
+				log.info("try진입1");
 				callTossRefund(paymentKey, refundAmount);
+				log.info("try진입2");
 				//1.orderItem상태 변경
 				orderItemMapper.updateOrderItemStatusByOrderItemNo(orderItemNo, "REFUNDED");
+				log.info("try진입3");
 				//2.refunD상태변경 상태 COMPLETED로 변경
+				log.info("try진입4");
 				refundMapper.updateRefundStatus(refundNo,"COMPLETED");
+				log.info("try진입5");
 				//3.refund_item상태 COMPLETED로 변경
+				log.info("try진입6");
 				refundMapper.updateRefundItemStatus(refundNo,"COMPLETED");
+				log.info("try진입7");
 				//4.완료 시각 기록
 				refundMapper.updateCompletedAt(refundNo);
+				log.info("try진입8");
 				//5.orderItemNo로 재고를 그 refund_quantity만큼 올려야함
 				//refundNo로 refundItem에서 가져온 refund_Quantity(프론트값 신뢰x)
 				
 				//order_item에 있는 product_option_no 가져와서
 				// 그 프로덕트 옵션의 stock을 +quantity하면될듯
+				log.info("try진입9");
 				Long productOptionNo= orderItemMapper.getProductOptionNoByOrderItemNo(orderItemNo);
+				log.info("try진입10");
 				productOptionMapper.updateQuantityWhileRefunding(productOptionNo,refundQuantity);
 				
-				
+				log.info("try진입11");
 				// 연결되어 있는 리뷰 삭제,종현님이 구현한거 가져옴
 				reviewMapper.deleteReviewByOrderItemNo(orderItemNo);
 				
 				//등급 재산정, 종현님이 구현한거 가져옴
+				log.info("try진입12");
 				updateMemberGradeByAmount(memberNo);
 				log.info("환불 완료 처리 - 회원 {}번 등급 재산정 완료", memberNo);
 

@@ -37,6 +37,10 @@ public interface OrderItemMapper {
     // 결제 시 재고 차감하기
 	void deductStock(Long productOptionNo, Integer quantity);
 
+	Integer getUnitPriceOfOrderItem(Long orderItemNo) throws Exception;
+
+	Integer getCoupontDiscountAmountOfOrderItem(Long orderItemNo) throws Exception;
+
 }
 
 

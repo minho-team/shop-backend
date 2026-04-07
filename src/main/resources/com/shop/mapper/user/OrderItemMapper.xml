@@ -167,10 +167,20 @@
 		select product_option_no from order_item where order_item_no = #{orderItemNo}
 	</select>
 	
+	<!-- 환불 시 재고 차감 -->
 	<update id="deductStock">
 		update product_option set stock = stock - #{quantity} where product_option_no = #{productOptionNo}
 	</update>
 	
+	<!-- 환불 시 orderItem의 스냅샷 가격 가져오기 -->
+	<select id ="getUnitPriceOfOrderItem">
+		select UNIT_PRICE from order_item where order_item_no = #{orderItemNo}
+	</select>
+	
+	<!-- 환불 시 쿠폰으로 할인된 양을 가져오기 -->
+	<select id ="getCoupontDiscountAmountOfOrderItem">
+		select COUPON_DISCOUNT_AMOUNT from order_item where order_item_no = #{orderItemNo}
+	</select>
 	
 	
 	
