@@ -17,4 +17,8 @@ public interface RouletteMapper {
 
     // 쿠폰 발급
     void insertMemberCoupon(MemberCoupon memberCoupon);
+    
+    // 쿠폰 중복 방지
+    int countMemberCouponByGrade(@Param("memberNo") Long memberNo,
+            @Param("couponNo") Long couponNo);
 }

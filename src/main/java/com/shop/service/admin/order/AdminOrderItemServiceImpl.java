@@ -92,8 +92,12 @@ public class AdminOrderItemServiceImpl implements AdminOrderItemService {
         if (isGradeUpgraded(oldGrade, newGrade)) {
             Long couponNo = GRADE_COUPON_MAP.get(newGrade);
             if (couponNo != null) {
-                rouletteService.issueGradeCoupon(memberNo, couponNo);
-                log.info("[등급 쿠폰 지급] 회원: {}, {} 달성 → 쿠폰 {}번 지급 완료", memberNo, newGrade, couponNo);
+                if (!rouletteService.isGradeCouponAlreadyIssued(memberNo, couponNo)) {
+                    rouletteService.issueGradeCoupon(memberNo, couponNo);
+                    log.info("[등급 쿠폰 지급] 회원: {}, {} 달성 → 쿠폰 {}번 지급 완료", memberNo, newGrade, couponNo);
+                } else {
+                    log.info("[등급 쿠폰 중복 방지] 회원: {}, {} 쿠폰 이미 보유", memberNo, newGrade);
+                }
             }
         }
     }

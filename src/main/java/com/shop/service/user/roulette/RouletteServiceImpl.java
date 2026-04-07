@@ -132,4 +132,9 @@ public class RouletteServiceImpl implements RouletteService {
 	             .build();
 	     rouletteMapper.insertMemberCoupon(mc);
 	 }
+	 // 쿠폰중복지급방지
+	 @Override
+	 public boolean isGradeCouponAlreadyIssued(Long memberNo, Long couponNo) throws Exception {
+	     return rouletteMapper.countMemberCouponByGrade(memberNo, couponNo) > 0;
+	 }
 }

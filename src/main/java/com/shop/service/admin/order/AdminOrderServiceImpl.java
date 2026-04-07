@@ -1,10 +1,12 @@
 package com.shop.service.admin.order;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.shop.domain.Member;
 import com.shop.dto.admin.order.AdminOrderDto;
 import com.shop.dto.admin.order.AdminOrderItemDTO;
 import com.shop.dto.admin.order.AdminOrderListRequest;
@@ -14,8 +16,10 @@ import com.shop.dto.admin.order.OrderStatusUpdateRequestDTO;
 import com.shop.dto.admin.order.PageResponseDto;
 import com.shop.dto.admin.order.RefundStatusUpdateRequestDTO;
 import com.shop.mapper.admin.AdminOrderMapper;
+import com.shop.mapper.user.MemberMapper;
 import com.shop.mapper.user.OrdersMapper;
 import com.shop.service.user.member.MemberService;
+import com.shop.service.user.roulette.RouletteService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +32,17 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 	private final AdminOrderMapper adminOrderMapper;
 	private final MemberService memberService;
 	private final OrdersMapper ordersMapper;
+	private final MemberMapper memberMapper;
+	private final RouletteService rouletteService;
+	
+	private static final Map<String, Long> GRADE_COUPON_MAP = Map.of(
+		    "SILVER", 18L,
+		    "GOLD",   19L,
+		    "VIP",    20L,
+		    "VVIP",   21L
+		);
+	
+	private static final List<String> GRADE_ORDER = List.of("BASIC", "SILVER", "GOLD", "VIP", "VVIP");
 
 	@Override
 	public AdminOrderListResponse getOrderList(AdminOrderListRequest request) throws Exception {
@@ -127,21 +142,31 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 	}
 
 	private void updateMemberGradeByAmount(Long memberNo) throws Exception {
-		// 1. 배송완료된 총 금액 조회
-		long totalAmount = ordersMapper.selectTotalPurchaseAmount(memberNo);
+	    long totalAmount = ordersMapper.selectTotalPurchaseAmount(memberNo);
 
-		// 2. 금액별 등급 판별
-		String newGrade = "BASIC";
-		if (totalAmount >= 1000000)
-			newGrade = "VVIP";
-		else if (totalAmount >= 500000)
-			newGrade = "VIP";
-		else if (totalAmount >= 300000)
-			newGrade = "GOLD";
-		else if (totalAmount >= 100000)
-			newGrade = "SILVER";
+	    String newGrade = "BASIC";
+	    if (totalAmount >= 1000000)     newGrade = "VVIP";
+	    else if (totalAmount >= 500000) newGrade = "VIP";
+	    else if (totalAmount >= 300000) newGrade = "GOLD";
+	    else if (totalAmount >= 100000) newGrade = "SILVER";
 
-		// 3. DB 업데이트 호출
-		memberService.updateMemberGradeDirectly(memberNo, newGrade);
+	    Member member = memberMapper.readOneMemberByNo(memberNo);
+	    String oldGrade = (member != null && member.getGrade() != null)
+	                      ? member.getGrade() : "BASIC";
+
+	    memberService.updateMemberGradeDirectly(memberNo, newGrade);
+	    log.info("[관리자 로직] 회원 {} 등급 갱신: {} → {} (누적금액: {}원)", memberNo, oldGrade, newGrade, totalAmount);
+
+	    if (GRADE_ORDER.indexOf(newGrade) > GRADE_ORDER.indexOf(oldGrade)) {
+	        Long couponNo = GRADE_COUPON_MAP.get(newGrade);
+	        if (couponNo != null) {
+	            if (!rouletteService.isGradeCouponAlreadyIssued(memberNo, couponNo)) {
+	                rouletteService.issueGradeCoupon(memberNo, couponNo);
+	                log.info("[등급 쿠폰 지급] 회원: {}, {} 달성 → 쿠폰 {}번 지급 완료", memberNo, newGrade, couponNo);
+	            } else {
+	                log.info("[등급 쿠폰 중복 방지] 회원: {}, {} 쿠폰 이미 보유", memberNo, newGrade);
+	            }
+	        }
+	    }
 	}
 }
