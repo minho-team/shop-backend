@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -50,8 +51,19 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginDto dto, HttpServletResponse response) {
 
+		Member member1 = null;
+		try {
+			member1 = memberService.readOneMember(dto.getMemberId());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
-		log.info("id: [{}], pw: [{}]", dto.getMemberId(), dto.getPassword());
+		if(member1==null) {
+			return ResponseEntity.status(887).body("아이디가 존재하지 않습니다.");
+		}else if(member1.getStatus().equals("SUSPENDED")) {
+			return ResponseEntity.status(888).body("정지된 회원");
+		}
+		
 		try {
 			if (dto.getMemberId() == null || dto.getMemberId().isBlank()) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("아이디를 입력해주세요.");
@@ -59,6 +71,8 @@ public class AuthController {
 			if (dto.getPassword() == null || dto.getPassword().isBlank()) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호를 입력해주세요.");
 			}
+			
+			
 
 			Authentication authentication = authenticationManager
 					.authenticate(new UsernamePasswordAuthenticationToken(dto.getMemberId(), dto.getPassword()));
@@ -91,9 +105,14 @@ public class AuthController {
 			log.info("로그인 성공 - memberId:", member.getMemberId());
 			return ResponseEntity.ok(Map.of("message", "로그인 성공"));
 
-		} catch (Exception e) {
+		}catch (BadCredentialsException e) {
+		    log.warn("로그인 실패 - 잘못된 자격 증명");
+		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+		            .body("아이디 또는 비밀번호가 올바르지 않습니다.");
+		}
+		catch (Exception e) {
 			log.warn("로그인 실패 - 사유:", e.getMessage());
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 또는 비밀번호가 올바르지 않습니다.");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 예외 발생");
 		}
 	}
 
