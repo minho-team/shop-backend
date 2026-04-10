@@ -57,6 +57,8 @@ public class PaymentServiceImpl implements PaymentService {
 	@Value("${toss.secret-key}")
 	private String tossSecretKey;
 
+	//결제 창을 띄워주는 메서드
+	//금액 교차검증
 	@Override
 	@Transactional
 	public PaymentPrepareResponseDTO preparePayment(String memberId, PaymentPrepareRequestDTO request) {
